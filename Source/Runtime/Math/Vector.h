@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "../Core/Types.h"
+#include "EngineMath.h"
 #include "MathUtility.h"
 
 struct FVector {
