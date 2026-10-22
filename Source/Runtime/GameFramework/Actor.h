@@ -68,6 +68,19 @@ public:
 	virtual void RegisterAllComponents();
 	// Parameter : 바로 다시 Register 할껀지
 	virtual void UnregisterAllComponents();
+
+	template<typename T>
+	T* FindComponentByClass()
+	{
+		for (const auto& Comp : Components)
+		{
+			if (T Class = Cast<T>(Comp))
+			{
+				return Class;
+			}
+		}
+	}
+
 protected:
 	virtual void OnDefaultSubobjectCreated(UObject* Subobject) override;
 
