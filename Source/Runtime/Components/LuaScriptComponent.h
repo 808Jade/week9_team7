@@ -30,6 +30,10 @@ public:
 	bool IsLoaded() const { return bIsLoaded; }
 	void SetLoaded(bool bInIsLoaded) { bIsLoaded = bInIsLoaded; }
 
+	using Super::Serialize;
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+
+
 private:
 	std::filesystem::path ScriptPath;
 	sol::environment ScriptEnv;

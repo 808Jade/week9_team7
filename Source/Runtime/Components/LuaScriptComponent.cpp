@@ -63,6 +63,11 @@ void ULuaScriptComponent::ReloadScript()
 void ULuaScriptComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	// 스크립트가 로드되지 않았고, 스크립트 경로가 비어있지 않으면 스크립트를 로드
+	if(!bIsLoaded && !ScriptPath.empty())
+	{
+		LoadScript(ScriptPath);
+	}
 	// 루아 스크립트가 로드되지 않았거나 스크립트 경로가 비어있으면 BeginPlay를 호출하지 않음
 	if (!bIsLoaded) 	return;
 
@@ -160,5 +165,16 @@ void ULuaScriptComponent::OnOverlap(AActor* OtherActor)
 	{
 		sol::error Error = Result;
 		HTR_LOG(Error, "Error occurred while calling OnOverlap: {}", Error.what());
+	}
+}
+
+void ULuaScriptComponent::Serialize(FStructuredArchive::FRecord Record)
+{
+	Super::Serialize(Record);
+	FString PathStr = ScriptPath.string();
+	Record << SA_VALUE("ScriptPath", PathStr);
+	if (Record.GetUnderlyingArchive().IsLoading())
+	{
+		ScriptPath = PathStr;
 	}
 }
