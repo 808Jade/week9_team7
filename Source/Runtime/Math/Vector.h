@@ -111,6 +111,7 @@ public:
 	static FVector Zero();*/
 
 	FVector ProjectOnToNormal(const FVector& Normal) const;
+	static FVector PointPlaneProject(const FVector& Point, const FVector& PlaneBase, const FVector& PlaneNormal);
 	static FVector VectorPlaneProject(const FVector& V, const FVector& PlaneNormal);
 	static bool Coincident(const FVector& Normal1, const FVector& Normal2, float ParallelCosineThreshold = THRESH_NORMALS_ARE_PARALLEL);
 };
