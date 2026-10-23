@@ -37,3 +37,9 @@ struct FLODSphere
         return Result;
     }
 };
+
+class FSphere
+{
+public:
+
+};

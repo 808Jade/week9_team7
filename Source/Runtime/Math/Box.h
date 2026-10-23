@@ -43,4 +43,9 @@ struct FBox
 		Max.Y = std::max(Max.Y, Other.Max.Y);
 		Max.Z = std::max(Max.Z, Other.Max.Z);
 	}
+
+	FVector GetCenter() { return (Min + Max) * 0.5f; }
+	FVector GetExtent() { return (Max - Min) * 0.5f; }
+
+	FVector FindClosestPoint(const FVector& StartPoint, const FVector& Extent);
 };
