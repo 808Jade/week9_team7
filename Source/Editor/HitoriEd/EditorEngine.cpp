@@ -8,7 +8,6 @@
 #include "Core/StatOverlay.h"
 #include "Input/InputSystem.h"
 
-
 #include "Render/GeometryGenerator.h"
 
 #include "Engine/World.h"

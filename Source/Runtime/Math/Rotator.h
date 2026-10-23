@@ -15,6 +15,7 @@ struct FRotator
 		};
 	};
 	FRotator();
+	FRotator(float Angle);
 	FRotator(float P, float Y, float R);
 	FRotator(FVector V);
 
