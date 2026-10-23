@@ -10,6 +10,8 @@ public:
 	static bool SaveSceneAs(UWorld* World);
 	static bool LoadScene(UWorld* World);
 
+	static const FString& GetCurrentScenePath() { return CurrentScenePath; }
+
 private:
 	static FString OpenSaveSceneDialog();
 	static FString OpenLoadSceneDialog();

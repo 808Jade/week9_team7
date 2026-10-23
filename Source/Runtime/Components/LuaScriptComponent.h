@@ -4,7 +4,7 @@
 class ULuaScriptComponent : public UActorComponent
 {
 	DECLARE_CLASS(ULuaScriptComponent, UActorComponent)
-	REFLECT_START()
+	REFLECT_START(ULuaScriptComponent)
 		PROPERTY_FLAGS(ScriptPath, CPF_VisibleAnywhere)
 	REFLECT_END()
 

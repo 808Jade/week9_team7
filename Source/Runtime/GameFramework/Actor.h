@@ -69,16 +69,17 @@ public:
 	// Parameter : 바로 다시 Register 할껀지
 	virtual void UnregisterAllComponents();
 
-	template<typename T>
-	T* FindComponentByClass()
+	template<typename TargetComp>
+	TargetComp* FindComponentByClass() const
 	{
 		for (const auto& Comp : Components)
 		{
-			if (T Class = Cast<T>(Comp))
+			if (TargetComp* Class = Cast<TargetComp>(Comp))
 			{
 				return Class;
 			}
 		}
+		return nullptr;
 	}
 
 protected:
