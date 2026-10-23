@@ -17,6 +17,7 @@
 #include "Core/SplashScreen.h"
 #include "Core/Stats/LightweightStats.h"
 #include "Core/Async/TaskPool.h"
+#include "Scripting/ScriptWatcher.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -143,6 +144,9 @@ bool FEngineLoop::Tick()
 	{
 		return true;
 	}
+
+	// Hot Reload: 월드 Tick 전에 스크립트 파일 변경을 확인한다 (액터 Tick 순회 도중 재로드 방지)
+	FScriptWatcher::Get().Tick(EngineTimer::GetDeltaTime());
 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_EngineTick);
