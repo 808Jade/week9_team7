@@ -25,6 +25,7 @@
 #include "GameFramework/Actor/PointLightActor.h"
 #include "GameFramework/Actor/SpotLightActor.h"
 #include "GameFramework/Actor/RectLightActor.h"
+#include "GameFramework/Actor/StaticMeshActor.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/RectLightComponent.h"
@@ -793,6 +794,10 @@ void UEditorEngine::UpdateGizmoAndPicking()
 	const FVector2 LocalMousePosition = ViewportsPanel->GetLocalMousePosition();
 	ViewClient->UpdateGizmoAndPicking(Gizmo.get(), LocalMousePosition, [this](AActor* SelectedActor) {
 		OutlinerPanel->SelectActor(SelectedActor);
+		if (AStaticMeshActor* MeshActor = Cast<AStaticMeshActor>(SelectedActor))
+		{
+			MeshActor->Picked();
+		}
 	});
 }
 

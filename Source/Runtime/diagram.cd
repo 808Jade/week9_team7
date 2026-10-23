@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AActor" Collapsed="true">
+    <Position X="14.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAACRAAEBQZAIADIAACAGEhADBAAAABgABBEAAx5AA=</HashCode>
+      <FileName>GameFramework\Actor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ABillboardActor" Collapsed="true">
+    <Position X="9.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAEAAAAAAAABABAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\BillboardActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ADirectionalLightActor" Collapsed="true">
+    <Position X="13.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAQAAAAEAAAAAAAQAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\DirectionalLightActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AExponentialHeightFogActor" Collapsed="true">
+    <Position X="27.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAEAAAAAAQAAABAAAAEAEAAAgAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\ExponentialHeightFogActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AFireBallActor" Collapsed="true">
+    <Position X="2.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAABIAAAAAAAAAAEAAAAAAAAAAAIAAAAAAg=</HashCode>
+      <FileName>GameFramework\Actor\FireBallActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ALightActorBase" Collapsed="true">
+    <Position X="16" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgEAAAAAAAAAABAQAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\LightActorBase.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AParticleActor" Collapsed="true">
+    <Position X="25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\ParticleActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="APointLightActor" Collapsed="true">
+    <Position X="18.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAQAAAAAAAAIAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\PointLightActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AProjectileActor" Collapsed="true">
+    <Position X="4.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIBAQAAAIAAwAAAIAAAkBAABAAAAAEAABAAAUAA=</HashCode>
+      <FileName>GameFramework\Actor\ProjectileActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ARectLightActor" Collapsed="true">
+    <Position X="11.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAABAAAgQAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>GameFramework\Actor\RectLightActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ASkyLightActor" Collapsed="true">
+    <Position X="16" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAgAAABAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\SkyLightActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ASpotLightActor" Collapsed="true">
+    <Position X="20.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAEAAAAEAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\SpotLightActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AStaticMeshActor" Collapsed="true">
+    <Position X="7" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAIVAAAAAAAAgAAAAIAAAAAAAAAAQAAAgAAAiAAA=</HashCode>
+      <FileName>GameFramework\Actor\StaticMeshActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ATextRenderActor" Collapsed="true">
+    <Position X="22.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAQgBAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFramework\Actor\TextRenderActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ACameraActor" Collapsed="true">
+    <Position X="11.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAgAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Camera\CameraActor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UActorComponent" Collapsed="true">
+    <Position X="12.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgEAAYK4AoBAEABCEBEaIAECASIBAoBERAcBEMgwAgg=</HashCode>
+      <FileName>Components\ActorComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UBillboardComponent" Collapsed="true">
+    <Position X="10.5" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAEAEAQAgAAJQAAAAAAEQBA0CAAAUAEAAAACABwEAA=</HashCode>
+      <FileName>Components\BillboardComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UCameraComponent" Collapsed="true">
+    <Position X="6" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BCCRAZIAAggCwBiAEwEAEIAcgCgAIAoiUgACAAAAAAA=</HashCode>
+      <FileName>Camera\CameraComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UDirectionalLightComponent" Collapsed="true">
+    <Position X="19.75" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAgAAABIAAAAAAAIACAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\DirectionalLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UExponentialHeightFogComponent" Collapsed="true">
+    <Position X="15" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAACAAAAAACAABAggQAEAAAgSAAECCKAAgAAGAAA=</HashCode>
+      <FileName>Components\ExponentialHeightFogComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UFireBallComponent" Collapsed="true">
+    <Position X="22" Y="18.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAABAIAAAAAAAAAAAAAAAACAAAAAAAgAAAA=</HashCode>
+      <FileName>Components\FireBallComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ULightComponent" Collapsed="true">
+    <Position X="22" Y="14" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAQAgBAAQAAAQAAAECASACBAAABAAAAACMQAA=</HashCode>
+      <FileName>Components\LightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UMovementComponent" Collapsed="true">
+    <Position X="18.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAQAAgAgAIAAAASAAgBAACCAAAAAAAAAEAAAAkAIA=</HashCode>
+      <FileName>Components\MovementComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UMeshComponent" Collapsed="true">
+    <Position X="12.75" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAEAAIgAAAAAAAACAAAAAgCADCAAEAAAAAAAgAQA=</HashCode>
+      <FileName>Components\MeshComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ULocalLightComponent" Collapsed="true">
+    <Position X="24.25" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAIAIAAAAAAIAA=</HashCode>
+      <FileName>Components\LocalLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UParticleSubUVComponent" Collapsed="true">
+    <Position X="10.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gwAAAAAAQgIgCACEAgQggJAAQwAQACkAgSAAAQAgECA=</HashCode>
+      <FileName>Components\ParticleSubUVComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UPointLightComponent" Collapsed="true">
+    <Position X="23.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAABAAUAAAABEAAAECAgAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>Components\PointLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UPrimitiveComponent" Collapsed="true">
+    <Position X="10.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ggAAEEAgQAEIIAACEAAAEgEAwQAAAAAEFAAAAGCgEAA=</HashCode>
+      <FileName>Components\PrimitiveComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UProjectileMovementComponent" Collapsed="true">
+    <Position X="19.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gQAhFAAAQgAAAAAkAAEFgAACEQIgUAEBAAaBBYECQIE=</HashCode>
+      <FileName>Components\ProjectileMovementComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="URectLightComponent" Collapsed="true">
+    <Position X="26.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAABAAQAAAAAAkBEACgAgAAAACAAAEAABAA=</HashCode>
+      <FileName>Components\RectLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="URotatingMovementComponent" Collapsed="true">
+    <Position X="17.25" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAACAAAAAAAIAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\RotatingMovementComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="USceneComponent" Collapsed="true">
+    <Position X="10.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>oAAgAIKgEskCACSSCQFAAFagA2EIAAgAQAAAQE6AEAQ=</HashCode>
+      <FileName>Components\SceneComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="USkyLightComponent" Collapsed="true">
+    <Position X="17.5" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\SkyLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="USpotLightComponent" Collapsed="true">
+    <Position X="24.25" Y="18.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAQABAAQAAAAAAQAEICAAAAAAAAAAAAAAkAA=</HashCode>
+      <FileName>Components\SpotLightComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UStaticMeshComponent" Collapsed="true">
+    <Position X="12.75" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAQAAQgAAIQAAAAAAAABAwAECGAAAAAAAAABgAAA=</HashCode>
+      <FileName>Components\StaticMeshComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UTextRenderComponent" Collapsed="true">
+    <Position X="8.25" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAhAAIABIAIIEAACAQAgAMAAAAAAACAQmIAA=</HashCode>
+      <FileName>Components\TextRenderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ULightComponentBase" Collapsed="true">
+    <Position X="22" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQABAAAAAAAQAIEAAAAABgAIAAAAAAAAAAgAAAEAAAA=</HashCode>
+      <FileName>Components\LightComponentBase.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="맑은 고딕" Size="9" />
+</ClassDiagram>
