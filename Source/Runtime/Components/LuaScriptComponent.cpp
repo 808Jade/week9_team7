@@ -3,6 +3,6 @@
 
 bool ULuaScriptComponent::ReloadScript()
 {
-	HTR_LOG(Info, "Reload requested: {}", ScriptPath.c_str());
+	HTR_LOG(Info, "Reload requested: {}", ScriptPath);
 	return true;
 }

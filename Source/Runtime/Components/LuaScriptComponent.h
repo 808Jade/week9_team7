@@ -11,7 +11,7 @@ class ULuaScriptComponent : public UActorComponent
 public:
 	const FString& GetScriptPath() const { return ScriptPath; }
 	void SetScriptPath(const FString& InPath) { ScriptPath = InPath; }
-	bool HasScript() const { return !ScriptPath.empty(); }
+	bool HasScriptPath() const { return !ScriptPath.empty(); }
 	bool ReloadScript();
 
 private:
