@@ -16,7 +16,7 @@ AStaticMeshActor::AStaticMeshActor()
 	// 2. 람다 함수 바인딩 (Add 멀티캐스트 테스트)
 	OnPicked.Add([](AStaticMeshActor* Actor, int Count) {
 		const FString ActorName = Actor ? Actor->GetName() : "None";
-		HTR_LOG(Info, "[Lambda] {} picked! (current picked cnt : {})", ActorName, Count);
+		HTR_LOG(Info, "[Lambda] {} pick event received! (Count: {})", ActorName, Count);
 	});
 }
 

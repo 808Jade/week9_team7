@@ -54,11 +54,11 @@ private:
 inline void UCntLogger::OnActorPicked(AStaticMeshActor* Actor, int Count)
 {
 	const FString ActorName = Actor ? Actor->GetName() : "None";
-	HTR_LOG(Info, "[UCntLogger] {} picked! (current picked cnt : {})", ActorName, Count);
+	HTR_LOG(Info, "[UCntLogger] {} picked! (Current count: {})", ActorName, Count);
 }
 
 inline void UCntLogger::OnActorPickedTooMuch(AStaticMeshActor* Actor, int Count)
 {
 	const FString ActorName = Actor ? Actor->GetName() : "None";
-	HTR_LOG(Warning, "[UCntLogger] warning : {} too much picked (cnt : {})", ActorName, Count);
+	HTR_LOG(Warning, "[UCntLogger] Warning: {} picked too much! (Count: {})", ActorName, Count);
 }

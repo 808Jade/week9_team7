@@ -796,6 +796,19 @@ void UEditorEngine::UpdateGizmoAndPicking()
 		OutlinerPanel->SelectActor(SelectedActor);
 		if (AStaticMeshActor* MeshActor = Cast<AStaticMeshActor>(SelectedActor))
 		{
+			if (EditorWorld && EditorWorld->GetPersistentLevel())
+			{
+				for (AActor* Actor : EditorWorld->GetPersistentLevel()->GetActors())
+				{
+					if (APointLightActor* Light = Cast<APointLightActor>(Actor))
+					{
+						if (!Light->GetObservedMesh())
+						{
+							Light->WatchMesh(MeshActor);
+						}
+					}
+				}
+			}
 			MeshActor->Picked();
 		}
 	});
