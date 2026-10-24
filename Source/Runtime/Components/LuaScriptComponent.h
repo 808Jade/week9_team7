@@ -34,12 +34,9 @@ public:
 	void SetScriptPath(const FString& InPath);
 	bool HasScriptPath() const { return !ScriptPath.empty(); }
 
+	// env 교체와 로드 상태 변경은 LoadScript만 한다 ("성공했을 때만 교체" 보장). 외부에는 읽기만 연다
 	sol::environment& GetScriptEnv() { return ScriptEnv; }
-	void SetScriptEnv(const sol::environment& InScriptEnv) { ScriptEnv = InScriptEnv; }
-	std::filesystem::file_time_type GetLastWriteTime() const { return LastWriteTime; }
-	void SetLastWriteTime(const std::filesystem::file_time_type& InLastWriteTime) { LastWriteTime = InLastWriteTime; }
 	bool IsLoaded() const { return bIsLoaded; }
-	void SetLoaded(bool bInIsLoaded) { bIsLoaded = bInIsLoaded; }
 
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
@@ -62,28 +59,42 @@ private:
 	void StopWatchingScript();
 	void OnScriptFileChanged(const std::filesystem::path& InChangedPath);
 
+	// 로그용 스크립트 파일 이름 (예: Scene_Actor.lua)
+	FString GetScriptFileName() const;
+
 	FDelegateHandle ScriptWatchHandle;
+
+	// 마지막 LoadScript 실패 사유. Lua 에러면 "경로:줄번호: 메시지" 형태 그대로 담긴다
+	// LoadScript는 실패를 직접 로그로 찍지 않고 여기에 남긴다 -> 호출한 쪽(BeginPlay / 재로드)이 상황에 맞게 출력
+	FString LastLoadError;
 	// ==== HotReload ====
 
+	// 반환값: Lua 에러가 났을 때만 false.
+	// 스크립트에 그 함수가 없으면 할 일이 없는 것이므로 true (예: BeginPlay를 정의하지 않은 스크립트)
 	template<typename... Args>
-	void CallLuaFunction(const char* FunctionName, Args&&... InArgs)
+	bool CallLuaFunction(const char* FunctionName, Args&&... InArgs)
 	{
-		if (!bIsLoaded) return;
+		if (!bIsLoaded) return false;
 
 		sol::protected_function Function = ScriptEnv[FunctionName];
-		if (!Function.valid()) return;
+		if (!Function.valid()) return true;
 
 		auto Result = Function(std::forward<Args>(InArgs)...);
 		if (!Result.valid())
 		{
 			sol::error Error = Result;
 			HTR_LOG(Error, "[LuaScriptComponent] Error occurred while calling {}: {}", FunctionName, Error.what());
+			return false;
 		}
+		return true;
 	}
+
+	void CallLuaBeginPlay();
 
 	FString ScriptPath = "";
 
 	sol::environment ScriptEnv;
-	std::filesystem::file_time_type LastWriteTime;
 	bool bIsLoaded = false;
+	// Lua BeginPlay가 에러 없이 끝났는지. false면 다음 재로드 성공 시 OnHotReload 대신 BeginPlay를 부른다
+	bool bLuaBegunPlay = false;
 };

@@ -19,3 +19,7 @@ end
 
 function OnHit(OtherActor)
 end
+
+-- Hot Reload
+function OnHotReload()
+end

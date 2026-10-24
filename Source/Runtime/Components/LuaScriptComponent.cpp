@@ -34,6 +34,59 @@ namespace
 		OutCode = Stream.str();
 		return true;
 	}
+
+	// C++가 LoadScript에서 매번 새로 주입하는 키. 옛 값을 옮기지 않는다
+	constexpr const char* InjectedKeys[] = { "Object", "obj", "actor", "this" };
+
+	// 인자로 들어오는 key가 LoadScript에서 매번 새로 주입하는 키인지 확인한다. 
+	bool IsInjectedKey(const sol::object& Key)
+	{
+		if (Key.get_type() != sol::type::string)
+		{
+			return false;
+		}
+
+		const std::string Name = Key.as<std::string>();
+		for (const char* Injected : InjectedKeys)
+		{
+			if (Name == Injected)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	int32 MigrateScriptState(const sol::environment& OldEnv, sol::environment& NewEnv, int32& OutSkippedFunctions)
+	{
+		int32 Migrated = 0;
+		OutSkippedFunctions = 0;
+
+		for (const auto& [Key, Value] : OldEnv)
+		{
+			const sol::type ValueType = Value.get_type();
+			// 함수는 새 코드 것을 써야함
+			if (ValueType == sol::type::function)
+			{
+				++OutSkippedFunctions;
+				continue;
+			}
+			// 코루틴은 옛 코드로 돌고 있기 때문에 패스
+			if (ValueType == sol::type::thread)
+			{
+				continue;
+			}
+			// 주입되는 키도 패스
+			if (IsInjectedKey(Key))
+			{
+				continue;
+			}
+
+			NewEnv.raw_set(Key, Value);
+			++Migrated;
+		}
+		return Migrated;
+	}
 }
 
 ULuaScriptComponent::ULuaScriptComponent()
@@ -71,19 +124,20 @@ void ULuaScriptComponent::SetScriptPath(const FString& InPath)
 bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 {
 	const FString PathString = PathToUtf8(InScriptPath);
+	LastLoadError.clear();
 
 	// 스크립트 파일이 존재하는지 확인
 	std::error_code ErrorCode;
 	if (!std::filesystem::exists(InScriptPath, ErrorCode))
 	{
-		HTR_LOG(Error, "Script file not found: {}", PathString);
+		LastLoadError = "Script file not found: " + PathString;
 		return false;
 	}
 
 	std::string Code;
 	if (!ReadFileToString(InScriptPath, Code))
 	{
-		HTR_LOG(Error, "Failed to read script file: {}", PathString);
+		LastLoadError = "Failed to read script file: " + PathString;
 		return false;
 	}
 
@@ -94,13 +148,23 @@ bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 	sol::load_result Chunk = LuaState.load_buffer(Code.data(), Code.size(), "@" + PathString);
 	if (!Chunk.valid())
 	{
+		// 청크 이름이 "@경로"라서 메시지가 "경로:줄번호: 내용" 형태로 온다
 		sol::error Error = Chunk;
-		HTR_LOG(Error, "Syntax error in script: {}", Error.what());
+		LastLoadError = FString("Syntax error: ") + Error.what();
 		return false;
 	}
 
 	// 2) 새 environment를 만들고, 현재 오브젝트를 Lua 환경에 바인딩
 	sol::environment NewEnv(LuaState, sol::create, LuaState.globals());
+
+	int32 MigratedCount = 0;
+	int32 SkippedFunctionCount = 0;
+	const bool bIsReload = bIsLoaded && ScriptEnv.valid();
+	if (bIsReload)
+	{
+		MigratedCount = MigrateScriptState(ScriptEnv, NewEnv, SkippedFunctionCount);
+	}
+
 	NewEnv["Object"] = GetOwner();
 	NewEnv["obj"] = GetOwner();
 	NewEnv["actor"] = GetOwner();
@@ -113,14 +177,17 @@ bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 	if (!Result.valid())
 	{
 		sol::error Error = Result;
-		HTR_LOG(Error, "Error occurred while executing script: {}", Error.what());
+		LastLoadError = FString("Runtime error: ") + Error.what();
 		return false;
 	}
 
 	// 4) 성공 시에만 교체
 	ScriptEnv = NewEnv;
 	bIsLoaded = true;
-	LastWriteTime = std::filesystem::last_write_time(InScriptPath, ErrorCode);
+	if (bIsReload)
+	{
+		HTR_LOG(Info, "[HotReload] State migrated: {} values, {} functions replaced", MigratedCount, SkippedFunctionCount);
+	}
 
 	// 외부에서 다른 경로로 로드한 경우 경로를 갱신 (감시 대상도 같이 바뀜)
 	if (PathString != ScriptPath)
@@ -137,10 +204,13 @@ void ULuaScriptComponent::BeginPlay()
 
 	if (!bIsLoaded && HasScriptPath())
 	{
-		LoadScript(Utf8ToPath(ScriptPath));
+		if (!LoadScript(Utf8ToPath(ScriptPath)))
+		{
+			HTR_LOG(Error, "[Lua] {} load failed: {}", GetScriptFileName(), LastLoadError);
+			HTR_LOG(Warning, "[Lua] {} is not running. Fix and save the file to load it (Hot Reload)", GetScriptFileName());
+		}
 	}
-	CallLuaFunction("BeginPlay");
-
+	CallLuaBeginPlay();
 	StartWatchingScript();
 }
 
@@ -180,12 +250,14 @@ void ULuaScriptComponent::OnUnregister()
 
 	// Destroy / DestroyComponent / PIE 종료 모두 여기를 거친다.
 	// 소멸자에서 Lua를 호출하면 Owner나 Lua VM이 이미 정리됐을 수 있으므로 여기서 EndPlay를 부른다.
-	if (bIsLoaded && HasBegunPlay())
+	// Lua BeginPlay를 끝낸 경우에만 짝이 되는 EndPlay를 부른다
+	if (bIsLoaded && bLuaBegunPlay)
 	{
 		EndPlay();
 	}
 	ScriptEnv = sol::environment();
 	bIsLoaded = false;
+	bLuaBegunPlay = false;
 
 	Super::OnUnregister();
 }
@@ -222,34 +294,76 @@ void ULuaScriptComponent::OnScriptFileChanged(const std::filesystem::path& InCha
 {
 	(void)InChangedPath;
 
-	const FString OwnerName = GetOwner() ? GetOwner()->GetName() : FString("None");
-	if (ReloadScript())
+	// 성공/실패 로그는 ReloadScript가 남긴다
+	ReloadScript();
+}
+
+void ULuaScriptComponent::CallLuaBeginPlay()
+{
+	if (!bIsLoaded)
 	{
-		HTR_LOG(Info, "[HotReload] Reloaded: {} ({})", ScriptPath, OwnerName);
+		return;
 	}
-	else
+
+	// 에러로 중간에 멈췄으면 '실행 안 함'으로 둔다 -> 고쳐서 저장하면 재로드 때 BeginPlay를 다시 부른다
+	bLuaBegunPlay = CallLuaFunction("BeginPlay");
+}
+
+FString ULuaScriptComponent::GetScriptFileName() const
+{
+	if (!HasScriptPath())
 	{
-		HTR_LOG(Error, "[HotReload] Reload failed, keeping previous version: {} ({})", ScriptPath, OwnerName);
+		return "(no script)";
 	}
+	return PathToUtf8(Utf8ToPath(ScriptPath).filename());
 }
 
 bool ULuaScriptComponent::ReloadScript()
 {
 	if (!HasScriptPath())
 	{
+		LastLoadError = "Script path is empty";
 		return false;
 	}
 
-	// 문법 검사 -> 새 environment에서 실행 -> 성공 시 교체 (LoadScript 내부)
+	const FString FileName = GetScriptFileName();
+	const FString OwnerName = GetOwner() ? GetOwner()->GetName() : FString("None");
+
+	// 문법 검사 -> 새 environment에서 실행 -> 성공 시 교체
 	if (!LoadScript(Utf8ToPath(ScriptPath)))
 	{
+		// 실패: Lua 에러(줄 번호 포함)를 그대로 출력하고, 지금 무엇이 실행 중인지 알려준다
+		HTR_LOG(Error, "[HotReload] {} reload failed ({}): {}", FileName, OwnerName, LastLoadError);
+		if (bIsLoaded)
+		{
+			HTR_LOG(Warning, "[HotReload] {} ({}) is still running the previous version", FileName, OwnerName);
+		}
+		else
+		{
+			HTR_LOG(Warning, "[HotReload] {} ({}) is not running: no valid version has been loaded yet", FileName, OwnerName);
+		}
 		return false;
 	}
 
-	// (선택) 스크립트가 재로드 직후 처리할 일이 있으면 정의해서 사용
-	CallLuaFunction("OnHotReload");
+	// 성공 로그를 Lua 훅(BeginPlay / OnHotReload)보다 먼저 찍어서, 스크립트가 찍는 로그가 그 아래에 오게 한다
+	HTR_LOG(Info, "[HotReload] {} reloaded ({})", FileName, OwnerName);
 
 	// TODO(코루틴): 이 컴포넌트가 소유한 코루틴 정리 (FCoroutineScheduler 연동 시)
+
+	if (!bLuaBegunPlay)
+	{
+		if (HasBegunPlay())
+		{
+			// 처음 로드가 실패했거나, 이전 BeginPlay가 에러로 중간에 멈춘 경우
+			HTR_LOG(Info, "[HotReload] {} ({}): BeginPlay has not completed yet, calling BeginPlay", FileName, OwnerName);
+			CallLuaBeginPlay();
+		}
+	}
+	else
+	{
+		CallLuaFunction("OnHotReload");
+	}
+
 	return true;
 }
 
