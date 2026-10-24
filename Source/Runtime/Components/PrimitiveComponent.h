@@ -6,8 +6,11 @@
 #include "Render/RenderPacket.h"
 #include "Render/GeometryGenerator.h"
 #include "Collision/HitResult.h"
+#include "Core/Delegate.h"
 
+class UPrimitiveComponent;
 class FPrimitiveSceneProxy;
+struct FOverlapResult;
 
 enum class EPrimitiveType
 {
@@ -19,6 +22,9 @@ enum class EPrimitiveType
 	Particle,
 	ParticleQuad
 };
+
+DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/)
+DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/)
 
 class UPrimitiveComponent :public USceneComponent
 {
@@ -95,4 +101,15 @@ protected:
 private:
 	friend class FScene;
 	FPrimitiveSceneProxy* SceneProxy = nullptr;
+
+public:
+	virtual bool UpdateOverlaps();
+	
+	const TArray<UPrimitiveComponent*>& GetOverlappingComponents() const;
+
+	FComponentBeginOverlapSignature OnComponentBeginOverlap;
+	FComponentEndOverlapSignature OnComponentEndOverlap;
+
+private:
+	TArray<UPrimitiveComponent*> OverlappingComponents;
 };

@@ -9,6 +9,8 @@
 #include "Engine/Scene.h"
 #include "Engine/World.h"
 
+#include "Collision/OverlapResult.h"
+
 namespace
 {
 	FString PrimitiveTypeToString(EPrimitiveType Type)
@@ -146,4 +148,64 @@ bool UPrimitiveComponent::TraceMesh(const FRay& WorldRay, const FStaticMeshData&
 bool UPrimitiveComponent::TraceMeshLocal(const FRay& LocalRay, const FStaticMeshData& Mesh, float& OutT)
 {
 	return RayIntersectsMesh(LocalRay, Mesh, OutT);
+}
+
+bool UPrimitiveComponent::UpdateOverlaps()
+{
+	const AActor* MyActor = GetOwner();
+	if(MyActor && (!MyActor->HasBegunPlay() || !MyActor->GetActorEnableCollision()))
+	{
+		return false;
+	}
+
+	UWorld* MyWorld = GetWorld();
+	if(!MyWorld)
+	{
+		return false;
+	}
+
+	TArray<FOverlapResult> Overlaps;
+	MyWorld->OverlapMulti(Overlaps, GetWorldLocation(), GetWorldRotation().Quaternion(), GetCollisionShape(), MyActor);
+
+	TArray<UPrimitiveComponent*> NewOverlappingComponents;
+	for(FOverlapResult& Overlap : Overlaps)
+	{
+		if(Overlap.Component == this)
+		{
+			continue;
+		}
+		NewOverlappingComponents.Add(Overlap.Component);
+	}
+
+	FHitResult EmptyHit;
+	for(UPrimitiveComponent* NewComp : NewOverlappingComponents)
+	{
+		if(OverlappingComponents.Find(NewComp) == -1)
+		{
+			OnComponentBeginOverlap.Broadcast(this, NewComp->GetOwner(), NewComp, false, EmptyHit);
+			if(NewComp)
+			{
+				NewComp->OnComponentBeginOverlap.Broadcast(NewComp, GetOwner(), this, false, EmptyHit);
+				NewComp->OverlappingComponents.AddUnique(this);
+			}
+		}
+	}
+
+	for(UPrimitiveComponent* OldComp : OverlappingComponents)
+	{
+		if(NewOverlappingComponents.Find(OldComp) == -1)
+		{
+			OnComponentEndOverlap.Broadcast(this, OldComp->GetOwner(), OldComp);
+			if(OldComp)
+			{
+				OldComp->OnComponentEndOverlap.Broadcast(OldComp, GetOwner(), this);
+				OldComp->OverlappingComponents.Remove(this);
+			}
+		}
+	}
+
+
+	OverlappingComponents = NewOverlappingComponents;
+
+	return true;
 }

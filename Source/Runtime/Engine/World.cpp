@@ -166,8 +166,6 @@ void UWorld::Tick(float DeltaTime)
 			Comp->TickComponent(DeltaTime);
 		}
 	}
-
-
 }
 
 void UWorld::ClearWorld()
@@ -843,20 +841,6 @@ void UWorld::BeginPlay()
 		BeginPlayList.Dequeue();
 		if (Actor) Actor->BeginPlay();
 	}
-
-	// UWorld::BeginPlay() 하단에 임시 검증 코드 삽입
-	TArray<FOverlapResult> Overlaps;
-	FCollisionShape TestSphere = FCollisionShape::MakeSphere(20.0f);
-
-	// 1. 겹치는 위치 검증 (40, 0, 0)
-	bool bHit1 = OverlapMulti(Overlaps, FVector(40.0f, 0.0f, 0.0f), FQuat::Identity(), TestSphere);
-	HTR_LOG(Info, "Overlap Test 1 (Expected: True) -> Result: {}, Count: {}", bHit1, Overlaps.Num());
-
-	Overlaps.Empty();
-
-	// 2. 떨어진 위치 검증 (300, 0, 0)
-	bool bHit2 = OverlapMulti(Overlaps, FVector(300.0f, 0.0f, 0.0f), FQuat::Identity(), TestSphere);
-	HTR_LOG(Info, "Overlap Test 2 (Expected: False) -> Result: {}, Count: {}", bHit2, Overlaps.Num());
 }
 
 void UWorld::EndPlay()

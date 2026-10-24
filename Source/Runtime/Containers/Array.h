@@ -204,6 +204,7 @@ public:
 
 	uint32 Add(const T& data);
 	uint32 Add(T&& data);
+	uint32 AddUnique(const T& data);
 
 	void Push(const ElementType& Item)
 	{
@@ -428,6 +429,18 @@ inline uint32 TArray<T>::Add(T&& data)
 	mDatas.push_back(std::move(data));
 
 	return static_cast<uint32>(mDatas.size()) - 1;
+}
+
+template<typename T>
+inline uint32 TArray<T>::AddUnique(const T& data)
+{
+	int32 Index;
+	if(Find(data, Index))
+	{
+		return static_cast<uint32>(Index);
+	}
+
+	return Add(data);
 }
 
 template <typename T>
