@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Property.h"
+#include "Function.h"
 #include "Object.h"
 
 using ClassConstructor = UObject * (*)(void* Memory);
@@ -16,6 +17,7 @@ public:
 	ClassConstructor Constructor = nullptr;
 
 	TArray<FProperty> Properties;
+	TArray<FFunction> Functions;
 	UObject* DefaultObject = nullptr;
 
 	bool IsChildOf(const UClass* BaseClass) const;

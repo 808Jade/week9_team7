@@ -23,11 +23,7 @@ public:
 private:
     FLuaManager() = default;
     ~FLuaManager() = default;
-    void BindEngineAPI();
-	void BindVectorAPI();
-    void BindRotatorAPI();
-	void BindActorAPI();
-    void BindInputAPI();
+    void BindEngine();
 
     sol::state Lua;
     bool bInitialized = false;
