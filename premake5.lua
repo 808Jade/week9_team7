@@ -179,6 +179,11 @@ project "HitoriEditor"
 		"Source/Editor/**.rc",   -- 창·exe 아이콘
 	}
 
+	excludes
+	{
+		"Source/Programs/HitoriGame/**",
+	}
+
 	includedirs
 	{
 		"Source",             -- "Editor/OutputLog/ConsolePanel.h"처럼 Source 기준 include를 쓴다
@@ -208,6 +213,41 @@ project "HitoriEditor"
 		targetname "Benchmark_Debug"
 
 	filter {}
+
+
+-- 독립 게임 애플리케이션. 에디터나 ImGui를 링크하지 않고 순수 엔진만 링크한다.
+project "HitoriGame"
+	location "Source/Programs/HitoriGame"
+	kind     "WindowedApp"
+	CommonSettings()
+
+	pchheader "EnginePCH.h"
+	pchsource "Source/Programs/HitoriGame/GamePCH.cpp"
+
+	links { "HitoriEngine" }
+
+	files
+	{
+		"Source/Programs/HitoriGame/**.h",
+		"Source/Programs/HitoriGame/**.cpp",
+	}
+
+	includedirs
+	{
+		"Source",
+		"Source/Runtime",
+		"%{IncludeDir.stb}",
+		"%{IncludeDir.json}",
+		"%{IncludeDir.DDSLoader}",
+	}
+
+	links
+	{
+		"d3d11.lib",
+		"dxgi.lib",
+		"dxguid.lib",
+		"d3dcompiler.lib",
+	}
 
 
 -- 셰이더를 VS에서 편집하기 위한 보기 전용 프로젝트 (언리얼의 Shaders와 같은 역할).

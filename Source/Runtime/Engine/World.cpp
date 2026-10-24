@@ -487,6 +487,7 @@ void UWorld::CreateMainCamera()
 	MainCamera->GetCameraComponent()->SetRelativeLocation(FVector(-5.0f, -5.0f, 5.0f));
 
 	// 메인 카메라는 Level에 속하지 않아 BeginPlay를 거치지 않으므로 여기서 등록한다.
+	MainCamera->RegisterAllComponents();
 	MainCamera->RegisterAllActorTickFunctions(true);
 }
 

@@ -2,14 +2,28 @@
 
 #include "Engine.h"
 
+#include "Render/SkyboxRenderer.h"
+
+
 class UGameEngine : public UEngine
 {
 	DECLARE_CLASS(UGameEngine, UEngine)
+
 public:
 	FEngineConfig GetConfig() const override;
 
 	virtual bool Init() override;
 	virtual void Tick(float DeltaTime)override;
+	virtual void PreExit();
+
+	void RenderFrame();
+
 private:
-	
+	UWorld* GameWorld = nullptr;
+	TSharedPtr<FGameViewportClient> GameViewport;
+
+	FRenderer* Renderer = nullptr;
+	TUniquePtr<FSkyboxRenderer> SkyboxRenderer;
+
+
 };
