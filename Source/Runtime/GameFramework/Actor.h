@@ -41,8 +41,11 @@ public:
 	void RemoveOwnedComponent(UActorComponent* Component);
 	
 	FVector GetActorLocation() const;
+	void SetActorLocation(const FVector& NewLocation, bool bSweep = false);
 	FRotator GetActorRotation() const;
+	void SetActorRotation(const FRotator& NewRotation, bool bSweep = false);
 	FVector GetActorScale3D() const;
+	void SetActorScale3D(const FVector& NewScale);
 	FQuat GetActorQuat() const;           //xx 타입명변경
 	FTransform GetActorTransform() const;
 	bool TryGetActorBounds(FBox& OutBounds) const;
@@ -68,6 +71,20 @@ public:
 	virtual void RegisterAllComponents();
 	// Parameter : 바로 다시 Register 할껀지
 	virtual void UnregisterAllComponents();
+
+	template<typename TargetComp>
+	TargetComp* FindComponentByClass() const
+	{
+		for (const auto& Comp : Components)
+		{
+			if (TargetComp* Class = Cast<TargetComp>(Comp))
+			{
+				return Class;
+			}
+		}
+		return nullptr;
+	}
+
 protected:
 	virtual void OnDefaultSubobjectCreated(UObject* Subobject) override;
 

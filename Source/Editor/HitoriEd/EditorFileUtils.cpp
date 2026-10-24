@@ -118,7 +118,7 @@ FString FEditorFileUtils::OpenSaveSceneDialog()
 
 	ofn.lpstrFilter = "Scene Files (*.scene)\0*.scene\0";
 	ofn.lpstrDefExt = "scene";
-	ofn.lpstrInitialDir = "Scene/";
+	ofn.lpstrInitialDir = "Scenes/";
 
 	ofn.Flags =
 		OFN_PATHMUSTEXIST |
@@ -149,7 +149,7 @@ FString FEditorFileUtils::OpenLoadSceneDialog()
 		"All Files (*.*)\0*.*\0";
 
 	ofn.lpstrDefExt = "scene";
-	ofn.lpstrInitialDir = "Scene/";
+	ofn.lpstrInitialDir = "Scenes/";
 
 	ofn.Flags =
 		OFN_FILEMUSTEXIST |

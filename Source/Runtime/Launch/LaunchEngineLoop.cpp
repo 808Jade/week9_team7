@@ -17,6 +17,7 @@
 #include "Core/SplashScreen.h"
 #include "Core/Stats/LightweightStats.h"
 #include "Core/Async/TaskPool.h"
+#include "Scripting/ScriptWatcher.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -143,6 +144,8 @@ bool FEngineLoop::Tick()
 	{
 		return true;
 	}
+
+	FScriptWatcher::Get().Tick(EngineTimer::GetDeltaTime());
 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_EngineTick);

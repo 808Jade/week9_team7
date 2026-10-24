@@ -12,6 +12,8 @@ public:
     static bool IsKeyPressed(EKeyCode KeyCode);
     static bool IsKeyReleased(EKeyCode KeyCode);
     static bool IsKeyDown(EKeyCode KeyCode);
+	static bool IsAnyKeyDown();
+	static bool IsAnyKeyPressed();
 
     static bool IsMouseDown(EMouseButton MouseButton);
     static bool IsMousePressed(EMouseButton MouseButton);
@@ -29,6 +31,7 @@ public:
 
     static inline int32 GetMouseX() { return MouseX; }
     static inline int32 GetMouseY() { return MouseY; }
+	static inline std::pair<int32, int32> GetMousePosition() { return { MouseX, MouseY }; }
 
     static inline int32 GetMouseDeltaX() { return DeltaX; }
     static inline int32 GetMouseDeltaY() { return DeltaY; }

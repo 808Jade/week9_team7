@@ -1,0 +1,221 @@
+{
+    "Version": 4,
+    "World": {
+        "PersistentLevel": {
+            "Actors": [
+                {
+                    "Class": "ADirectionalLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 20.0 },
+                                    "Rotation": { "Pitch": 45.0, "Roll": 0.0, "Yaw": 45.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UDirectionalLightComponent",
+                            "Name": "UDirectionalLightComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "AngularRadiusDegrees": 0.5,
+                                "Intensity": 1.0,
+                                "LightColor": 4294967295,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1,
+                                "ShadowSharpen": 0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "DirectionalLight",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AStaticMeshActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": -0.5 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 30.0, "Y": 30.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UStaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Cube",
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "Floor",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ATextRenderActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 4.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UTextRenderComponent",
+                            "Name": "TextRenderComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Font": "Assets/Fonts/NanumWild.json",
+                                "Text": "Count: 0",
+                                "TextSize": 2.5,
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ScoreText",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AStaticMeshActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 1.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.5, "Y": 1.5, "Z": 1.5 }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UStaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Cube",
+                                "Transform": {
+                                    "Location": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+                                    "Rotation": { "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0 },
+                                    "Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileMovementComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Bounciness": 0.6,
+                                "Friction": 0.2,
+                                "Gravity": 9.81,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 100.0,
+                                "ProjectileGravityScale": 0.0,
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": false,
+                                "bSimulationEnabled": true,
+                                "bSweepCollision": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "LuaScriptComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "ScriptPath": "Scripts/TestController.lua",
+                            "Properties": {
+                                "ScriptPath": "Scripts/TestController.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "PlayerCube",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                }
+            ],
+            "Properties": {}
+        },
+        "Properties": {}
+    }
+}

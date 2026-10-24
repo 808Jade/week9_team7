@@ -23,6 +23,36 @@ bool FInputSystem::IsKeyDown(EKeyCode KeyCode)
     return bKeyStates[static_cast<int>(KeyCode)];
 }
 
+bool FInputSystem::IsAnyKeyDown()
+{
+	for (bool bDown : bKeyStates)
+	{
+		if (bDown) return true;
+	}
+
+	for (bool bDown : bMouseStates)
+	{
+		if (bDown) return true;
+	}
+	return false;
+}
+
+bool FInputSystem::IsAnyKeyPressed()
+{
+	for (int i = 0; i < 256; ++i)
+	{
+		if (bKeyStates[i] && !bPrevKeyStates[i])
+			return true;
+	}
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (bMouseStates[i] && !bPrevMouseStates[i])
+			return true;
+	}
+	return false;
+}
+
 bool FInputSystem::IsKeyPressed(EKeyCode KeyCode)
 {
     unsigned int Index = static_cast<unsigned int>(KeyCode);
