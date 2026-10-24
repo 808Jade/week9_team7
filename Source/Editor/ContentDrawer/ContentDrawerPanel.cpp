@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Editor/ContentDrawer/ContentDrawerPanel.h"
 #include "Asset/AssetManager.h"
 #include "Text/Font.h"
@@ -156,9 +156,18 @@ void FContentDrawerPanel::OnRender()
 				UTexture2D* TextureAsset = nullptr;
 				UFont* FontAsset = nullptr;
 
+				auto GetIconTexture = [](const FString& IconPath) -> UTexture2D*
+				{
+					if (UTexture2D* Tex = UAssetManager::GetAssetByPath<UTexture2D>(IconPath))
+					{
+						return Tex;
+					}
+					return UAssetManager::Get().LoadTexture(IconPath, false);
+				};
+
 				if (bIsDirectory)
 				{
-					Thumbnail = UAssetManager::GetAssetByPath<UTexture2D>(FolderIconPath);
+					Thumbnail = GetIconTexture(FolderIconPath);
 				}
 				else
 				{
@@ -176,7 +185,19 @@ void FContentDrawerPanel::OnRender()
 
 					if (Thumbnail == nullptr)
 					{
-						Thumbnail = UAssetManager::GetAssetByPath<UTexture2D>(FileIconPath);
+						if (ExtString == ".lua")
+						{
+							Thumbnail = GetIconTexture(ScriptIconPath);
+						}
+						else if (ExtString == ".scene")
+						{
+							Thumbnail = GetIconTexture(SceneIconPath);
+						}
+
+						if (Thumbnail == nullptr)
+						{
+							Thumbnail = GetIconTexture(FileIconPath);
+						}
 					}
 				}
 
@@ -187,9 +208,13 @@ void FContentDrawerPanel::OnRender()
 					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.35f, 0.65f, 1.0f, 1.0f));
 				}
 
-				if (Thumbnail)
+				if (Thumbnail && Thumbnail->GetResource() && Thumbnail->GetResource()->GetSRV())
 				{
 					ImGui::ImageButton(PathString.c_str(), (ImTextureID)Thumbnail->GetResource()->GetSRV(), { thumbnailSize, thumbnailSize });
+				}
+				else
+				{
+					ImGui::Button(FilenameString.c_str(), { thumbnailSize, thumbnailSize });
 				}
 
 				if (bIsSelected)

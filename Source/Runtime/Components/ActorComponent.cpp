@@ -1,7 +1,8 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 
 UActorComponent::~UActorComponent()
 {
@@ -180,4 +181,9 @@ void UActorComponent::ExecuteUnregisterEvents()
 	{
 		OnUnregister();
 	}
+}
+
+UGameInstance* UActorComponent::GetGameInstance() const
+{
+	return WorldPrivate ? WorldPrivate->GetGameInstance() : nullptr;
 }

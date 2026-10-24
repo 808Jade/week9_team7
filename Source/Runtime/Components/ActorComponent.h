@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "UObject/Object.h"
 #include "UObject/Class.h"
@@ -6,6 +6,7 @@
 
 class AActor;
 class UWorld;
+class UGameInstance;
 
 class UActorComponent : public UObject
 {
@@ -68,6 +69,7 @@ public:
 	bool IsRenderStateCreated() const { return bRenderStateCreated; }
 
 	UWorld* GetWorld() const { return WorldPrivate; }
+	UGameInstance* GetGameInstance() const;
 protected:
 
 	virtual void OnRegister();

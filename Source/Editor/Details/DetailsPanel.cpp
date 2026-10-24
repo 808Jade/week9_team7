@@ -898,6 +898,14 @@ namespace
 		}
 
 		// ?ㅻⅨ UI? 媛숈? 湲곕낯 ?고듃濡??쒖떆
+		UTexture2D* ScriptIcon = UAssetManager::GetAssetByPath<UTexture2D>("Assets/Icons/LuaScript.png");
+		if (!ScriptIcon) ScriptIcon = UAssetManager::Get().LoadTexture("Assets/Icons/LuaScript.png", false);
+		if (ScriptIcon && ScriptIcon->GetResource() && ScriptIcon->GetResource()->GetSRV())
+		{
+			ImGui::Image((ImTextureID)ScriptIcon->GetResource()->GetSRV(), ImVec2(18.0f, 18.0f));
+			ImGui::SameLine();
+		}
+
 		ImGui::InputTextWithHint("Script File", "None", FileNameBuffer, sizeof(FileNameBuffer), ImGuiInputTextFlags_ReadOnly);
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
