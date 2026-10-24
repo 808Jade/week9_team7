@@ -30,6 +30,8 @@
 #include "Render/ObjectConstants.h"
 
 #include "UObject/UObjectGlobals.h"
+#include "Lua/LuaManager.h"
+#include "Lua/Bindings/LuaBindings.h"
 
 namespace
 {
@@ -123,6 +125,9 @@ void UWorld::Tick(float DeltaTime)
 	// ?먮뵒???붾뱶媛 ?꾨땲硫??≫꽣 ?깆쓣 ?뚮┛??
 	if (WorldType != EWorldType::Editor)
 	{
+		FLuaManager::Get().SetActiveWorld(this);
+		LuaBindings::TickTimers(DeltaTime);
+
 		while (!BeginPlayList.IsEmpty())
 		{
 			AActor* Actor = BeginPlayList.Peek();
@@ -672,6 +677,9 @@ bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 				if (!Proxy->IsVisible())
 					return false;
 
+				if (IsPlayInEditor() && Proxy->GetComponent() && Proxy->GetComponent()->GetOwner() && !Proxy->GetComponent()->GetOwner()->GetActorEnableCollision())
+					return false;
+
 				const FMatrix& WorldToLocal = Proxy->GetWorldToLocal();
 				const FRay LocalRay{
 					.Origin = WorldToLocal.TransformPosition(WorldRay.Origin),
@@ -798,6 +806,7 @@ void UWorld::BeginPlay()
 void UWorld::EndPlay()
 {
 	bBegunPlay = false;
+	LuaBindings::ClearTimers();
 	if (PlayerController)
 	{
 		PlayerController->ClearInputState();

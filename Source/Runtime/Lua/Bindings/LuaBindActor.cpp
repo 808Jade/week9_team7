@@ -10,6 +10,8 @@
 #include "Engine/Level.h"
 #include "Core/EngineLog.h"
 #include "Lua/LuaManager.h"
+#include "UObject/UObjectHash.h"
+#include "Serialization/JsonArchive.h"
 
 namespace LuaBindings
 {
@@ -352,5 +354,123 @@ namespace LuaBindings
 
 		ActorType["TeleportTo"] = TeleportFunc;
 		ActorType["Teleport"] = TeleportFunc;
+
+		// 3. 충돌 활성화 / 비활성화
+		ActorType["SetActorEnableCollision"] = &AActor::SetActorEnableCollision;
+		ActorType["GetActorEnableCollision"] = &AActor::GetActorEnableCollision;
+		ActorType["EnableCollision"] = sol::property(&AActor::GetActorEnableCollision, &AActor::SetActorEnableCollision);
+
+		// 4. 동적 컴포넌트 추가
+		ActorType["AddComponent"] = [](AActor* Self, const FString& ComponentClassName) -> UActorComponent* {
+			if (!Self) return nullptr;
+			UClass* CompClass = FindClass(ComponentClassName);
+			if (!CompClass) CompClass = FindClass("U" + ComponentClassName);
+			if (!CompClass || !CompClass->IsChildOf(UActorComponent::StaticClass()))
+			{
+				HTR_LOG(Warning, "[Lua AddComponent] Component class '{}' not found", ComponentClassName);
+				return nullptr;
+			}
+			return Self->AddComponent(CompClass, NAME_None);
+		};
+
+		// 5. 액터 스폰 (SpawnActor)
+		auto SpawnActorHelper = [](UWorld* World, const FString& ClassName, const FVector& Location, const FRotator& Rotation) -> AActor* {
+			if (!World)
+			{
+				World = FLuaManager::Get().GetActiveWorld();
+			}
+			if (!World)
+			{
+				HTR_LOG(Error, "[Lua SpawnActor] No active world found");
+				return nullptr;
+			}
+
+			UClass* ActorClass = FindClass(ClassName);
+			if (!ActorClass) ActorClass = FindClass("A" + ClassName);
+			if (!ActorClass || !ActorClass->IsChildOf(AActor::StaticClass()))
+			{
+				HTR_LOG(Warning, "[Lua SpawnActor] Actor class '{}' not found", ClassName);
+				return nullptr;
+			}
+
+			FTransform SpawnTransform(Rotation, Location, FVector::OneVector);
+			return World->SpawnActor(ActorClass, NAME_None, &SpawnTransform);
+		};
+
+		// 멤버 SpawnActor (this:SpawnActor("ClassName", loc, rot))
+		ActorType["SpawnActor"] = sol::overload(
+			[SpawnActorHelper](AActor* Self, const FString& ClassName, const FVector& Loc, const FRotator& Rot) -> AActor* {
+				UWorld* World = Self ? Self->GetWorld() : nullptr;
+				return SpawnActorHelper(World, ClassName, Loc, Rot);
+			},
+			[SpawnActorHelper](AActor* Self, const FString& ClassName, const FVector& Loc) -> AActor* {
+				UWorld* World = Self ? Self->GetWorld() : nullptr;
+				return SpawnActorHelper(World, ClassName, Loc, FRotator());
+			},
+			[SpawnActorHelper](AActor* Self, const FString& ClassName) -> AActor* {
+				UWorld* World = Self ? Self->GetWorld() : nullptr;
+				FVector Loc = Self ? Self->GetActorLocation() : FVector::ZeroVector;
+				FRotator Rot = Self ? Self->GetActorRotation() : FRotator();
+				return SpawnActorHelper(World, ClassName, Loc, Rot);
+			}
+		);
+
+		// 전역 SpawnActor (SpawnActor("ClassName", loc, rot))
+		Lua["SpawnActor"] = sol::overload(
+			[SpawnActorHelper](const FString& ClassName, const FVector& Loc, const FRotator& Rot) -> AActor* {
+				return SpawnActorHelper(nullptr, ClassName, Loc, Rot);
+			},
+			[SpawnActorHelper](const FString& ClassName, const FVector& Loc) -> AActor* {
+				return SpawnActorHelper(nullptr, ClassName, Loc, FRotator());
+			},
+			[SpawnActorHelper](const FString& ClassName) -> AActor* {
+				return SpawnActorHelper(nullptr, ClassName, FVector::ZeroVector, FRotator());
+			}
+		);
+
+		// 6. Scene 모듈 (씬 로드 및 리로드)
+		auto SceneTable = Lua.create_named_table("Scene");
+
+		SceneTable["Load"] = [](const FString& ScenePath) -> bool {
+			UWorld* World = FLuaManager::Get().GetActiveWorld();
+			if (!World)
+			{
+				HTR_LOG(Error, "[Lua Scene.Load] No active world found");
+				return false;
+			}
+			ClearTimers();
+			bool bSuccess = FJsonArchive::LoadWorld(World, ScenePath);
+			if (bSuccess && World->HasBegunPlay())
+			{
+				World->BeginPlay();
+			}
+			return bSuccess;
+		};
+
+		SceneTable["Reload"] = []() -> bool {
+			UWorld* World = FLuaManager::Get().GetActiveWorld();
+			if (!World)
+			{
+				HTR_LOG(Error, "[Lua Scene.Reload] No active world found");
+				return false;
+			}
+			const FString& LastPath = FJsonArchive::GetLastLoadedScenePath();
+			if (LastPath.empty())
+			{
+				HTR_LOG(Warning, "[Lua Scene.Reload] No previous scene path recorded");
+				return false;
+			}
+			ClearTimers();
+			bool bSuccess = FJsonArchive::LoadWorld(World, LastPath);
+			if (bSuccess && World->HasBegunPlay())
+			{
+				World->BeginPlay();
+			}
+			return bSuccess;
+		};
+
+		SceneTable["GetCurrentPath"] = []() -> FString {
+			return FJsonArchive::GetLastLoadedScenePath();
+		};
 	}
 }

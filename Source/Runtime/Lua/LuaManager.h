@@ -3,6 +3,8 @@
 #include <sol/sol.hpp>
 #include "Core/Types.h"
 
+class UWorld;
+
 class FLuaManager
 {
 public:
@@ -27,6 +29,9 @@ public:
         return Lua;
     }
 
+    void SetActiveWorld(UWorld* InWorld) { ActiveWorld = InWorld; }
+    UWorld* GetActiveWorld() const { return ActiveWorld; }
+
 private:
     FLuaManager() = default;
     ~FLuaManager() = default;
@@ -34,4 +39,5 @@ private:
 
     sol::state Lua;
     bool bInitialized = false;
+    UWorld* ActiveWorld = nullptr;
 };
