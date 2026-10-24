@@ -804,10 +804,8 @@ namespace
 		}
 	}
 
-	// 선택된 액터의 Lua 스크립트 영역: 경로 표시 + [Create Script] / [Edit Script]
-	// - 버튼 상태는 매 프레임 다시 계산한다.
-	// - 파일이 실제로 있는지는 디스크 I/O라 여기서 확인하지 않는다. (클릭 시 FLuaScriptUtils가 확인)
-	// - 이 함수는 CustomFont(한글)에 접근할 수 없으므로 UI 문구는 영어로 쓴다.
+	// 컴포넌트 프로퍼티 아래에 버튼 1개 + "Script File" 칸
+	// 스크립트가 없으면 [Create Script], 있으면 [Edit Script] (같은 자리에서 라벨이 바뀐다)
 	void DrawScriptSection(AActor* Actor, UActorComponent*& OutSelectedComponent)
 	{
 		if (!Actor) { return; }
@@ -822,56 +820,65 @@ namespace
 		const bool bIsEditorWorld = World && World->GetWorldType() == EWorldType::Editor;
 		const bool bIsSceneSaved = !FEditorFileUtils::GetCurrentScenePath().empty();
 
-		// Create: 에디터 월드이고, 씬이 저장됐거나 이미 경로가 있을 때(파일 복구 용도)
-		const bool bCanCreate = bIsEditorWorld && (bIsSceneSaved || bHasScriptPath);
-		// Edit: 경로만 있으면 PIE 중에도 허용 (Play 중 수정 -> Hot Reload)
-		const bool bCanEdit = bHasScriptPath;
-
 		ImGui::PushID("LuaScriptSection");
-		ImGui::SeparatorText("Script");
 
-		// ---------- 2. 경로 표시 ----------
-		if (bHasScriptPath)
+		// ---------- 2. 버튼 1개: Create Script / Edit Script ----------
+		if (!bHasScriptPath)
 		{
-			ImGui::Text("Script: %s", ScriptComp->GetScriptPath().c_str());
+			const bool bCanCreate = bIsEditorWorld && bIsSceneSaved;
+
+			ImGui::BeginDisabled(!bCanCreate);
+			if (ImGui::Button("Create Script"))
+			{
+				// 실패 이유는 FLuaScriptUtils가 로그로 남기므로 UI에서는 분기하지 않는다
+				if (FLuaScriptUtils::GenerateScript(Actor))
+				{
+					// Add Component와 동일하게 스크립트 컴포넌트를 바로 선택
+					if (ULuaScriptComponent* CreatedComp = FLuaScriptUtils::GetScriptComponent(Actor))
+					{
+						OutSelectedComponent = CreatedComp;
+					}
+				}
+			}
+			ImGui::EndDisabled();
+			// AllowWhenDisabled가 없으면 비활성 버튼에서는 툴팁이 뜨지 않는다
+			if (!bCanCreate && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+			{
+				ImGui::SetTooltip("%s", !bIsEditorWorld ? "Not available during PIE. Stop PIE first." : "Save the scene first.");
+			}
 		}
 		else
 		{
-			ImGui::TextDisabled("No script");
-		}
-
-		// ---------- 3. Create Script ----------
-		ImGui::BeginDisabled(!bCanCreate);
-		if (ImGui::Button("Create Script"))
-		{
-			// 실패 이유는 FLuaScriptUtils가 로그로 남기므로 UI에서는 분기하지 않는다
-			if (FLuaScriptUtils::GenerateScript(Actor))
+			// PIE 중에도 허용 (Play 중 수정 -> Hot Reload)
+			if (ImGui::Button("Edit Script"))
 			{
-				// Add Component와 동일하게 스크립트 컴포넌트를 바로 선택
-				if (ULuaScriptComponent* CreatedComp = FLuaScriptUtils::GetScriptComponent(Actor))
+				// 버튼이 하나뿐이라 '파일 복구'도 여기서 처리한다
+				if (bIsEditorWorld)
 				{
-					OutSelectedComponent = CreatedComp;
+					FLuaScriptUtils::GenerateScript(Actor);
 				}
+				FLuaScriptUtils::OpenScript(Actor);
 			}
 		}
-		ImGui::EndDisabled();
-		// AllowWhenDisabled가 없으면 비활성 버튼에서는 툴팁이 뜨지 않는다
-		if (!bCanCreate && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+
+		// ---------- 3. Script File: 파일 이름만 읽기 전용으로 표시 ----------
+		char FileNameBuffer[256] = {};
+		if (bHasScriptPath)
 		{
-			ImGui::SetTooltip("%s", !bIsEditorWorld ? "Not available during PIE. Stop PIE first." : "Save the scene first.");
+			// 저장 경로는 항상 '/' 구분자 (예: Scripts/Room_AStaticMeshActor_2.lua)
+			const FString& ScriptPath = ScriptComp->GetScriptPath();
+			const size_t SlashIndex = ScriptPath.find_last_of("/\\");
+			const FString FileName = (SlashIndex == FString::npos) ? ScriptPath : ScriptPath.substr(SlashIndex + 1);
+			strncpy_s(FileNameBuffer, sizeof(FileNameBuffer), FileName.c_str(), _TRUNCATE);
 		}
 
-		// ---------- 4. Edit Script ----------
-		ImGui::SameLine();
-		ImGui::BeginDisabled(!bCanEdit);
-		if (ImGui::Button("Edit Script"))
+		// 다른 UI와 같은 기본 폰트로 표시
+		ImGui::InputTextWithHint("Script File", "None", FileNameBuffer, sizeof(FileNameBuffer), ImGuiInputTextFlags_ReadOnly);
+
+		// 전체 경로는 마우스를 올렸을 때 툴팁으로
+		if (bHasScriptPath && ImGui::IsItemHovered())
 		{
-			FLuaScriptUtils::OpenScript(Actor);
-		}
-		ImGui::EndDisabled();
-		if (!bCanEdit && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-		{
-			ImGui::SetTooltip("Create a script first.");
+			ImGui::SetTooltip("%s", ScriptComp->GetScriptPath().c_str());
 		}
 
 		ImGui::PopID();
@@ -912,8 +919,6 @@ namespace
 			ImGui::EndPopup();
 		}
 
-		// 팝업 블록 밖에서 호출해야 매 프레임 그려진다
-		DrawScriptSection(Actor, OutSelectedComponent);
 	}
 }
 
@@ -1021,6 +1026,10 @@ void FDetailsPanel::OnRender()
 			ImGui::PushID(TargetComponent);
 			ImGui::SeparatorText("Component Properties");
 			DrawProperties(TargetComponent, CustomFont);
+
+			// 명세 위치: 선택된 컴포넌트 프로퍼티 바로 아래에 [Create/Edit Script] + Script File
+			DrawScriptSection(TargetActor, TargetComponent);
+
 			DrawShadowPreview();
 
 			if(SelectCandidateComponent != TargetComponent)
