@@ -41,8 +41,11 @@ public:
 	void RemoveOwnedComponent(UActorComponent* Component);
 	
 	FVector GetActorLocation() const;
+	void SetActorLocation(const FVector& NewLocation, bool bSweep = false);
 	FRotator GetActorRotation() const;
+	void SetActorRotation(const FRotator& NewRotation, bool bSweep = false);
 	FVector GetActorScale3D() const;
+	void SetActorScale3D(const FVector& NewScale);
 	FQuat GetActorQuat() const;           //xx 타입명변경
 	FTransform GetActorTransform() const;
 	bool TryGetActorBounds(FBox& OutBounds) const;

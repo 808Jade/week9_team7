@@ -18,6 +18,7 @@
 #include "Components/RotatingMovementComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/FireBallComponent.h"
+#include "Components/LuaScriptComponent.h"
 #include "Asset/AssetManager.h"
 #include "Render/Material.h"
 #include "Render/Texture2D.h"
@@ -39,12 +40,12 @@ namespace
 		ImVec4 color(_color.X, _color.Y, _color.Z, _color.W);
 		ImVec2 buttonSize = { lineHeight + 2.0f , lineHeight };
 
-		// 각 버튼의 색상 설정
+		// 媛?踰꾪듉???됱긽 ?ㅼ젙
 		ImGui::PushStyleColor(ImGuiCol_Button, color);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ color.x + 0.1f, color.y + 0.1f, color.z + 0.1f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ color.x - 0.1f, color.y - 0.1f, color.z - 0.1f, 1.0f });
 
-		// 굵은 폰트 적용
+		// 援듭? ?고듃 ?곸슜
 		if (ImGui::Button(_label.c_str(), buttonSize))
 		{
 			_value = _resetValue;
@@ -52,7 +53,7 @@ namespace
 		}
 		ImGui::PopStyleColor(3);
 
-		// 드래그 슬라이더
+		// ?쒕옒洹??щ씪?대뜑
 		ImGui::SameLine();
 		std::string dragID = "##" + _label;
 		isValueChanged |= ImGui::DragFloat(dragID.c_str(), &_value, _speed, _minValue, _maxValue, "%.2f");
@@ -71,19 +72,19 @@ namespace
 		bool isVectorChanged = false;
 
 		ImGui::PushID(_label.c_str());
-		if (ImGui::BeginTable(_label.c_str(), 2, flags)) // 고유 ID, 열 2개, 플래그
+		if (ImGui::BeginTable(_label.c_str(), 2, flags)) // 怨좎쑀 ID, ??2媛? ?뚮옒洹?
 		{
-			// ImGuiTableColumnFlags_WidthFixed: 초기 너비 고정
-			// ImGuiTableColumnFlags_WidthStretch: 창 크기에 따라 너비 조절 (기본값)
+			// ImGuiTableColumnFlags_WidthFixed: 珥덇린 ?덈퉬 怨좎젙
+			// ImGuiTableColumnFlags_WidthStretch: 李??ш린???곕씪 ?덈퉬 議곗젅 (湲곕낯媛?
 			ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, _columnWidth);
 			ImGui::TableSetupColumn("Content", ImGuiTableColumnFlags_WidthStretch);
 
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			ImGui::Text(_label.c_str()); // 왼쪽 열: 레이블
+			ImGui::Text(_label.c_str()); // ?쇱そ ?? ?덉씠釉?
 
 			ImGui::TableSetColumnIndex(1);
-			// [컨트롤러 UI 코드] // 오른쪽 열: 컨트롤러
+			// [而⑦듃濡ㅻ윭 UI 肄붾뱶] // ?ㅻⅨ履??? 而⑦듃濡ㅻ윭
 			ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 2,0 });
 			ImGui::PushFont(boldFont);
@@ -114,8 +115,8 @@ namespace
 		return isVectorChanged;
 	}
 
-	// FRotator의 V는 (Pitch, Yaw, Roll) 순서지만 엔진은 Roll=X, Pitch=Y, Yaw=Z축이므로
-	// X/Y/Z 칸이 실제 회전축과 맞도록 재배열해 편집한다.
+	// FRotator??V??(Pitch, Yaw, Roll) ?쒖꽌吏留??붿쭊? Roll=X, Pitch=Y, Yaw=Z異뺤씠誘濡?
+	// X/Y/Z 移몄씠 ?ㅼ젣 ?뚯쟾異뺢낵 留욌룄濡??щ같?댄빐 ?몄쭛?쒕떎.
 	bool DrawRotatorAsXYZ(const FString& _label, FRotator& _rotator)
 	{
 		float Euler[3] = { _rotator.Roll, _rotator.Pitch, _rotator.Yaw };
@@ -153,21 +154,21 @@ namespace
 			ImGui::Button("Empty", { ThumbnailSize, ThumbnailSize });
 		}
 
-		// 바로 위 위젯이 드롭을 받는다
+		// 諛붾줈 ???꾩젽???쒕∼??諛쏅뒗??
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(EditorDragDrop::Texture))
 			{
 				UTexture2D* DroppedTexture = *static_cast<UTexture2D**>(Payload->Data);
 
-				// 머티리얼이 없으면 기본 머티리얼에서 시작한다
+				// 癒명떚由ъ뼹???놁쑝硫?湲곕낯 癒명떚由ъ뼹?먯꽌 ?쒖옉?쒕떎
 				if (!Material)
 				{
 					Material = UMaterial::CreateInstance(UAssetManager::GetAssetByPath<UMaterial>("DefaultMaterial"));
 					*MaterialPtr = Material;
 				}
-				// 공유 에셋이면 지금 복제한다.
-				// 이 시점까지 미루면 손대지 않은 오브젝트는 계속 공유 에셋을 쓴다.
+				// 怨듭쑀 ?먯뀑?대㈃ 吏湲?蹂듭젣?쒕떎.
+				// ???쒖젏源뚯? 誘몃（硫??먮?吏 ?딆? ?ㅻ툕?앺듃??怨꾩냽 怨듭쑀 ?먯뀑???대떎.
 				else if (Material->bIsInstance == false)
 				{
 					Material = UMaterial::CreateInstance(Material);
@@ -176,7 +177,7 @@ namespace
 
 				if (Material)
 				{
-					// 슬롯이 배열 범위 밖이면 그 자리까지 늘려 준다
+					// ?щ’??諛곗뿴 踰붿쐞 諛뽰씠硫?洹??먮━源뚯? ?섎젮 以??
 					while (static_cast<int32>(Material->Textures.Num()) <= SlotIndex)
 					{
 						Material->Textures.Add(nullptr);
@@ -200,7 +201,7 @@ namespace
 		}
 		else
 		{
-			ImGui::TextDisabled("(비어 있음)");
+			ImGui::TextDisabled("(鍮꾩뼱 ?덉쓬)");
 		}
 		ImGui::EndGroup();
 
@@ -250,7 +251,7 @@ namespace
 						ImGui::SetTooltip("%s", ItemPath.c_str());
 					}
 
-					// 메모리를 직접 바꾸지 않고 SetFont를 거친다
+					// 硫붾え由щ? 吏곸젒 諛붽씀吏 ?딄퀬 SetFont瑜?嫄곗튇??
 					if (UTextRenderComponent* TextComponent = Cast<UTextRenderComponent>(Owner))
 						TextComponent->SetFont(*Itr);
 					else
@@ -297,7 +298,7 @@ namespace
 						ImGui::SetTooltip("%s", ItemPath.c_str());
 					}
 
-					// 메모리를 직접 바꾸지 않고 SetFont를 거친다
+					// 硫붾え由щ? 吏곸젒 諛붽씀吏 ?딄퀬 SetFont瑜?嫄곗튇??
 					if (UStaticMeshComponent* MeshComponent = Cast<UStaticMeshComponent>(Owner))
 						MeshComponent->SetStaticMesh(*Itr);
 					else
@@ -313,8 +314,8 @@ namespace
 
 	UMaterial* EnsureMaterialOverride(UMeshComponent* MeshComponent, int32 Slot, UMaterial* Effective, UMaterial* Override)
 	{
-		// 이 컴포넌트 전용 인스턴스가 아니면 지금 적용 중인 머티리얼을 복제해서 덮어쓰기로 만든다.
-		// 메시의 머티리얼은 같은 메시를 쓰는 모든 액터가 공유하므로 직접 고치면 안 된다.
+		// ??而댄룷?뚰듃 ?꾩슜 ?몄뒪?댁뒪媛 ?꾨땲硫?吏湲??곸슜 以묒씤 癒명떚由ъ뼹??蹂듭젣?댁꽌 ??뼱?곌린濡?留뚮뱺??
+		// 硫붿떆??癒명떚由ъ뼹? 媛숈? 硫붿떆瑜??곕뒗 紐⑤뱺 ?≫꽣媛 怨듭쑀?섎?濡?吏곸젒 怨좎튂硫????쒕떎.
 		if (Override && Override->bIsInstance)	return Override;
 
 		UMaterial* Source = Effective ? Effective : UAssetManager::GetAssetByPath<UMaterial>("DefaultMaterial");
@@ -416,8 +417,8 @@ namespace
 		ImGui::PopID();
 	}
 
-	// 메시 컴포넌트의 머티리얼 슬롯을 한 줄씩 그린다.
-	// 텍스처를 드롭하면 그 슬롯의 덮어쓰기에 반영하고, 메시 에셋의 머티리얼은 건드리지 않는다.
+	// 硫붿떆 而댄룷?뚰듃??癒명떚由ъ뼹 ?щ’????以꾩뵫 洹몃┛??
+	// ?띿뒪泥섎? ?쒕∼?섎㈃ 洹??щ’????뼱?곌린??諛섏쁺?섍퀬, 硫붿떆 ?먯뀑??癒명떚由ъ뼹? 嫄대뱶由ъ? ?딅뒗??
 	void DrawMaterialSlots(UMeshComponent* MeshComponent)
 	{
 		const int32 NumSlots = MeshComponent->GetNumMaterials();
@@ -431,7 +432,7 @@ namespace
 			return;
 		}
 
-		// 메쉬 내의 매터리얼 별 Slot 순회
+		// 硫붿돩 ?댁쓽 留ㅽ꽣由ъ뼹 蹂?Slot ?쒗쉶
 		for (int32 Slot = 0; Slot < NumSlots; ++Slot)
 		{
 			ImGui::PushID(Slot);
@@ -596,7 +597,7 @@ namespace
 		}
 	}
 
-	// UClass에 등록된 프로퍼티를 타입에 맞는 위젯으로 그린다
+	// UClass???깅줉???꾨줈?쇳떚瑜???낆뿉 留욌뒗 ?꾩젽?쇰줈 洹몃┛??
 	void DrawProperty(UObject* Object, const FProperty& Property, ImFont* CustomFont)
 	{
 		void* ValuePtr = reinterpret_cast<char*>(Object) + Property.Offset;
@@ -604,7 +605,7 @@ namespace
 
 		const char* DisplayName = Property.Name.c_str();
 
-		// 패널이 넓으면 라벨 | 값을 한 줄에, 좁거나 라벨이 길면 라벨 아래 줄에 값을 놓는다.
+		// ?⑤꼸???볦쑝硫??쇰꺼 | 媛믪쓣 ??以꾩뿉, 醫곴굅???쇰꺼??湲몃㈃ ?쇰꺼 ?꾨옒 以꾩뿉 媛믪쓣 ?볥뒗??
 		const float StartX = ImGui::GetCursorPosX();
 		const float AvailableWidth = ImGui::GetContentRegionAvail().x;
 		const float LabelWidth = AvailableWidth * 0.45f;
@@ -641,7 +642,7 @@ namespace
 		case EPropertyType::Rotator:
 		{
 			FRotator* Value = static_cast<FRotator*>(ValuePtr);
-			// Transform의 Rotation과 같은 X/Y/Z 축 순서로 보여준다.
+			// Transform??Rotation怨?媛숈? X/Y/Z 異??쒖꽌濡?蹂댁뿬以??
 			float Euler[3] = { Value->Roll, Value->Pitch, Value->Yaw };
 			if (ImGui::DragFloat3(Label.c_str(), Euler, 0.1f))
 			{
@@ -675,7 +676,7 @@ namespace
 
 		case EPropertyType::LinearColor:
 		{
-			// 타입은 Vector4와 같고 위젯만 색상 선택기다
+			// ??낆? Vector4? 媛숆퀬 ?꾩젽留??됱긽 ?좏깮湲곕떎
 			FLinearColor* Value = static_cast<FLinearColor*>(ValuePtr);
 			bChanged = ImGui::ColorEdit4(Label.c_str(), &Value->R);
 			break;
@@ -709,7 +710,7 @@ namespace
 
 			//if (bChange)
 			//{
-			//	// 씬 컴포넌트면 SetTransform을 거치고, 아니면 값을 직접 쓴다
+			//	// ??而댄룷?뚰듃硫?SetTransform??嫄곗튂怨? ?꾨땲硫?媛믪쓣 吏곸젒 ?대떎
 			//	if (USceneComponent* SceneComponent = Cast<USceneComponent>(Object))
 			//	{
 			//		SceneComponent->SetTransform(Transform);
@@ -750,7 +751,7 @@ namespace
 		}
 	}
 
-	// 클래스 계층을 따라 올라가며 각 단계의 프로퍼티를 표시
+	// ?대옒??怨꾩링???곕씪 ?щ씪媛硫?媛??④퀎???꾨줈?쇳떚瑜??쒖떆
 	void DrawProperties(UObject* Object, ImFont* CustomFont)
 	{
 		if (!Object)
@@ -764,12 +765,12 @@ namespace
 			ClassChain.Add(Class);
 		}
 
-		// 기반 클래스부터 표시
+		// 湲곕컲 ?대옒?ㅻ????쒖떆
 		for (auto It = ClassChain.rbegin(); It != ClassChain.rend(); ++It)
 		{
 			UClass* Class = *It;
 
-			// 노출할 프로퍼티가 하나도 없으면 헤더도 그리지 않는다
+			// ?몄텧???꾨줈?쇳떚媛 ?섎굹???놁쑝硫??ㅻ뜑??洹몃━吏 ?딅뒗??
 			bool bHasVisibleProperty = false;
 			for (const FProperty& Property : Class->GetProperties())
 			{
@@ -905,7 +906,7 @@ namespace
 			ImGui::InputText("##Component Name", ComponentNameInputBuf, sizeof(ComponentNameInputBuf));
 			TArray<UClass*> Classes;
 			GetDerivedClasses(UActorComponent::StaticClass(), Classes);
-			// 이름순 정렬하면 메뉴가 안정적
+			// ?대쫫???뺣젹?섎㈃ 硫붾돱媛 ?덉젙??
 			for (UClass* Class : Classes)
 			{
 				//if (!IsSpawnableComponent(Class)) continue;
@@ -1002,8 +1003,8 @@ void FDetailsPanel::OnRender()
 
 	if (TargetActor)
 	{
-		// 빌보드처럼 디테일에 숨겨진 컴포넌트가 선택되면 노출되는 부모로 올린다.
-		// (예: 라이트는 빌보드를 클릭해서 고르지만 수치는 SpotLight 쪽에 있다)
+		// 鍮뚮낫?쒖쿂???뷀뀒?쇱뿉 ?④꺼吏?而댄룷?뚰듃媛 ?좏깮?섎㈃ ?몄텧?섎뒗 遺紐⑤줈 ?щ┛??
+		// (?? ?쇱씠?몃뒗 鍮뚮낫?쒕? ?대┃?댁꽌 怨좊Ⅴ吏留??섏튂??SpotLight 履쎌뿉 ?덈떎)
 		while (TargetComponent && TargetComponent->IsHiddenInDetails())
 		{
 			USceneComponent* HiddenComponent = Cast<USceneComponent>(TargetComponent);
@@ -1016,7 +1017,7 @@ void FDetailsPanel::OnRender()
 		DrawCompoenetList(TargetActor, TargetComponent);				
 		ImGui::Separator();
 
-		// 액터 -> 컴포넌트 순으로, 클래스별 프로퍼티 표시
+		// ?≫꽣 -> 而댄룷?뚰듃 ?쒖쑝濡? ?대옒?ㅻ퀎 ?꾨줈?쇳떚 ?쒖떆
 		ImGui::PushID(TargetActor);
 		DrawProperties(TargetActor, CustomFont);
 		ImGui::PopID();
@@ -1140,11 +1141,11 @@ void FDetailsPanel::DrawCompoenetList(AActor* SelectedActor, UActorComponent*& O
 
 void FDetailsPanel::DrawSceneComponentNode(USceneComponent* Component, USceneComponent* Root, UActorComponent*& OutSelectedComponent)
 {
-	// 빌보드 같은 에디터 표시용 컴포넌트는 트리에 노출하지 않는다
+	// 鍮뚮낫??媛숈? ?먮뵒???쒖떆??而댄룷?뚰듃???몃━???몄텧?섏? ?딅뒗??
 	if (!Component || Component->IsHiddenInDetails())
 		return;
 
-	// 숨겨진 자식만 있는 노드가 펼침 화살표를 갖지 않도록 노출되는 자식만 센다
+	// ?④꺼吏??먯떇留??덈뒗 ?몃뱶媛 ?쇱묠 ?붿궡?쒕? 媛뽰? ?딅룄濡??몄텧?섎뒗 ?먯떇留??쇰떎
 	TArray<USceneComponent*> Children;
 	for (USceneComponent* Child : Component->GetAttachChildren())
 	{
@@ -1178,13 +1179,13 @@ void FDetailsPanel::DrawSceneComponentNode(USceneComponent* Component, USceneCom
 
 	USceneComponent* DragComponent = Component;
 
-	// source: Root 제외, 현재 Component를 payload에 담음
+	// source: Root ?쒖쇅, ?꾩옱 Component瑜?payload???댁쓬
 	if (Component != Root && ImGui::BeginDragDropSource())
 	{
 		ImGui::SetDragDropPayload(EditorDragDrop::Component, &Component, sizeof(USceneComponent*));
 		ImGui::EndDragDropSource();
 	}
-	// target: 모든 행이 가능, payload를 받아 현재 Component를 부모로 사용
+	// target: 紐⑤뱺 ?됱씠 媛?? payload瑜?諛쏆븘 ?꾩옱 Component瑜?遺紐⑤줈 ?ъ슜
 	if (ImGui::BeginDragDropTarget())
 	{
 		if (const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(EditorDragDrop::Component))

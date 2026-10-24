@@ -20,6 +20,8 @@ IncludeDir["ImGui"] = "Source/ThirdParty/ImGui"
 IncludeDir["stb"]   = "Source/ThirdParty/stb"
 IncludeDir["json"]  = "Source/ThirdParty/json"
 IncludeDir["DDSLoader"] = "Source/ThirdParty/DDSLoader"
+IncludeDir["LuaJIT"] = "Source/ThirdParty/LuaJIT/include"
+IncludeDir["sol2"]   = "Source/ThirdParty/sol2/include"
 
 -- premake의 filter는 project()를 만나면 초기화된다.
 -- 두 프로젝트가 같은 런타임(/MDd vs /MD)으로 컴파일되지 않으면 링크가 실패하므로
@@ -48,7 +50,7 @@ function CommonSettings()
 
 	filter "system:windows"
 		systemversion "latest"
-		buildoptions { "/utf-8" }
+		buildoptions { "/utf-8", "/bigobj" }
 		defines { "ENGINE_PLATFORM_WINDOWS" }
 
 	filter "configurations:Debug"
@@ -145,6 +147,13 @@ project "HitoriEngine"
 		"%{IncludeDir.stb}",
 		"%{IncludeDir.json}",
 		"%{IncludeDir.DDSLoader}",
+		"%{IncludeDir.LuaJIT}",
+		"%{IncludeDir.sol2}",
+	}
+
+	libdirs
+	{
+		"Source/ThirdParty/LuaJIT/lib",
 	}
 
 	links
@@ -153,6 +162,7 @@ project "HitoriEngine"
 		"dxgi.lib",
 		"dxguid.lib",
 		"d3dcompiler.lib",
+		"lua51.lib",
 	}
 
 	filter "files:Source/ThirdParty/DDSLoader/**.cpp"
@@ -188,6 +198,13 @@ project "HitoriEditor"
 		"%{IncludeDir.ImGui}/backends",
 		"%{IncludeDir.stb}",
 		"%{IncludeDir.json}",
+		"%{IncludeDir.LuaJIT}",
+		"%{IncludeDir.sol2}",
+	}
+
+	libdirs
+	{
+		"Source/ThirdParty/LuaJIT/lib",
 	}
 
 	links
@@ -196,6 +213,12 @@ project "HitoriEditor"
 		"dxgi.lib",
 		"dxguid.lib",
 		"d3dcompiler.lib",
+		"lua51.lib",
+	}
+
+	postbuildcommands
+	{
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"'
 	}
 
 	filter "configurations:ObjViewer"

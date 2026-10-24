@@ -34,6 +34,10 @@ public: \
 #define PROPERTY_TYPE_FLAGS(PropertyName, PropertyType, Flags) \
     InClass->AddProperty<decltype(ThisClass::PropertyName)>(#PropertyName, offsetof(ThisClass, PropertyName), EPropertyType::##PropertyType, Flags);
 
+#define FUNCTION(FunctionName) \
+    InClass->AddFunction(#FunctionName, [](UObject* Target, void* /*Params*/) { \
+        static_cast<ThisClass*>(Target)->FunctionName(); \
+    });
 #define REFLECT_END()\
 	};\
 private:
