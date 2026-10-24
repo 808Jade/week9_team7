@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "UObject/Object.h"
 #include "UObject/Class.h"
@@ -73,7 +73,7 @@ public:
 	using FBillboardTraceTransform = FMatrix(*)(const UBillboardComponent&, const void*);
 	// 현재 World의 Component에 Ray를 전달하고 가장 가까운 유효 교차를 반환한다.
 	bool LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
-		FBillboardTraceTransform ResolveBillboard = nullptr, const void* ViewContext = nullptr);
+		FBillboardTraceTransform ResolveBillboard = nullptr, const void* ViewContext = nullptr, AActor* IgnoreActor = nullptr);
 	bool SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, FHitResult& OutHit, AActor* IgnoreActor = nullptr);
 
 	void BeginPlay();

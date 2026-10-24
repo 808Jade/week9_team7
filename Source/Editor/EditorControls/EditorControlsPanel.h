@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Editor/EditorUI/EditorPanel.h"
 
 #include "Editor/Gizmo/Gizmo.h"
@@ -45,6 +45,9 @@ public:
 
 	int32 SpaceSelectedIndex = 0;
 	const char* SpaceItems[2] ={"Local","World"};
+
+	int32 CurrentSnapIdx = 4; // 1.0m
+	int32 CurrentRotIdx = 2; // 15 deg
 
 	TArray<UClass*> Classes
 	{

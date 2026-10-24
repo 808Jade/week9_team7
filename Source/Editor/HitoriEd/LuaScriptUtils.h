@@ -18,6 +18,8 @@ public:
 	static FString MakeScriptPath(AActor* InActor);
 	static bool GenerateScript(AActor* InActor);
 	static bool OpenScript(AActor* InActor);
+	static bool OpenScriptPath(const FString& InPath);
+	static bool AssignScript(AActor* InActor, const FString& InPath);
 
 	// 프로젝트 루트(작업 디렉터리) 기준 상대 경로 -> 정규화된 절대 경로. 실패 시 빈 path
 	// ShellExecute, Hot Reload(파일 감시)에서 공용으로 사용

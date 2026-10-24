@@ -1,6 +1,7 @@
 #include "EnginePCH.h"
 
 #include "Editor/HitoriEd/EditorEngine.h"
+#include "Editor/HitoriEd/EditorUndoManager.h"
 
 #include "Core/EngineStatics.h"
 #include "Core/EngineTimer.h"
@@ -193,6 +194,17 @@ bool UEditorEngine::Init()
 		[this](USceneComponent* Root)
 		{
 			Gizmo->SetTarget(Root, true);
+
+			TArray<USceneComponent*> AdditionalComps;
+			if (OutlinerPanel)
+			{
+				for (AActor* Act : OutlinerPanel->GetSelectedActors())
+				{
+					if (Act && Act->GetRootComponent())
+						AdditionalComps.Add(Act->GetRootComponent());
+				}
+			}
+			Gizmo->SetAdditionalTargets(AdditionalComps);
 			DetailsPanel->SetTarget(Root ? Root->GetOwner() : nullptr);
 
 			UPrimitiveComponent* Primitive = Cast<UPrimitiveComponent>(Root);
@@ -203,6 +215,56 @@ bool UEditorEngine::Init()
 			}
 			Outline->SetTarget(Primitive);
 		});
+
+	Gizmo->SetOnTransformCommitted(
+		[this](const TArray<USceneComponent*>& Targets, const TArray<FTransform>& PreTransforms, const TArray<FTransform>& PostTransforms)
+		{
+			TArray<FActorTransformRecord> Records;
+			for (int32 i = 0; i < Targets.Num() && i < PreTransforms.Num() && i < PostTransforms.Num(); ++i)
+			{
+				if (Targets[i])
+				{
+					FActorTransformRecord Rec;
+					Rec.Component = Targets[i];
+					Rec.Actor = Targets[i]->GetOwner();
+					Rec.BeforeTransform = PreTransforms[i];
+					Rec.AfterTransform = PostTransforms[i];
+					Records.Add(Rec);
+				}
+			}
+			if (!Records.IsEmpty())
+			{
+				FEditorUndoManager::Get().PushAction(std::make_unique<FTransformUndoAction>(Records, "Gizmo Transform"));
+			}
+		}
+	);
+
+	FEditorUndoManager::Get().SetPostUndoRedoCallback(
+		[this]()
+		{
+			if (EditorWorld)
+			{
+				EditorWorld->GetScene().UpdateAllTransforms();
+			}
+			if (OutlinerPanel)
+			{
+				AActor* Selected = OutlinerPanel->GetSelectedActor();
+				ULevel* Level = EditorWorld ? EditorWorld->GetPersistentLevel() : nullptr;
+				if (Level && Selected && !Level->GetActors().Contains(Selected))
+				{
+					OutlinerPanel->SelectActor(nullptr);
+				}
+			}
+			if (Gizmo && Gizmo->GetTarget())
+			{
+				Gizmo->SetTarget(Gizmo->GetTarget(), true);
+			}
+			if (DetailsPanel)
+			{
+				DetailsPanel->SetTarget(OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr);
+			}
+		}
+	);
 
 	DetailsPanel->SetSelectionCallback(
 		[this](UActorComponent* Component)
@@ -243,6 +305,7 @@ bool UEditorEngine::Init()
 	LineBatcher->Init(Renderer, GetActiveWorld());
 
 	DetailsPanel->SetWorld(GetActiveWorld());
+	ContentDrawerPanel->SetWorld(GetActiveWorld());
 
 	EditorControlsPanel->SetWorld(EditorWorld);
 	EditorControlsPanel->SetIsPlayingQuery([this]() { return IsPlaying(); });
@@ -331,7 +394,95 @@ void UEditorEngine::BeginFrame(const float DeltaTime)
 	EditorControlsPanel->FEditorControlsPanel::DeltaTime = DeltaTime;
 
 	if (!ImGui::GetIO().WantTextInput && FInputSystem::IsKeyPressed(EKeyCode::Delete))
-		DeleteActor(OutlinerPanel->GetSelectedActor());
+	{
+		TArray<AActor*> SelectedList = OutlinerPanel ? OutlinerPanel->GetSelectedActors() : TArray<AActor*>{};
+		if (SelectedList.IsEmpty() && OutlinerPanel && OutlinerPanel->GetSelectedActor())
+		{
+			SelectedList.Add(OutlinerPanel->GetSelectedActor());
+		}
+		DeleteActorsWithUndo(SelectedList);
+		if (OutlinerPanel)
+			OutlinerPanel->ClearSelection();
+	}
+
+	if (!ImGui::GetIO().WantTextInput)
+	{
+		// 1. Ctrl + Z (?ㅽ뻾 痍⑥냼 - Undo) / Ctrl + Y or Ctrl + Shift + Z (?ㅼ떆 ?ㅽ뻾 - Redo) / Ctrl + G (洹몃━???ㅻ깄 ?좉?)
+		if (FInputSystem::IsKeyDown(EKeyCode::Control))
+		{
+			if (FInputSystem::IsKeyPressed(EKeyCode::Z))
+			{
+				if (FInputSystem::IsKeyDown(EKeyCode::Shift))
+				{
+					FEditorUndoManager::Get().Redo();
+				}
+				else
+				{
+					FEditorUndoManager::Get().Undo();
+				}
+			}
+			else if (FInputSystem::IsKeyPressed(EKeyCode::Y))
+			{
+				FEditorUndoManager::Get().Redo();
+			}
+			else if (FInputSystem::IsKeyPressed(EKeyCode::G))
+			{
+				if (Gizmo)
+				{
+					bool bNewSnap = !Gizmo->IsGridSnapEnabled();
+					Gizmo->SetGridSnapEnabled(bNewSnap);
+					HTR_LOG(Info, "[Gizmo] Grid Snap {}", bNewSnap ? "Enabled" : "Disabled");
+				}
+			}
+		}
+
+		// 2. Ctrl + S (?????
+		if (FInputSystem::IsKeyDown(EKeyCode::Control) && FInputSystem::IsKeyPressed(EKeyCode::S))
+		{
+			SaveCurrentScene();
+		}
+// 3. Alt + P (PIE 플레이 / 정지 토글)
+		if (FInputSystem::IsKeyDown(EKeyCode::Alt) && FInputSystem::IsKeyPressed(EKeyCode::P))
+		{
+			if (IsPlaying())
+				RequestEndPlayMap();
+			else
+				RequestPlaySession();
+		}
+
+		// 4. End (바닥에 딱 붙이기 - Snap to Floor)
+		if (FInputSystem::IsKeyPressed(EKeyCode::End))
+		{
+			SnapSelectedActorsToFloor();
+		}
+
+		// 5. F (선택한 액터로 뷰포트 카메라 포커스)
+		if (FInputSystem::IsKeyPressed(EKeyCode::F))
+		{
+			FocusOnSelectedActor();
+		}
+
+		// 6. Ctrl + C / Ctrl + V (액터 복사 & 붙여넣기)
+		if (FInputSystem::IsKeyDown(EKeyCode::Control))
+		{
+			if (FInputSystem::IsKeyPressed(EKeyCode::C))
+			{
+				if (OutlinerPanel)
+				{
+					CopiedActors = OutlinerPanel->GetSelectedActors();
+					if (CopiedActors.IsEmpty() && OutlinerPanel->GetSelectedActor())
+					{
+						CopiedActors.Add(OutlinerPanel->GetSelectedActor());
+					}
+					HTR_LOG(Info, "[Editor] Copied {} actor(s)", CopiedActors.Num());
+				}
+			}
+			else if (FInputSystem::IsKeyPressed(EKeyCode::V))
+			{
+				DuplicateActors(CopiedActors);
+			}
+		}
+	}
 }
 
 // 패널 요청과 입력을 뷰포트 클라이언트에 전달해 레이아웃과 카메라 상태를 갱신한다.
@@ -791,7 +942,25 @@ void UEditorEngine::UpdateGizmoAndPicking()
 
 	const FVector2 LocalMousePosition = ViewportsPanel->GetLocalMousePosition();
 	ViewClient->UpdateGizmoAndPicking(Gizmo.get(), LocalMousePosition, [this](AActor* SelectedActor) {
-		OutlinerPanel->SelectActor(SelectedActor);
+		const bool bCtrl = ImGui::GetIO().KeyCtrl || (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+		if (bCtrl)
+		{
+			if (SelectedActor)
+			{
+				if (OutlinerPanel->IsActorSelected(SelectedActor))
+				{
+					OutlinerPanel->RemoveFromSelection(SelectedActor);
+				}
+				else
+				{
+					OutlinerPanel->AddToSelection(SelectedActor);
+				}
+			}
+		}
+		else
+		{
+			OutlinerPanel->SelectActor(SelectedActor);
+		}
 	});
 }
 
@@ -1178,18 +1347,72 @@ void UEditorEngine::PreExit()
 }
 
 // 선택과 Gizmo 참조를 정리한 뒤 Actor를 삭제한다.
+void UEditorEngine::DeleteActorsWithUndo(const TArray<AActor*>& InActors)
+{
+	if (InActors.IsEmpty()) return;
+	if (IsPlaying() && !bIsPaused && !IsSimulatingInEditor()) return;
+
+	UWorld* World = GetActiveWorld();
+	if (!World) return;
+	ULevel* Level = World->GetPersistentLevel();
+	if (!Level) return;
+
+	TArray<AActor*> ValidActors;
+	for (AActor* Act : InActors)
+	{
+		if (Act && Level->GetActors().Contains(Act))
+		{
+			ValidActors.Add(Act);
+		}
+	}
+	if (ValidActors.IsEmpty()) return;
+
+	if (OutlinerPanel)
+	{
+		for (AActor* Act : ValidActors)
+		{
+			if (OutlinerPanel->IsActorSelected(Act))
+			{
+				OutlinerPanel->RemoveFromSelection(Act);
+			}
+		}
+		if (OutlinerPanel->GetSelectedActor() && ValidActors.Contains(OutlinerPanel->GetSelectedActor()))
+		{
+			OutlinerPanel->SelectActor(nullptr);
+		}
+	}
+	if (DetailsPanel)
+	{
+		for (AActor* Act : ValidActors)
+		{
+			if (DetailsPanel->GetTarget() == Act)
+			{
+				DetailsPanel->SetTarget(nullptr);
+			}
+		}
+	}
+	if (Gizmo && Gizmo->GetTarget() && ValidActors.Contains(Gizmo->GetTarget()->GetOwner()))
+	{
+		Gizmo->SetTarget(nullptr);
+	}
+
+	for (AActor* Act : ValidActors)
+	{
+		World->GetPathTracker().OnObjectDestroyed(Act);
+		Act->UnregisterAllComponents();
+		Act->RegisterAllActorTickFunctions(false);
+		Level->RemoveActor(Act);
+	}
+
+	FString Desc = ValidActors.Num() > 1 ? ("Delete " + std::to_string(ValidActors.Num()) + " Actors") : ("Delete " + ValidActors[0]->GetName());
+	FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(World, Level, ValidActors, false, false, Desc));
+}
+
 void UEditorEngine::DeleteActor(AActor* Actor)
 {
 	if (!Actor)
 		return;
-	// 실행 중 삭제는 게임 로직이 들고 있는 참조를 깨뜨릴 수 있어 Pause 상태에서만 허용한다.
-	if (IsPlaying() && !bIsPaused && !IsSimulatingInEditor())
-		return;
-
-	OutlinerPanel->SelectActor(nullptr);
-	DetailsPanel->SelectComponent(nullptr);
-
-	Actor->Destroy();
+	DeleteActorsWithUndo(TArray<AActor*>{ Actor });
 }
 
 void UEditorEngine::DeleteComponent(UActorComponent* Component)
@@ -1265,6 +1488,7 @@ void UEditorEngine::OnActiveWorldChanged()
 	if (DetailsPanel) DetailsPanel->SetWorld(UIWorld);
 	if (EditorControlsPanel) EditorControlsPanel->SetWorld(UIWorld);
 	if (SettingsPanel) SettingsPanel->SetWorld(UIWorld);
+	if (ContentDrawerPanel) ContentDrawerPanel->SetWorld(UIWorld);
 }
 
 void UEditorEngine::EndPlayMap()
@@ -1377,6 +1601,7 @@ void UEditorEngine::CopyPIEWindowToBackbuffer()
 // 씬 변경으로 무효화된 에디터의 선택 참조를 모두 해제한다.
 void UEditorEngine::ResetSceneSelection()
 {
+	FEditorUndoManager::Get().Clear();
 	Gizmo->SetTarget(nullptr, false);
 	Outline->SetTarget(nullptr);
 	DetailsPanel->SetTarget(nullptr);
@@ -1431,4 +1656,139 @@ void UEditorEngine::SaveSceneAs()
 		return;
 	}
 	FEditorFileUtils::SaveSceneAs(EditorWorld);
+}
+
+void UEditorEngine::SnapSelectedActorsToFloor()
+{
+	UWorld* World = GetActiveWorld();
+	if (!World) return;
+
+	TArray<AActor*> TargetActors = OutlinerPanel ? OutlinerPanel->GetSelectedActors() : TArray<AActor*>{};
+	if (TargetActors.IsEmpty() && OutlinerPanel && OutlinerPanel->GetSelectedActor())
+	{
+		TargetActors.Add(OutlinerPanel->GetSelectedActor());
+	}
+
+	TArray<FActorTransformRecord> Records;
+
+	for (AActor* Actor : TargetActors)
+	{
+		if (!Actor || !Actor->GetRootComponent()) continue;
+
+		FTransform PreTransform = Actor->GetRootComponent()->GetTransform();
+
+		FBox Bounds;
+		float PivotOffsetFromBottom = 0.0f;
+		float RayStartHeight = Actor->GetActorLocation().Z + 1.0f;
+		if (Actor->TryGetActorBounds(Bounds))
+		{
+			PivotOffsetFromBottom = Actor->GetActorLocation().Z - Bounds.Min.Z;
+			RayStartHeight = Bounds.Max.Z + 0.5f; // ?≫꽣 理쒖긽?⑤낫??0.5m ?꾩뿉??諛쒖궗
+		}
+
+		FVector Loc = Actor->GetActorLocation();
+		FRay Ray{ FVector(Loc.X, Loc.Y, RayStartHeight), FVector(0.0f, 0.0f, -1.0f) };
+		FHitResult Hit;
+		// ?먭린 ?먯떊(Actor)??臾댁떆?섍퀬 ?꾨옒 諛⑺뼢?쇰줈 ?덉씠罹먯뒪??		if (World->LineTraceSingle(Ray, Hit, nullptr, nullptr, Actor))
+		{
+			FVector NewLoc = Loc;
+			NewLoc.Z = Hit.ImpactPoint.Z + PivotOffsetFromBottom;
+			Actor->SetActorLocation(NewLoc);
+
+			FTransform PostTransform = Actor->GetRootComponent()->GetTransform();
+			if (PreTransform != PostTransform)
+			{
+				FActorTransformRecord Rec;
+				Rec.Actor = Actor;
+				Rec.Component = Actor->GetRootComponent();
+				Rec.BeforeTransform = PreTransform;
+				Rec.AfterTransform = PostTransform;
+				Records.Add(Rec);
+			}
+		}
+	}
+
+	if (!Records.IsEmpty())
+	{
+		FEditorUndoManager::Get().PushAction(std::make_unique<FTransformUndoAction>(Records, "Snap to Floor"));
+	}
+}
+
+void UEditorEngine::FocusOnSelectedActor()
+{
+	AActor* Selected = OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr;
+	if (!Selected) return;
+
+	FEditorViewportClient* ActiveClient = nullptr;
+	if (ViewportsPanel)
+	{
+		int32 ActiveIndex = ViewportsPanel->GetActiveViewIndex();
+		if (ActiveIndex >= 0 && ActiveIndex < 4)
+		{
+			ActiveClient = ViewportsPanel->GetViewportClient(ActiveIndex);
+		}
+	}
+	if (!ActiveClient && !AllViewportClients.IsEmpty())
+	{
+		ActiveClient = AllViewportClients[0];
+	}
+
+	if (ActiveClient)
+	{
+		FVector TargetPos = Selected->GetActorLocation();
+		float FocusDistance = 3.5f;
+
+		FBox Bounds;
+		if (Selected->TryGetActorBounds(Bounds))
+		{
+			TargetPos = Bounds.GetCenter();
+			float ExtentRadius = Bounds.GetExtent().Length();
+			FocusDistance = std::clamp(ExtentRadius * 2.5f, 2.5f, 100.0f);
+		}
+
+		FRotator Rot = ActiveClient->GetViewRotation();
+		FVector Forward = Rot.Quaternion().GetForwardVector();
+		ActiveClient->SetViewLocation(TargetPos - Forward * FocusDistance);
+	}
+}
+
+void UEditorEngine::DuplicateActors(const TArray<AActor*>& InActors)
+{
+	UWorld* World = GetActiveWorld();
+	if (!World || InActors.IsEmpty()) return;
+
+	ULevel* Level = World->GetPersistentLevel();
+	if (!Level) return;
+
+	TArray<AActor*> NewDuplicatedActors;
+
+	for (AActor* SrcActor : InActors)
+	{
+		if (!SrcActor) continue;
+		FName NewName = MakeUniqueObjectName(Level, SrcActor->GetClass(), SrcActor->GetFName());
+		AActor* DupActor = Cast<AActor>(StaticDuplicateObject(SrcActor, Level, NewName));
+		if (DupActor)
+		{
+			Level->AddActor(DupActor);
+			DupActor->RegisterAllComponents();
+			DupActor->SetActorLocation(SrcActor->GetActorLocation() + FVector(1.0f, 1.0f, 0.0f));
+			NewDuplicatedActors.Add(DupActor);
+		}
+	}
+
+	if (!NewDuplicatedActors.IsEmpty())
+	{
+		if (OutlinerPanel)
+		{
+			OutlinerPanel->ClearSelection();
+			for (AActor* Dup : NewDuplicatedActors)
+			{
+				OutlinerPanel->AddToSelection(Dup);
+			}
+		}
+		HTR_LOG(Info, "[Editor] Duplicated {} actor(s)", NewDuplicatedActors.Num());
+
+		FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+			World, Level, NewDuplicatedActors, true, true, "Duplicate Actor(s)"));
+	}
 }

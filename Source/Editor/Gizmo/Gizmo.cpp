@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Editor/Gizmo/Gizmo.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Actor.h"
@@ -28,6 +28,7 @@ void FGizmo::Update(const FRay& MouseRay, const FVector2& MousePos, const FMatri
 	{
 		HoveredAxis = -1;
 		DraggingAxis = -1;
+	AdditionalStartLocations.Empty();
 		return;
 	}
 
@@ -231,6 +232,28 @@ void FGizmo::BeginDrag(int Axis, const FRay& MouseRay, const FVector2& MousePos)
 
 	if (Mode == EGizmoMode::Rotation)
 		DragStartAngle = ComputeAngleOnPlane(DragStartPoint, Axis);
+
+	AdditionalStartLocations.Empty();
+	for (USceneComponent* Comp : AdditionalTargets)
+	{
+		if (Comp)
+			AdditionalStartLocations.Add(Comp->GetRelativeLocation());
+		else
+			AdditionalStartLocations.Add(FVector::ZeroVector);
+	}
+
+	DragStartTransforms.Empty();
+	if (Target)
+	{
+		DragStartTransforms.Add(Target->GetTransform());
+	}
+	for (USceneComponent* Comp : AdditionalTargets)
+	{
+		if (Comp && Comp != Target)
+		{
+			DragStartTransforms.Add(Comp->GetTransform());
+		}
+	}
 }
 
 // 평면 교차점 변화를 이동·회전·크기에 반영한다.
@@ -245,17 +268,49 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 	if (DraggingAxis == AXIS_SCREEN && Mode != EGizmoMode::Rotation)
 	{
 		if (Mode == EGizmoMode::Location)
-			Target->SetRelativeLocation(DragStartLocation + (current - DragStartPoint));
+		{
+			FVector Offset = current - DragStartPoint;
+			if (bGridSnapEnabled && GridSnapSize > 0.0001f)
+			{
+				if (bAbsoluteGridSnap && Space == EGizmoSpace::World)
+				{
+					FVector Desired = DragStartLocation + Offset;
+					Desired.X = std::round(Desired.X / GridSnapSize) * GridSnapSize;
+					Desired.Y = std::round(Desired.Y / GridSnapSize) * GridSnapSize;
+					Desired.Z = std::round(Desired.Z / GridSnapSize) * GridSnapSize;
+					Offset = Desired - DragStartLocation;
+				}
+				else
+				{
+					Offset.X = std::round(Offset.X / GridSnapSize) * GridSnapSize;
+					Offset.Y = std::round(Offset.Y / GridSnapSize) * GridSnapSize;
+					Offset.Z = std::round(Offset.Z / GridSnapSize) * GridSnapSize;
+				}
+			}
+
+			Target->SetRelativeLocation(DragStartLocation + Offset);
+			for (int32 i = 0; i < AdditionalTargets.Num(); ++i)
+			{
+				if (AdditionalTargets[i] && AdditionalTargets[i] != Target && i < AdditionalStartLocations.Num())
+				{
+					AdditionalTargets[i]->SetRelativeLocation(AdditionalStartLocations[i] + Offset);
+				}
+			}
+		}
 		else
 		{
 			float dx = MousePos.X - DragStartMousePos.X;
-			float dy = DragStartMousePos.Y - MousePos.Y;   // 화면 Y는 아래가 +
+			float dy = DragStartMousePos.Y - MousePos.Y;   // ?붾㈃ Y???꾨옒媛 +
 			float scaleDelta = (dx + dy) * 0.005f;
 
 			float factor = 1.0f + scaleDelta;
+			if (bScaleSnapEnabled && ScaleSnapStep > 0.0001f)
+			{
+				factor = std::round(factor / ScaleSnapStep) * ScaleSnapStep;
+			}
 			if (factor < 0.01f) factor = 0.01f;
 
-			if (!ApplyScaleToLight(factor)) 	// 조명이면 여기서 radius만 변경하고 return
+			if (!ApplyScaleToLight(factor)) 	// 議곕챸?대㈃ ?ш린??radius留?蹂寃쏀븯怨?return
 				Target->SetRelativeScale3D(DragStartScale * factor);
 		}
 		return;
@@ -265,6 +320,12 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 	{
 		float currentAngle = ComputeAngleOnPlane(current, DraggingAxis);
 		float deltaAngle = currentAngle - DragStartAngle;
+
+		if (bRotationSnapEnabled && RotationSnapAngle > 0.0001f)
+		{
+			const float SnapRad = RotationSnapAngle * (3.14159265358979323846f / 180.0f);
+			deltaAngle = std::round(deltaAngle / SnapRad) * SnapRad;
+		}
 
 		FQuat delta = FQuat::MakeFromAxisAngle(DragAxisDirection, deltaAngle);
 		FQuat start = DragStartRotation.Quaternion();
@@ -279,13 +340,57 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 	float amount = delta.Dot(DragAxisDirection);
 
 	if (Mode == EGizmoMode::Location)
-		Target->SetRelativeLocation(DragStartLocation + DragAxisDirection * amount);
+	{
+		FVector Offset;
+		if (bGridSnapEnabled && GridSnapSize > 0.0001f)
+		{
+			if (bAbsoluteGridSnap && Space == EGizmoSpace::World)
+			{
+				FVector RawPos = DragStartLocation + DragAxisDirection * amount;
+				FVector SnappedPos = RawPos;
+				if (std::abs(DragAxisDirection.X) > 0.9f)
+					SnappedPos.X = std::round(RawPos.X / GridSnapSize) * GridSnapSize;
+				else if (std::abs(DragAxisDirection.Y) > 0.9f)
+					SnappedPos.Y = std::round(RawPos.Y / GridSnapSize) * GridSnapSize;
+				else if (std::abs(DragAxisDirection.Z) > 0.9f)
+					SnappedPos.Z = std::round(RawPos.Z / GridSnapSize) * GridSnapSize;
+				else
+				{
+					float SnappedAmount = std::round(amount / GridSnapSize) * GridSnapSize;
+					SnappedPos = DragStartLocation + DragAxisDirection * SnappedAmount;
+				}
+				Offset = SnappedPos - DragStartLocation;
+			}
+			else
+			{
+				float SnappedAmount = std::round(amount / GridSnapSize) * GridSnapSize;
+				Offset = DragAxisDirection * SnappedAmount;
+			}
+		}
+		else
+		{
+			Offset = DragAxisDirection * amount;
+		}
+
+		Target->SetRelativeLocation(DragStartLocation + Offset);
+		for (int32 i = 0; i < AdditionalTargets.Num(); ++i)
+		{
+			if (AdditionalTargets[i] && AdditionalTargets[i] != Target && i < AdditionalStartLocations.Num())
+			{
+				AdditionalTargets[i]->SetRelativeLocation(AdditionalStartLocations[i] + Offset);
+			}
+		}
+	}
 	else   // Scale
 	{
 		float factor = 1.0f + amount;
+		if (bScaleSnapEnabled && ScaleSnapStep > 0.0001f)
+		{
+			factor = std::round(factor / ScaleSnapStep) * ScaleSnapStep;
+		}
 		if (factor < 0.01f) factor = 0.01f;
 
-		// 조명이면 여기서 radius만 반영하고 return
+		// 議곕챸?대㈃ ?ш린??radius留?諛섏쁺?섍퀬 return
 		if (ApplyScaleToLight(factor)) return;
 
 		FVector NewScale = DragStartScale;
@@ -297,10 +402,49 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 	}
 }
 
-// 드래그 축을 비워 조작을 종료한다.
+// ?쒕옒洹?異뺤쓣 鍮꾩썙 議곗옉??醫낅즺?쒕떎.
 void FGizmo::EndDrag()
 {
+	if (DraggingAxis >= 0)
+	{
+		TArray<USceneComponent*> Comps;
+		TArray<FTransform> EndTransforms;
+		if (Target)
+		{
+			Comps.Add(Target);
+			EndTransforms.Add(Target->GetTransform());
+		}
+		for (USceneComponent* Comp : AdditionalTargets)
+		{
+			if (Comp && Comp != Target)
+			{
+				Comps.Add(Comp);
+				EndTransforms.Add(Comp->GetTransform());
+			}
+		}
+
+		bool bChanged = false;
+		if (Comps.Num() == DragStartTransforms.Num())
+		{
+			for (int32 i = 0; i < Comps.Num(); ++i)
+			{
+				if (DragStartTransforms[i] != EndTransforms[i])
+				{
+					bChanged = true;
+					break;
+				}
+			}
+		}
+
+		if (bChanged && OnTransformCommitted)
+		{
+			OnTransformCommitted(Comps, DragStartTransforms, EndTransforms);
+		}
+	}
+
 	DraggingAxis = -1;
+	AdditionalStartLocations.Empty();
+	DragStartTransforms.Empty();
 }
 
 // 평면 기저에 점을 투영하고 atan2로 회전각을 구한다.

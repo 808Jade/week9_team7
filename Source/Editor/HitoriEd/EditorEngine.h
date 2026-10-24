@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Engine.h"
 #include "Core/Window.h"
@@ -68,6 +68,7 @@ public:
 	// 네 View 결과와 ImGui를 메인 Swapchain 백버퍼에 합성한다. Present는 FEngineLoop가 한다.
 	void PresentFrame();
 	void DeleteActor(AActor* Actor);
+	void DeleteActorsWithUndo(const TArray<AActor*>& InActors);
 	void DeleteComponent(UActorComponent* Component);
 
 	//Play 버튼을 눌렀을때 Play Session 실행을 요청한다.
@@ -217,6 +218,10 @@ private:
 
 	void CreatePIESession();
 	void StopPIESession();
+	void SnapSelectedActorsToFloor();
+	void FocusOnSelectedActor();
+	void DuplicateActors(const TArray<AActor*>& InActors);
+	TArray<AActor*> CopiedActors;
 	void DrawPIEWindows();
 
 
