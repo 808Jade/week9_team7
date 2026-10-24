@@ -192,6 +192,13 @@ void UWorld::Tick(float DeltaTime)
 void UWorld::ClearWorld()
 {
 	EndPlay();
+
+	if (MainCamera)
+	{
+		MainCamera->UnregisterAllComponents();
+		MainCamera->RegisterAllActorTickFunctions(false);
+	}
+
 	// BeginPlay 대기 중인 Actor 제거
 	while (!BeginPlayList.IsEmpty())
 	{

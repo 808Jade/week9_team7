@@ -76,6 +76,12 @@ bool FJsonArchive::LoadWorldFromBytes(UWorld* World, const TArray<uint8>& Bytes)
 	World->Serialize(Root.EnterRecord("World"));
 	Ar.Close();
 
+	if (World->GetMainCamera())
+	{
+		World->GetMainCamera()->RegisterAllComponents();
+		World->GetMainCamera()->RegisterAllActorTickFunctions(true);
+	}
+
 	World->GetScene().BuildBVH();
 	return !Reader.IsError();
 }

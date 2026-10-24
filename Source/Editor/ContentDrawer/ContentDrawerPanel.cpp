@@ -201,6 +201,16 @@ void FContentDrawerPanel::OnRender()
 					}
 				}
 
+				const float columnWidth = ImGui::GetContentRegionAvail().x;
+				const float buttonFramePadding = 4.0f;
+				const float buttonTotalWidth = thumbnailSize + buttonFramePadding * 2.0f;
+				const float buttonOffsetX = (columnWidth > buttonTotalWidth) ? (columnWidth - buttonTotalWidth) * 0.5f : 0.0f;
+
+				if (buttonOffsetX > 0.0f)
+				{
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + buttonOffsetX);
+				}
+
 				const bool bIsSelected = (SelectedEntryPath == Path);
 				if (bIsSelected)
 				{
@@ -208,6 +218,7 @@ void FContentDrawerPanel::OnRender()
 					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.35f, 0.65f, 1.0f, 1.0f));
 				}
 
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(buttonFramePadding, buttonFramePadding));
 				if (Thumbnail && Thumbnail->GetResource() && Thumbnail->GetResource()->GetSRV())
 				{
 					ImGui::ImageButton(PathString.c_str(), (ImTextureID)Thumbnail->GetResource()->GetSRV(), { thumbnailSize, thumbnailSize });
@@ -216,6 +227,7 @@ void FContentDrawerPanel::OnRender()
 				{
 					ImGui::Button(FilenameString.c_str(), { thumbnailSize, thumbnailSize });
 				}
+				ImGui::PopStyleVar();
 
 				if (bIsSelected)
 				{
@@ -298,7 +310,14 @@ void FContentDrawerPanel::OnRender()
 				// 파일 이름 표시 또는 인라인 이름 변경 입력창
 				if (bIsRenaming && Path == RenamingPath)
 				{
-					ImGui::PushItemWidth(thumbnailSize + padding);
+					const float inputWidth = (std::min)(columnWidth, thumbnailSize + padding);
+					const float inputOffsetX = (columnWidth > inputWidth) ? (columnWidth - inputWidth) * 0.5f : 0.0f;
+					if (inputOffsetX > 0.0f)
+					{
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + inputOffsetX);
+					}
+
+					ImGui::PushItemWidth(inputWidth);
 					if (bFocusRenameInput)
 					{
 						ImGui::SetKeyboardFocusHere();
@@ -316,7 +335,22 @@ void FContentDrawerPanel::OnRender()
 				}
 				else
 				{
-					ImGui::TextWrapped("%s", FilenameString.c_str());
+					const ImVec2 textSize = ImGui::CalcTextSize(FilenameString.c_str());
+					if (textSize.x <= columnWidth)
+					{
+						const float textOffsetX = (columnWidth - textSize.x) * 0.5f;
+						if (textOffsetX > 0.0f)
+						{
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffsetX);
+						}
+						ImGui::TextUnformatted(FilenameString.c_str());
+					}
+					else
+					{
+						ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + columnWidth);
+						ImGui::TextWrapped("%s", FilenameString.c_str());
+						ImGui::PopTextWrapPos();
+					}
 				}
 
 				ImGui::PopID();
