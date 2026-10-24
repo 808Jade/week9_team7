@@ -49,6 +49,8 @@ bld/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*
+# LuaJIT 런타임 DLL은 빌드 후 복사(postbuild)에 필요하므로 추적한다
+!Source/ThirdParty/LuaJIT/bin/*
 # Uncomment if you have tasks that rely on *.refresh files to move binaries
 # (https://github.com/github/gitignore/pull/3736)
 #!**/[Bb]in/*.refresh

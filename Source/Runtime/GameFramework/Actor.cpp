@@ -203,6 +203,14 @@ FVector AActor::GetActorLocation() const
 	return FVector::ZeroVector;
 }
 
+void AActor::SetActorLocation(const FVector& NewLocation, bool bSweep)
+{
+	if (RootComponent)
+	{
+		RootComponent->SetWorldLocation(NewLocation, bSweep);
+	}
+}
+
 FRotator AActor::GetActorRotation() const
 {
 	if (RootComponent)
@@ -212,6 +220,14 @@ FRotator AActor::GetActorRotation() const
 	return FRotator();
 }
 
+void AActor::SetActorRotation(const FRotator& NewRotation, bool bSweep)
+{
+	if (RootComponent)
+	{
+		RootComponent->SetWorldRotation(NewRotation, bSweep);
+	}
+}
+
 FVector AActor::GetActorScale3D() const
 {
 	if (RootComponent)
@@ -219,6 +235,14 @@ FVector AActor::GetActorScale3D() const
 		return RootComponent->GetWorldScale3D();
 	}
 	return FVector::OneVector;
+}
+
+void AActor::SetActorScale3D(const FVector& NewScale)
+{
+	if (RootComponent)
+	{
+		RootComponent->SetWorldScale3D(NewScale);
+	}
 }
 
 FQuat AActor::GetActorQuat() const

@@ -9,6 +9,10 @@ public:
 	static bool SaveScene(UWorld* World);
 	static bool SaveSceneAs(UWorld* World);
 	static bool LoadScene(UWorld* World);
+	static bool LoadSceneFromPath(UWorld* World, const FString& FilePath);
+
+	static const FString& GetCurrentScenePath() { return CurrentScenePath; }
+	static void SetCurrentScenePath(const FString& Path) { CurrentScenePath = Path; }
 
 private:
 	static FString OpenSaveSceneDialog();
@@ -16,4 +20,3 @@ private:
 
 	static FString CurrentScenePath;
 };
-

@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "World.h"
 #include "Level.h"
 
@@ -32,6 +32,8 @@
 #include "Render/ObjectConstants.h"
 
 #include "UObject/UObjectGlobals.h"
+#include "Lua/LuaManager.h"
+#include "Lua/Bindings/LuaBindings.h"
 
 
 namespace
@@ -69,12 +71,12 @@ bool UWorld::Init()
 		return false;
 	}
 
-	//레벨 연결
+	// 레벨 연결
 	PersistentLevel->SetWorld(this);
 	Levels.Add(PersistentLevel);
 	CurrentLevel = PersistentLevel;
 
-	//카메라 생성
+	// 카메라 생성
 	CreateMainCamera();
 
 	return true;
@@ -106,7 +108,7 @@ AActor* UWorld::SpawnActor(UClass* Class, FName InName, const FTransform* Transf
 		NewActor->GetRootComponent()->SetTransform(SpawnTransform);
 	}
 	
-	// 4. Level->Actors에 등록한 뒤 컴포넌트를 월드에 연결한다.
+	// 4. Level->Actors에 등록한 후에 컴포넌트를 월드에 연결한다.
 	PersistentLevel->AddActor(NewActor);
 	NewActor->RegisterAllComponents();
 
@@ -126,6 +128,9 @@ void UWorld::Tick(float DeltaTime)
 	// 에디터 월드가 아니면 액터 틱을 돌린다
 	if (WorldType != EWorldType::Editor)
 	{
+		FLuaManager::Get().SetActiveWorld(this);
+		LuaBindings::TickTimers(DeltaTime);
+
 		while (!BeginPlayList.IsEmpty())
 		{
 			AActor* Actor = BeginPlayList.Peek();
@@ -431,46 +436,6 @@ void UWorld::GatherRenderPackets(FRenderQueue& RenderQueue, const FViewContext* 
 	}
 }
 
-//void UWorld::GatherRenderPackets(TArray<FRenderPacket>& RenderArray, const FLODViewContext* LODView, const FFrustumPlanes* Frustum)
-//{
-//	for (TObjectIterator<UPrimitiveComponent> Itr; Itr; ++Itr)
-//	{
-//		if (!*Itr || !Itr->IsVisible())
-//			continue;
-//
-//		if (Frustum)
-//		{
-//			const FBox Box = Itr->CalcBounds();
-//			const FAABB Bounds{
-//				(Box.Min + Box.Max) * 0.5f,
-//				(Box.Max - Box.Min) * 0.5f
-//			};
-//			if (!IsAABBInFrustum(Bounds, *Frustum))
-//				continue;
-//		}
-//
-//		if (LODView)
-//		{
-//			if (auto* Component = Cast<UStaticMeshComponent>(*Itr))
-//			{
-//				if (UStaticMesh* Mesh =
-//					Component->GetStaticMesh())
-//				{
-//					const uint32 LOD = SelectStaticMeshLOD(
-//						*Mesh,
-//						Component->GetWorldMatrix(),
-//						*LODView);
-//
-//					Component->SubmitToRenderQueue(RenderQueue, LOD);
-//					continue;
-//				}
-//			}
-//		}
-//
-//		Itr->SubmitToRenderQueue(RenderQueue);
-//	}
-//}
-
 // 메인 카메라 생성
 void UWorld::CreateMainCamera()
 {
@@ -490,6 +455,7 @@ void UWorld::CreateMainCamera()
 	MainCamera->GetCameraComponent()->SetRelativeLocation(FVector(-5.0f, -5.0f, 5.0f));
 
 	// 메인 카메라는 Level에 속하지 않아 BeginPlay를 거치지 않으므로 여기서 등록한다.
+	MainCamera->RegisterAllComponents();
 	MainCamera->RegisterAllActorTickFunctions(true);
 }
 
@@ -674,7 +640,7 @@ bool UWorld::SweepMulti(TArray<FHitResult>& OutHIt, const FVector& Start, const 
 }
 
 bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
-	FBillboardTraceTransform ResolveBillboard, const void* ViewContext)
+	FBillboardTraceTransform ResolveBillboard, const void* ViewContext, AActor* IgnoreActor)
 {
 	SCOPE_CYCLE_COUNTER_ALWAYS(EditorStats::STAT_PickingTime_Name);
 	OutHit = FHitResult();
@@ -682,9 +648,20 @@ bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 
 	const auto TraceComponent = [&](FPrimitiveSceneProxy* Proxy, float& InOutNearestT)
 		{
+			if (!Proxy) return false;
+
+			UPrimitiveComponent* PrimitiveComp = Proxy->GetComponent();
+			if (IgnoreActor && PrimitiveComp && PrimitiveComp->GetOwner() == IgnoreActor)
+			{
+				return false;
+			}
+
 			if (UStaticMesh* Mesh = Proxy ? Proxy->GetMesh() : nullptr)
 			{
 				if (!Proxy->IsVisible())
+					return false;
+
+				if (IsPlayInEditor() && PrimitiveComp && PrimitiveComp->GetOwner() && !PrimitiveComp->GetOwner()->GetActorEnableCollision())
 					return false;
 
 				const FMatrix& WorldToLocal = Proxy->GetWorldToLocal();
@@ -697,19 +674,23 @@ bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 				if (!RayIntersectsMesh(LocalRay, Mesh->GetMeshData(), T))
 					return false;
 
-				OutHit.HitComponent = Proxy->GetComponent();
-				OutHit.Distance = T;
-				OutHit.ImpactPoint = WorldRay.Origin + WorldRay.Direction * T;
-				InOutNearestT = T;
+				const FVector LocalHitPoint = LocalRay.Origin + LocalRay.Direction * T;
+				const FVector WorldHitPoint = Proxy->GetLocalToWorld().TransformPosition(LocalHitPoint);
+				const float WorldDist = (WorldHitPoint - WorldRay.Origin).Dot(WorldRay.Direction);
+				if (WorldDist < 0.0f || WorldDist >= InOutNearestT)
+					return false;
+
+				OutHit.HitComponent = PrimitiveComp;
+				OutHit.Distance = WorldDist;
+				OutHit.ImpactPoint = WorldHitPoint;
+				InOutNearestT = WorldDist;
 				return true;
 			}
 
-			UPrimitiveComponent* Component = Proxy ? Proxy->GetComponent() : nullptr;
-
-			if (!Component || !Component->IsVisible())
+			if (!PrimitiveComp || !PrimitiveComp->IsVisible())
 				return false;
 
-			if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(Component))
+			if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(PrimitiveComp))
 			{
 				if (!ResolveBillboard)
 				{
@@ -749,15 +730,21 @@ bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 			};
 
 			float T = InOutNearestT;
-			if (!Component->LineTraceComponentLocal(LocalRay, T))
+			if (!PrimitiveComp->LineTraceComponentLocal(LocalRay, T))
 			{
 				return false;
 			}
 
-			OutHit.HitComponent = Component;
-			OutHit.Distance = T;
-			OutHit.ImpactPoint = WorldRay.Origin + WorldRay.Direction * T;
-			InOutNearestT = T;
+			const FVector LocalHitPoint = LocalRay.Origin + LocalRay.Direction * T;
+			const FVector WorldHitPoint = Proxy->GetLocalToWorld().TransformPosition(LocalHitPoint);
+			const float WorldDist = (WorldHitPoint - WorldRay.Origin).Dot(WorldRay.Direction);
+			if (WorldDist < 0.0f || WorldDist >= InOutNearestT)
+				return false;
+
+			OutHit.HitComponent = PrimitiveComp;
+			OutHit.Distance = WorldDist;
+			OutHit.ImpactPoint = WorldHitPoint;
+			InOutNearestT = WorldDist;
 			return true;
 		};
 
@@ -821,7 +808,8 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 
 void UWorld::BeginPlay()
 {
-	if (WorldType != EWorldType::PIE || bBegunPlay) return;
+	if ((WorldType != EWorldType::PIE && WorldType != EWorldType::Game) || bBegunPlay) return;
+	/*
 	if (!PlayerPawn)
 	{
 		for (AActor* Actor : PersistentLevel->GetActors())
@@ -836,6 +824,7 @@ void UWorld::BeginPlay()
 	}
 	if (!PlayerController) PlayerController = SpawnActor<APlayerController>();
 	if (PlayerController && PlayerPawn) PlayerController->Possess(PlayerPawn);
+	*/
 
 	// 기존 액터 목록을 고정한 후 시작한다. BeginPlay 중 생성된 액터는 대기열로 간다.
 	TArray<AActor*> InitialActors;
@@ -873,6 +862,7 @@ void UWorld::BeginPlay()
 void UWorld::EndPlay()
 {
 	bBegunPlay = false;
+	LuaBindings::ClearTimers();
 	if (PlayerController)
 	{
 		PlayerController->ClearInputState();

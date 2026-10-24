@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Level.h"
 #include "World.h"
 
@@ -13,6 +13,14 @@ void ULevel::AddActor(AActor* Actor)
 		return;
 
 	Actors.Add(Actor);
+}
+
+void ULevel::RemoveActor(AActor* Actor)
+{
+	if (!Actor)
+		return;
+
+	Actors.Remove(Actor);
 }
 
 void ULevel::ClearActors()

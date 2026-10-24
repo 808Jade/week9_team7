@@ -12,4 +12,7 @@ namespace EditorDragDrop
 	inline constexpr const char* Font = "ASSET_FONT";
 
 	inline constexpr const char* Component = "COMPONENT";
+
+	// 페이로드 내용: const char* (스크립트 상대 경로 문자열)
+	inline constexpr const char* LuaScript = "LUA_SCRIPT";
 }

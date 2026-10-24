@@ -53,6 +53,7 @@ bool FWindow::Create(HINSTANCE hInstance, int InWidth, int InHeight, const wchar
 	wc.hInstance = hInstance;
 	wc.lpszClassName = CLASS_NAME;
 	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	RegisterClassW(&wc);
 
 	DWORD style = bBorderless ? WS_POPUP : WS_OVERLAPPEDWINDOW;

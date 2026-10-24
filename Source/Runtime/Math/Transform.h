@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Math/EngineMath.h"
 #include "Math/Rotator.h"
@@ -32,4 +32,13 @@ struct FTransform
 	FVector InverseTransformVector(const FVector& V) const;
 
 	FVector InverseTransformPosition(const FVector& V) const;
+
+	bool operator==(const FTransform& Other) const
+	{
+		return Location == Other.Location && Scale == Other.Scale && Rotation == Other.Rotation;
+	}
+	bool operator!=(const FTransform& Other) const
+	{
+		return !(*this == Other);
+	}
 };

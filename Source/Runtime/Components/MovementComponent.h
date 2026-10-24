@@ -6,6 +6,7 @@ class UMovementComponent : public UActorComponent
 {
 	DECLARE_CLASS(UMovementComponent, UActorComponent)
 	REFLECT_START(ClassName)
+		FUNCTION(StopMovementImmediately)
 		REFLECT_END()
 
 protected:

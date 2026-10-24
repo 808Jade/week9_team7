@@ -171,20 +171,20 @@ struct FColor
 		A = (uint8)FMath::Min((int32)A + (int32)C.A, 255);
 	}
 
-	//static const FColor White;
-	//static const FColor Black;
-	//static const FColor Transparent;
-	//static const FColor Red;
-	//static const FColor Green;
-	//static const FColor Blue;
-	//static const FColor Yellow;
-	//static const FColor Cyan;
-	//static const FColor Magenta;
-	//static const FColor Orange;
-	//static const FColor Purple;
-	//static const FColor Turquoise;
-	//static const FColor Silver;
-	//static const FColor Emerald;
+	static const FColor White;
+	static const FColor Black;
+	static const FColor Transparent;
+	static const FColor Red;
+	static const FColor Green;
+	static const FColor Blue;
+	static const FColor Yellow;
+	static const FColor Cyan;
+	static const FColor Magenta;
+	static const FColor Orange;
+	static const FColor Purple;
+	static const FColor Turquoise;
+	static const FColor Silver;
+	static const FColor Emerald;
 };
 
 // constexpr은 암묵적 inline이라 사용하는 모든 곳에서 정의가 보여야 하므로 헤더에 둔다. FColor가 완전한 타입이어야 해서 여기에 정의한다.

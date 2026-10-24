@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "JsonArchive.h"
 
 #include "Engine/World.h"
@@ -18,6 +18,8 @@
 #include "Serialization/StructuredArchiveSlots.h"
 #include "Serialization/Formatter/JsonArchiveOutputFormatter.h"
 #include "Serialization/Formatter/JsonArchiveInputFormatter.h"
+
+FString FJsonArchive::LastLoadedScenePath = "";
 
 namespace
 {
@@ -109,6 +111,7 @@ bool FJsonArchive::LoadWorld(UWorld* World, const FString& Path)
 	if (File.fail())
 		return false;
 
+	LastLoadedScenePath = Path;
 	return LoadWorldFromBytes(World, Bytes);
 }
 

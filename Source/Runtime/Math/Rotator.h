@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Math/EngineMath.h"
 
 // Degree but Quat: Radians
@@ -15,6 +15,7 @@ struct FRotator
 		};
 	};
 	FRotator();
+	FRotator(float Angle);
 	FRotator(float P, float Y, float R);
 	FRotator(FVector V);
 
@@ -42,6 +43,16 @@ struct FRotator
 	FRotator operator*(const float Scalar)
 	{
 		return FRotator(Pitch * Scalar, Yaw * Scalar, Roll * Scalar);
+	}
+
+	bool operator==(const FRotator& Other) const
+	{
+		return Pitch == Other.Pitch && Yaw == Other.Yaw && Roll == Other.Roll;
+	}
+
+	bool operator!=(const FRotator& Other) const
+	{
+		return !(*this == Other);
 	}
 };
 

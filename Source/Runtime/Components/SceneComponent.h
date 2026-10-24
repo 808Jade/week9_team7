@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Math/Transform.h"
+#include "Math/Transform.h"
 #include "ActorComponent.h"
 #include "Math/Box.h"
 #include "Collision/HitResult.h"

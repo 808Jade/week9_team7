@@ -1,10 +1,13 @@
-﻿#pragma once
+#pragma once
 
 struct FBox
 {
 	FVector Min;
 	FVector Max;
 	
+	FVector GetCenter() const { return (Min + Max) * 0.5f; }
+	FVector GetExtent() const { return (Max - Min) * 0.5f; }
+	FVector GetSize() const { return Max - Min; }
 	FBox() : Min(FVector::ZeroVector), Max(FVector::ZeroVector) {}
 	FBox(const FVector& InMin, const FVector& InMax) : Min(InMin), Max(InMax) {}
 

@@ -93,12 +93,19 @@ bool FEditorFileUtils::LoadScene(UWorld* World)
 	if (FilePath.empty())
 		return false;
 
-	FilePath = std::filesystem::absolute(FilePath).lexically_normal().string();
+	return LoadSceneFromPath(World, FilePath);
+}
+
+bool FEditorFileUtils::LoadSceneFromPath(UWorld* World, const FString& InFilePath)
+{
+	if (!World || InFilePath.empty())
+		return false;
+
+	FString FilePath = std::filesystem::absolute(InFilePath).lexically_normal().string();
 
 	if (!FJsonArchive::LoadWorld(World, FilePath))
 		return false;
 
-	// 이제 이 파일이 현재 Scene
 	CurrentScenePath = FilePath;
 
 	HTR_LOG(Info, "Load Scene : {}", CurrentScenePath);
@@ -118,7 +125,7 @@ FString FEditorFileUtils::OpenSaveSceneDialog()
 
 	ofn.lpstrFilter = "Scene Files (*.scene)\0*.scene\0";
 	ofn.lpstrDefExt = "scene";
-	ofn.lpstrInitialDir = "Scene/";
+	ofn.lpstrInitialDir = "Scenes/";
 
 	ofn.Flags =
 		OFN_PATHMUSTEXIST |
@@ -149,7 +156,7 @@ FString FEditorFileUtils::OpenLoadSceneDialog()
 		"All Files (*.*)\0*.*\0";
 
 	ofn.lpstrDefExt = "scene";
-	ofn.lpstrInitialDir = "Scene/";
+	ofn.lpstrInitialDir = "Scenes/";
 
 	ofn.Flags =
 		OFN_FILEMUSTEXIST |
@@ -163,5 +170,3 @@ FString FEditorFileUtils::OpenLoadSceneDialog()
 
 	return FString();
 }
-
-

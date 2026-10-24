@@ -1,5 +1,6 @@
 #include "EnginePCH.h"
 #include "Editor/EditorUI/EditorUI.h"
+#include "Editor/HitoriEd/EditorUndoManager.h"
 
 
 bool FEditorUI::Init(bool bInUseDockSpace, bool bInPassthruCentralNode)
@@ -123,6 +124,37 @@ void FEditorUI::DrawMainMenuBar()
 
 			if (ImGui::MenuItem("Save")) { if (OnSaveScene) OnSaveScene(); }
 			if (ImGui::MenuItem("Save As...")) { if (OnSaveSceneAs) OnSaveSceneAs(); }
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Edit"))
+		{
+			const bool bCanUndo = FEditorUndoManager::Get().CanUndo();
+			FString UndoDesc = "Undo";
+			if (bCanUndo)
+			{
+				UndoDesc += " " + FEditorUndoManager::Get().GetTopUndoDescription();
+			}
+			UndoDesc += " (Ctrl+Z)";
+
+			if (ImGui::MenuItem(UndoDesc.c_str(), nullptr, false, bCanUndo))
+			{
+				FEditorUndoManager::Get().Undo();
+			}
+
+			const bool bCanRedo = FEditorUndoManager::Get().CanRedo();
+			FString RedoDesc = "Redo";
+			if (bCanRedo)
+			{
+				RedoDesc += " " + FEditorUndoManager::Get().GetTopRedoDescription();
+			}
+			RedoDesc += " (Ctrl+Y)";
+
+			if (ImGui::MenuItem(RedoDesc.c_str(), nullptr, false, bCanRedo))
+			{
+				FEditorUndoManager::Get().Redo();
+			}
 
 			ImGui::EndMenu();
 		}

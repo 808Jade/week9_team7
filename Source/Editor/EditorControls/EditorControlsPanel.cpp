@@ -1,6 +1,7 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 
 #include "Editor/EditorControls/EditorControlsPanel.h"
+#include "Editor/HitoriEd/EditorUndoManager.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 
@@ -35,7 +36,12 @@ void FEditorControlsPanel::Tick(float DeltaTime)
 void FEditorControlsPanel::AddActor(uint32 Index)
 {
 	if (Index >= static_cast<uint32>(Classes.Num())) return;
-	World->SpawnActor(Classes[Index]);
+	AActor* NewActor = World->SpawnActor(Classes[Index]);
+	if (NewActor)
+	{
+		FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+			World, World->GetPersistentLevel(), TArray<AActor*>{ NewActor }, true, true, "Spawn " + NewActor->GetName()));
+	}
 }
 
 // 액터 생성·카메라 속성·기즈모·경로 추적 UI를 그린다.
@@ -92,19 +98,49 @@ void FEditorControlsPanel::OnRender()
 	ImGui::Dummy(ImVec2(0.0f, SubsectionGap));
 	ImGui::SeparatorText("Light Spawn");
 	if (ImGui::Button("Directional Light"))
-		World->SpawnActor(ADirectionalLightActor::StaticClass());
+	{
+		if (AActor* Act = World->SpawnActor(ADirectionalLightActor::StaticClass()))
+		{
+			FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+				World, World->GetPersistentLevel(), TArray<AActor*>{ Act }, true, true, "Spawn Directional Light"));
+		}
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Spot Light"))
-		World->SpawnActor(ASpotLightActor::StaticClass());
+	{
+		if (AActor* Act = World->SpawnActor(ASpotLightActor::StaticClass()))
+		{
+			FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+				World, World->GetPersistentLevel(), TArray<AActor*>{ Act }, true, true, "Spawn Spot Light"));
+		}
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Point Light"))
-		World->SpawnActor(APointLightActor::StaticClass());
+	{
+		if (AActor* Act = World->SpawnActor(APointLightActor::StaticClass()))
+		{
+			FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+				World, World->GetPersistentLevel(), TArray<AActor*>{ Act }, true, true, "Spawn Point Light"));
+		}
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Rect Light"))
-		World->SpawnActor(ARectLightActor::StaticClass());
+	{
+		if (AActor* Act = World->SpawnActor(ARectLightActor::StaticClass()))
+		{
+			FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+				World, World->GetPersistentLevel(), TArray<AActor*>{ Act }, true, true, "Spawn Rect Light"));
+		}
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Sky Light"))
-		World->SpawnActor(ASkyLightActor::StaticClass());
+	{
+		if (AActor* Act = World->SpawnActor(ASkyLightActor::StaticClass()))
+		{
+			FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
+				World, World->GetPersistentLevel(), TArray<AActor*>{ Act }, true, true, "Spawn Sky Light"));
+		}
+	}
 
 	//////////////////////////////////////////////////////
 
@@ -121,7 +157,7 @@ void FEditorControlsPanel::OnRender()
 
 	if (Gizmo && ImGui::BeginTable("GizmoControls", 2))
 	{
-		ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 70.0f);
+		ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 80.0f);
 		ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
 
 		ImGui::TableNextRow();
@@ -147,6 +183,54 @@ void FEditorControlsPanel::OnRender()
 		if (ImGui::Combo("##GizmoSpace", &SpaceSelectedIndex, SpaceItems, IM_ARRAYSIZE(SpaceItems)))
 		{
 			Gizmo->SetSpace(static_cast<EGizmoSpace>(SpaceSelectedIndex));
+		}
+
+		// Grid Snap
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		bool bSnap = Gizmo->IsGridSnapEnabled();
+		if (ImGui::Checkbox("Grid Snap", &bSnap))
+		{
+			Gizmo->SetGridSnapEnabled(bSnap);
+		}
+
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-1.0f);
+		static const char* SnapSizesText[] = { "0.05m", "0.1m", "0.25m", "0.5m", "1.0m", "2.0m", "5.0m", "10.0m" };
+		static const float SnapSizesVal[] = { 0.05f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f, 5.0f, 10.0f };
+		if (ImGui::Combo("##GridSnapSize", &CurrentSnapIdx, SnapSizesText, IM_ARRAYSIZE(SnapSizesText)))
+		{
+			Gizmo->SetGridSnapSize(SnapSizesVal[CurrentSnapIdx]);
+		}
+
+		// Absolute Grid Snap
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Snap Grid");
+
+		ImGui::TableSetColumnIndex(1);
+		bool bAbs = Gizmo->IsAbsoluteGridSnap();
+		if (ImGui::Checkbox("Absolute Grid", &bAbs))
+		{
+			Gizmo->SetAbsoluteGridSnap(bAbs);
+		}
+
+		// Rotation Snap
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		bool bRotSnap = Gizmo->IsRotationSnapEnabled();
+		if (ImGui::Checkbox("Rot Snap", &bRotSnap))
+		{
+			Gizmo->SetRotationSnapEnabled(bRotSnap);
+		}
+
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-1.0f);
+		static const char* RotAnglesText[] = { "5 deg", "10 deg", "15 deg", "30 deg", "45 deg", "90 deg" };
+		static const float RotAnglesVal[] = { 5.0f, 10.0f, 15.0f, 30.0f, 45.0f, 90.0f };
+		if (ImGui::Combo("##RotSnapAngle", &CurrentRotIdx, RotAnglesText, IM_ARRAYSIZE(RotAnglesText)))
+		{
+			Gizmo->SetRotationSnapAngle(RotAnglesVal[CurrentRotIdx]);
 		}
 
 		ImGui::EndTable();
