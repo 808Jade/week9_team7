@@ -94,6 +94,8 @@ float4 mainPS(FPSInput Input) : SV_Target
     if (SkyColorIntensity.a > 0.0f)
         BaseLighting += SkyColorIntensity.rgb * SkyColorIntensity.a;
     float ViewDepth = dot(WorldPosition - CameraPosition.xyz, CameraForward.xyz);
+    static const float CascadeBlendRatio = 0.15f; // 15% blend ratio
+
     [loop]
     for (uint DirectionalIndex = 0; DirectionalIndex < LightCounts.z; ++DirectionalIndex)
     {
@@ -106,20 +108,27 @@ float4 mainPS(FPSInput Input) : SV_Target
         float3 LightColor = Light.Color * Light.Intensity;
                 
         int CascadeIndex = -1;
-        [loop]
-        for (uint i = 0; i < CascadeShadowCount; ++i)
-        {
-            if (ViewDepth < CascadeShadowDistances[i])
-            {
-                CascadeIndex = i;
-                break;
-            }
-        }
+        float BlendT = 0.0f;
+        SelectCascade(ViewDepth, CascadeShadowDistances, CascadeShadowCount, CascadeBlendRatio, CascadeIndex, BlendT);
+
         float Shadow = 1.0f;
         if (CascadeIndex != -1 && Light.ShadowIndex != INVALID_SHADOW_INDEX)
         {
-            FLightShadowRenderData LightShadow = LightShadows[Light.ShadowIndex + CascadeIndex];
+            uint Base = Light.ShadowIndex;
+            FLightShadowRenderData LightShadow = LightShadows[Base + CascadeIndex];
             Shadow = CalculateShadow(Input.Position.xyz, WorldPosition, N, -Light.Direction, Light, LightShadow, LightShadowAtlas, ShadowAtlasWidth, ShadowAtlasHeight, PointSampler, ShadowSampler, 1.0f, PcfMode, LIGHT_TYPE_DIRECTIONAL);
+
+            [branch]
+            if (BlendT > 0.0f)
+            {
+                float NextShadow = 1.0f;
+                if (uint(CascadeIndex) + 1 < CascadeShadowCount)
+                {
+                    FLightShadowRenderData NextLightShadow = LightShadows[Base + CascadeIndex + 1];
+                    NextShadow = CalculateShadow(Input.Position.xyz, WorldPosition, N, -Light.Direction, Light, NextLightShadow, LightShadowAtlas, ShadowAtlasWidth, ShadowAtlasHeight, PointSampler, ShadowSampler, 1.0f, PcfMode, LIGHT_TYPE_DIRECTIONAL);
+                }
+                Shadow = lerp(Shadow, NextShadow, BlendT);
+            }
         }
 
         BaseLighting += LightColor * saturate(dot(N, -LightDir)) * Shadow;

@@ -21,5 +21,5 @@ public:
 
 
 private:
-	float AngularRadiusDegrees = 3.0f;
+	float AngularRadiusDegrees = 0.5f;
 };

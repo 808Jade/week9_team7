@@ -8,6 +8,8 @@
 #include "GameFramework/Actor/SpotLightActor.h"
 #include "GameFramework/Actor/RectLightActor.h"
 #include "GameFramework/Actor/StaticMeshActor.h"
+#include "GameFramework/Actor/ParticleActor.h"
+#include "GameFramework/Actor/TextRenderActor.h"
 
 UClass* GetEngineClass()
 {
@@ -16,6 +18,8 @@ UClass* GetEngineClass()
     // MSVC 링커 최적화 과정에서 최종 바이너리(.exe)에서 누락(Strip)됩니다.
     // 씬 파일(.scene) 로드 시 FindClass()를 통해 동적 생성(리플렉션)이 가능하도록
     // StaticClass()를 호출하여 링커가 해당 .obj 파일들을 포함하도록 강제합니다.
+	AParticleActor::StaticClass();
+    ATextRenderActor::StaticClass();
     ADirectionalLightActor::StaticClass();
     ASkyLightActor::StaticClass();
     APointLightActor::StaticClass();
