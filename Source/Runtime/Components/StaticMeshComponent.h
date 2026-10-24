@@ -33,6 +33,12 @@ public:
 	bool IsEditorIcon() const { return bEditorIcon; }
 	void SetEditorIcon(bool IsEditorIcon) { bEditorIcon = IsEditorIcon; }
 
+	virtual bool IsShown(bool bGameView) const override
+	{
+		if (bGameView && bEditorIcon) return false;
+		return Super::IsShown(bGameView);
+	}
+
 private:
 	UStaticMesh* StaticMesh = nullptr;
 	// Mesh의 Section별 Material과 Texture를 보존해 각각의 렌더 패킷으로 제출한다.
