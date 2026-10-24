@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Render/RenderPacket.h"
 #include "Render/ObjectConstants.h"
@@ -51,9 +51,9 @@ struct FSceneRenderData
 
 	static constexpr uint32 ShadowMapSize = 4096;
 	static constexpr uint32 MaxCascadeShadowCount = 4;
-	static constexpr float MaxCascadeDistance = 1000.f;
+	static constexpr float MaxCascadeDistance = 300.f;
 
-	static constexpr float CascadeBlendRatio = 0.1f;
+	static constexpr float CascadeBlendRatio = 0.15f;
 
 	struct alignas(64) FGatherChunk
 	{
@@ -505,6 +505,7 @@ struct FSceneRenderData
 					float Linear = CameraNear + (CascadeShadowFar - CameraNear) * ((j + 1) / (float)CascadeShadowCount);
 					float Log = CameraNear * std::pow(CascadeShadowFar / CameraNear, (j + 1) / (float)CascadeShadowCount);
 					float Dist = (1.f - LogRatio) * Linear + LogRatio * Log;
+					if (j == 0) Dist = FMath::Min(Dist, 10.0f);
 
 					const float NearDist = PrevSplit;
 					const float FarDist = Dist;
@@ -527,7 +528,7 @@ struct FSceneRenderData
 					const float SnappedCenterZ = std::floor(CenterInLight.Z / TexelSize) * TexelSize;
 
 					// 절두체 바깥 Caster를 수용하기 위한 깊이 여유
-					const float CasterDistance = Radius * 2.0f;
+					const float CasterDistance = 10.0f;
 					const float LightNearX = CenterInLight.X - Radius - CasterDistance;
 					const float LightFarX  = CenterInLight.X + Radius;
 
