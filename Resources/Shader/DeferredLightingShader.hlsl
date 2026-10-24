@@ -94,8 +94,6 @@ float4 mainPS(FPSInput Input) : SV_Target
     if (SkyColorIntensity.a > 0.0f)
         BaseLighting += SkyColorIntensity.rgb * SkyColorIntensity.a;
     float ViewDepth = dot(WorldPosition - CameraPosition.xyz, CameraForward.xyz);
-    int DebugCascadeIndex = -1;
-    float DebugBlendT = 0.0f;
     static const float CascadeBlendRatio = 0.15f; // 15% blend ratio
 
     [loop]
@@ -112,8 +110,6 @@ float4 mainPS(FPSInput Input) : SV_Target
         int CascadeIndex = -1;
         float BlendT = 0.0f;
         SelectCascade(ViewDepth, CascadeShadowDistances, CascadeShadowCount, CascadeBlendRatio, CascadeIndex, BlendT);
-        DebugCascadeIndex = CascadeIndex;
-        DebugBlendT = BlendT;
 
         float Shadow = 1.0f;
         if (CascadeIndex != -1 && Light.ShadowIndex != INVALID_SHADOW_INDEX)
@@ -138,28 +134,9 @@ float4 mainPS(FPSInput Input) : SV_Target
         BaseLighting += LightColor * saturate(dot(N, -LightDir)) * Shadow;
     }
 
-    // Cascade Debug Color (15% lerp gradient)
-    float3 CascadeDebugColor = float3(1.0f, 1.0f, 1.0f);
-    if (DebugCascadeIndex >= 0 && DebugCascadeIndex < 4)
-    {
-        static const float3 DebugColors[4] = {
-            float3(1.0f, 0.25f, 0.25f), // 0: Red
-            float3(0.25f, 1.0f, 0.25f), // 1: Green
-            float3(0.25f, 0.45f, 1.0f), // 2: Blue
-            float3(1.0f, 1.0f, 0.25f)  // 3: Yellow
-        };
-        CascadeDebugColor = DebugColors[DebugCascadeIndex];
-        if (DebugBlendT > 0.0f)
-        {
-            float3 NextColor = (uint(DebugCascadeIndex) + 1 < CascadeShadowCount)
-                ? DebugColors[DebugCascadeIndex + 1]
-                : float3(1.0f, 1.0f, 1.0f);
-            CascadeDebugColor = lerp(CascadeDebugColor, NextColor, DebugBlendT);
-        }
-    }
     float3 Lighting = Albedo * BaseLighting;
     if (LightCounts.x == 0 && LightCounts.y == 0 && LightCounts.w == 0)
-        return float4(Lighting * CascadeDebugColor, 1.0f);
+        return float4(Lighting, 1.0f);
 
     // 직교 투영의 시선 광선은 평행하므로 시선 방향이 위치에 따라 달라지지 않는다.
     float3 ToCamera = CameraPosition.w > 0.5f
@@ -315,7 +292,7 @@ float4 mainPS(FPSInput Input) : SV_Target
         AccumulateLocalLight(LocalDiffuse, LocalSpecular, Albedo, Metallic, Roughness, N, V, L, Radiance);
     }
     
-    return float4((Lighting + LocalDiffuse + LocalSpecular) * CascadeDebugColor, 1.0f);
+    return float4(Lighting + LocalDiffuse + LocalSpecular, 1.0f);
 }
 
 
