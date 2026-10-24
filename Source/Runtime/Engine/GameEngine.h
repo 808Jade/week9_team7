@@ -3,7 +3,7 @@
 #include "Engine.h"
 
 #include "Render/SkyboxRenderer.h"
-
+#include "Text/TextRenderer.h"
 
 class UGameEngine : public UEngine
 {
@@ -24,6 +24,5 @@ private:
 
 	FRenderer* Renderer = nullptr;
 	TUniquePtr<FSkyboxRenderer> SkyboxRenderer;
-
-
+	TUniquePtr<FTextRenderer> TextRenderer;
 };

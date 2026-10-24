@@ -58,7 +58,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -123,7 +125,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -188,7 +192,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -253,7 +259,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -319,7 +327,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -414,7 +424,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -483,7 +495,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -552,7 +566,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -621,7 +637,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -690,7 +708,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -759,7 +779,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -828,7 +850,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -897,7 +921,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -966,7 +992,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -1035,7 +1063,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -1104,7 +1134,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -1173,7 +1205,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": true,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         }
@@ -1220,6 +1254,10 @@
                             "Properties": {
                                 "Intensity": 0.30000001192092896,
                                 "LightColor": 4294967295,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
                                 "Transform": {
                                     "Location": {
                                         "X": -5.947237491607666,
@@ -1238,6 +1276,7 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadows": true,
                                 "bHiddenInGame": false,
                                 "bVisible": true
                             }
@@ -1294,7 +1333,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": false,
                                 "bHiddenInGame": true,
+                                "bReceiveShadow": false,
                                 "bVisible": false
                             }
                         }
@@ -1339,16 +1380,21 @@
                             "Name": "UDirectionalLightComponent",
                             "Parent": "",
                             "Properties": {
-                                "Intensity": 15.699999809265137,
+                                "AngularRadiusDegrees": 3.0,
+                                "Intensity": 1.0,
                                 "LightColor": 4294967295,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 2.324465751647949
+                                        "X": -7.895970821380615,
+                                        "Y": 5.2451863288879395,
+                                        "Z": 1.582953929901123
                                     },
                                     "Rotation": {
-                                        "Pitch": 29.060747146606445,
+                                        "Pitch": 55.17121124267578,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -1359,6 +1405,7 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadows": true,
                                 "bHiddenInGame": false,
                                 "bVisible": true
                             }
@@ -1415,7 +1462,9 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": false,
                                 "bHiddenInGame": true,
+                                "bReceiveShadow": false,
                                 "bVisible": true
                             }
                         },
@@ -1448,12 +1497,471 @@
                                     }
                                 },
                                 "bAutoActivate": true,
+                                "bCastShadow": false,
                                 "bHiddenInGame": false,
+                                "bReceiveShadow": false,
                                 "bVisible": true
                             }
                         }
                     ],
                     "Name": "ADirectionalLightActor_0",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AProjectileActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": -7.451650619506836,
+                                        "Y": 0.0,
+                                        "Z": 2.9823803901672363
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "ProjectileMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Sphere",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.5,
+                                        "Y": 0.5,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadow": true,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UFireBallComponent",
+                            "Name": "FireBallComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "AttenuationRadius": 6.5,
+                                "Intensity": 1.7999999523162842,
+                                "LightColor": 4291559679,
+                                "LightFalloffExponent": 3.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadows": true,
+                                "bHiddenInGame": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "FireBallMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Sphere",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 3.25,
+                                        "Y": 3.25,
+                                        "Z": 3.25
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadow": true,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileMovementComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.6000000238418579,
+                                "Friction": 0.20000000298023224,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 1.600000023841858,
+                                "InintialSpeed": 20.0,
+                                "MaxSpeed": 100.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 1.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": true,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "AProjectileActor_0",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AProjectileActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "ProjectileMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Sphere",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.5,
+                                        "Y": 0.5,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadow": true,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UFireBallComponent",
+                            "Name": "FireBallComponent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "AttenuationRadius": 6.5,
+                                "Intensity": 1.7999999523162842,
+                                "LightColor": 4291559679,
+                                "LightFalloffExponent": 3.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadows": true,
+                                "bHiddenInGame": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "FireBallMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "StaticMesh": "Sphere",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 3.25,
+                                        "Y": 3.25,
+                                        "Z": 3.25
+                                    }
+                                },
+                                "bAutoActivate": false,
+                                "bCastShadow": true,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileMovementComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.6000000238418579,
+                                "Friction": 0.20000000298023224,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 20.0,
+                                "MaxSpeed": 100.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 1.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": false,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": true,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "AProjectileActor_1",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APointLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UPointLightComponent",
+                            "Name": "UPointLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 5.0,
+                                "Intensity": 74.80000305175781,
+                                "LightColor": 4294901760,
+                                "LightFalloffExponent": 1.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 6.237672805786133,
+                                        "Z": 1.581392765045166
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Point.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "UPointLightComponent",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "APointLightActor_0",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
