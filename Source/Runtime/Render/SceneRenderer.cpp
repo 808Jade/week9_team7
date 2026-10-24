@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "Render/SceneRenderer.h"
 #include "Render/Renderer.h"
 #include "Render/SceneLightResources.h"
@@ -147,7 +147,7 @@ void FSceneRenderer::InitViews(FRenderer* Renderer, const FSceneRenderOptions& O
 	RenderData.PointLightShadowMapSize = Options.PointShadowMapSize;
 	RenderData.SpotLightShadowMapSize = Options.SpotShadowMapSize;
 
-	RenderData.Commit(View.FrustumCorners, View.Frustum, View.NearClip, View.FarClip, GetCascadeCount(), GetCascadeLogRatio(),
+	RenderData.Commit(View.FrustumCorners, View.Frustum, View.NearClip, View.FarClip, View.FieldOfView, View.AspectRatio, View.ViewLocation, View.ViewForward, GetCascadeCount(), GetCascadeLogRatio(),
 		Options.bCacheShadows, Scene.GetShadowInvalidations(), bLightUploadSucceeded);
 }
 
