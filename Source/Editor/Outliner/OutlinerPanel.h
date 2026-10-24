@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Editor/EditorUI/EditorPanel.h"
-
+#include "Containers/Array.h"
 #include <functional>
 
 class UWorld;
@@ -21,7 +21,7 @@ public:
     ~FOutlinerPanel() = default;
 
     void SetSelectionCallback(SelectionCallback InCallback) { Callback = InCallback; }
-    void SetDeleteActorCallback(DeleteActorCallback InCallback) { DeleteCallback = InCallback;}
+    void SetDeleteActorCallback(DeleteActorCallback InCallback) { DeleteCallback = InCallback; }
 
 public:
     bool Init() override;
@@ -34,15 +34,25 @@ public:
     void DrawActors(ULevel* Level);
     void DrawActorNode(AActor* Actor);
     void SelectActor(AActor* Actor);
+    void SelectRange(AActor* FromActor, AActor* ToActor);
 
     AActor* GetSelectedActor() const;
+    const TArray<AActor*>& GetSelectedActors() const { return SelectedActors; }
+    void ClearSelection();
+    void AddToSelection(AActor* Actor);
+    void RemoveFromSelection(AActor* Actor);
+    bool IsActorSelected(AActor* Actor) const;
 
+    void StartRenaming(AActor* Actor) { RenamingActor = Actor; }
 
 private:
     UWorld* World = nullptr;
     UObject* SelectedObject = nullptr;
+    TArray<AActor*> SelectedActors;
+    AActor* RenamingActor = nullptr;
+    AActor* LastClickedActor = nullptr;
 
     SelectionCallback Callback;
     DeleteActorCallback DeleteCallback;
-    AActor* PendingDeleteActor = nullptr;
+    TArray<AActor*> PendingDeleteActors;
 };
