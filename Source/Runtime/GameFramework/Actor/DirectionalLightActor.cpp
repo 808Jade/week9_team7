@@ -17,7 +17,7 @@ ADirectionalLightActor::ADirectionalLightActor()
     ArrowComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
     ArrowComponent->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.5f));
     ArrowComponent->SetHiddenInDetails(true);
+    ArrowComponent->SetHiddenInGame(true);
     ArrowComponent->SetCastShadow(false);
     ArrowComponent->SetReceiveShadow(false);
-
 }
