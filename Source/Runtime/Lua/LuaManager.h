@@ -18,7 +18,14 @@ public:
     void Shutdown();
 
     // 루아 가상 머신 반환
-    sol::state& GetState() { return Lua; }
+    sol::state& GetState()
+    {
+        if (!bInitialized)
+        {
+            Init();
+        }
+        return Lua;
+    }
 
 private:
     FLuaManager() = default;

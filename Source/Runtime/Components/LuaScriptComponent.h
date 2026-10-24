@@ -8,7 +8,8 @@ class ULuaScriptComponent : public UActorComponent
 	DECLARE_CLASS(ULuaScriptComponent, UActorComponent)
 
 	REFLECT_START(ClassName)
-		REFLECT_END()
+		PROPERTY(ScriptPath)
+	REFLECT_END()
 
 public:
 	ULuaScriptComponent();
@@ -26,8 +27,8 @@ public:
 	void TriggerLuaOverlap(AActor* OtherActor) { OnOverlap(OtherActor); }
 	void TriggerLuaHit(AActor* OtherActor) { OnHit(OtherActor); }
 
-	std::filesystem::path GetScriptPath() const { return ScriptPath; }
-	void SetScriptPath(const std::filesystem::path& InScriptPath) { ScriptPath = InScriptPath; }
+	FString GetScriptPath() const { return ScriptPath; }
+	void SetScriptPath(const FString& InScriptPath) { ScriptPath = InScriptPath; }
 	sol::environment& GetScriptEnv() { return ScriptEnv; }
 	void SetScriptEnv(const sol::environment& InScriptEnv) { ScriptEnv = InScriptEnv; }
 	std::filesystem::file_time_type GetLastWriteTime() const { return LastWriteTime; }
@@ -37,6 +38,8 @@ public:
 
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+
+	FString ScriptPath;
 
 private:
 	template<typename... Args>
@@ -55,7 +58,6 @@ private:
 		}
 	}
 
-	std::filesystem::path ScriptPath;
 	sol::environment ScriptEnv;
 	std::filesystem::file_time_type LastWriteTime;
 	bool bIsLoaded = false;

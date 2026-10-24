@@ -120,11 +120,23 @@ namespace LuaBindings
 		);
 		InputTable["IsMousePressed"] = sol::overload(
 			[](EMouseButton btn) { return FInputSystem::IsMousePressed(btn); },
-			[](int btn) { return FInputSystem::IsMousePressed(static_cast<EMouseButton>(btn)); }
+			[](int btn) { return FInputSystem::IsMousePressed(static_cast<EMouseButton>(btn)); },
+			[](const FString& btn) {
+				if (btn == "Left" || btn == "left") return FInputSystem::IsMousePressed(EMouseButton::Left);
+				if (btn == "Right" || btn == "right") return FInputSystem::IsMousePressed(EMouseButton::Right);
+				if (btn == "Middle" || btn == "middle") return FInputSystem::IsMousePressed(EMouseButton::Middle);
+				return false;
+			}
 		);
 		InputTable["IsMouseReleased"] = sol::overload(
 			[](EMouseButton btn) { return FInputSystem::IsMouseReleased(btn); },
-			[](int btn) { return FInputSystem::IsMouseReleased(static_cast<EMouseButton>(btn)); }
+			[](int btn) { return FInputSystem::IsMouseReleased(static_cast<EMouseButton>(btn)); },
+			[](const FString& btn) {
+				if (btn == "Left" || btn == "left") return FInputSystem::IsMouseReleased(EMouseButton::Left);
+				if (btn == "Right" || btn == "right") return FInputSystem::IsMouseReleased(EMouseButton::Right);
+				if (btn == "Middle" || btn == "middle") return FInputSystem::IsMouseReleased(EMouseButton::Middle);
+				return false;
+			}
 		);
 
 		InputTable["GetAxis"] = [](const FString& AxisName) -> float {

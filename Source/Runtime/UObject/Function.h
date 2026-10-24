@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Core/EngineString.h"
-#include "Math/EngineMath.h"
+#include <functional>
+
+class UObject;
+class UClass;
 
 struct FFunction
 {
 	FString Name;
-	void* FuncPtr = nullptr;
-	
+	UClass* OwnerClass = nullptr;
+	std::function<void(UObject* Target, void* Params)> Invoker;
 };

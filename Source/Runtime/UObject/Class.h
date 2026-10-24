@@ -24,6 +24,7 @@ public:
 	UObject* GetDefaultObject();
 
 	inline const TArray<FProperty>& GetProperties() const { return Properties; }
+	const TArray<FFunction>& GetFunctions() const { return Functions; }
 
 	template<class T>
 	T* GetDefaultObject()
@@ -48,6 +49,24 @@ public:
 	void AddProperty(const FString& InName, uint64 InOffset, EPropertyType InType, uint32 InFlags = CPF_Default)
 	{
 		Properties.Add({ InName, InType, InOffset, sizeof(T), nullptr, InFlags });
+	}
+
+	void AddFunction(const FString& InName, std::function<void(UObject* Target, void* Params)> InInvoker)
+	{
+		Functions.Add({ InName, this, InInvoker });
+	}
+
+	const FFunction* FindFunction(const FString& InName) const
+	{
+		for (const UClass* C = this; C != nullptr; C = C->Super) 
+		{
+			for (const FFunction& Func : C->Functions)
+			{
+				if (Func.Name == InName)
+					return &Func;
+			}
+		}
+		return nullptr;
 	}
 private:
 	mutable int32 ClassUnique = 0;

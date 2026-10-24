@@ -66,10 +66,19 @@ namespace LuaBindings
 			return FVector2(-v.X, -v.Y);
 		};
 
-		// 정적 상수
+		// 정적 상수 및 생성자 메타테이블
 		sol::table Vector2Table = Lua["Vector2"];
 		Vector2Table["Zero"] = FVector2(0.0f, 0.0f);
 		Vector2Table["One"] = FVector2(1.0f, 1.0f);
+
+		sol::table Vector2Meta = Lua.create_table();
+		Vector2Meta[sol::meta_function::call] = [](sol::object /*self*/, sol::variadic_args args) -> FVector2 {
+			if (args.size() == 0) return FVector2(0.0f, 0.0f);
+			if (args.size() == 1) return FVector2(args.get<float>(0));
+			return FVector2(args.get<float>(0), args.get<float>(1));
+		};
+		Vector2Table[sol::metatable_key] = Vector2Meta;
+		Lua["FVector2"] = Vector2Table;
 	}
 
 	static void BindColor(sol::state& Lua)
@@ -99,19 +108,28 @@ namespace LuaBindings
 			return a == b;
 		};
 
-		// 정적 색상 상수
+		// 정적 색상 상수 및 생성자 메타테이블
 		sol::table ColorTable = Lua["Color"];
-		ColorTable["White"] = FColor::White;
-		ColorTable["Black"] = FColor::Black;
-		ColorTable["Red"] = FColor::Red;
-		ColorTable["Green"] = FColor::Green;
-		ColorTable["Blue"] = FColor::Blue;
-		ColorTable["Yellow"] = FColor::Yellow;
-		ColorTable["Orange"] = FColor::Orange;
-		ColorTable["Purple"] = FColor::Purple;
-		ColorTable["Cyan"] = FColor::Cyan;
-		ColorTable["Magenta"] = FColor::Magenta;
-		ColorTable["Transparent"] = FColor::Transparent;
+		ColorTable["White"] = FColor(255, 255, 255, 255);
+		ColorTable["Black"] = FColor(0, 0, 0, 255);
+		ColorTable["Red"] = FColor(255, 0, 0, 255);
+		ColorTable["Green"] = FColor(0, 255, 0, 255);
+		ColorTable["Blue"] = FColor(0, 0, 255, 255);
+		ColorTable["Yellow"] = FColor(255, 255, 0, 255);
+		ColorTable["Orange"] = FColor(255, 165, 0, 255);
+		ColorTable["Purple"] = FColor(128, 0, 128, 255);
+		ColorTable["Cyan"] = FColor(0, 255, 255, 255);
+		ColorTable["Magenta"] = FColor(255, 0, 255, 255);
+		ColorTable["Transparent"] = FColor(0, 0, 0, 0);
+
+		sol::table ColorMeta = Lua.create_table();
+		ColorMeta[sol::meta_function::call] = [](sol::object /*self*/, sol::variadic_args args) -> FColor {
+			if (args.size() == 0) return FColor(255, 255, 255, 255);
+			if (args.size() <= 3) return FColor(args.get<uint8>(0), args.get<uint8>(1), args.get<uint8>(2), 255);
+			return FColor(args.get<uint8>(0), args.get<uint8>(1), args.get<uint8>(2), args.get<uint8>(3));
+		};
+		ColorTable[sol::metatable_key] = ColorMeta;
+		Lua["FColor"] = ColorTable;
 	}
 
 	static void BindVector(sol::state& Lua)
@@ -206,7 +224,7 @@ namespace LuaBindings
 			}
 		);
 
-		// UnLua 스타일 정적 벡터 상수 등록
+		// 스타일 정적 벡터 상수 등록
 		sol::table VectorTable = Lua["Vector"];
 		VectorTable["Zero"] = FVector(0.0f, 0.0f, 0.0f);
 		VectorTable["ZeroVector"] = FVector(0.0f, 0.0f, 0.0f);
@@ -217,6 +235,16 @@ namespace LuaBindings
 		VectorTable["RightVector"] = FVector(0.0f, 1.0f, 0.0f);
 		VectorTable["Up"] = FVector(0.0f, 0.0f, 1.0f);
 		VectorTable["UpVector"] = FVector(0.0f, 0.0f, 1.0f);
+
+		// 함수처럼 Vector(x, y, z) 직접 호출 가능하도록 메타테이블 __call 설정
+		sol::table VectorMeta = Lua.create_table();
+		VectorMeta[sol::meta_function::call] = [](sol::object /*self*/, sol::variadic_args args) -> FVector {
+			if (args.size() == 0) return FVector(0.0f, 0.0f, 0.0f);
+			if (args.size() == 1) return FVector(args.get<float>(0));
+			return FVector(args.get<float>(0), args.get<float>(1), args.get<float>(2));
+		};
+		VectorTable[sol::metatable_key] = VectorMeta;
+		Lua["FVector"] = VectorTable;
 	}
 
 	static void BindRotator(sol::state& Lua)
@@ -282,10 +310,20 @@ namespace LuaBindings
 		RotatorType["GetRightVector"] = GetRotRight;
 		RotatorType["GetUpVector"] = GetRotUp;
 
-		// UnLua 스타일 정적 로테이터 상수 등록
+		// 스타일 정적 로테이터 상수 등록
 		sol::table RotatorTable = Lua["Rotator"];
 		RotatorTable["Zero"] = FRotator(0.0f, 0.0f, 0.0f);
 		RotatorTable["ZeroRotator"] = FRotator(0.0f, 0.0f, 0.0f);
+
+		// 함수처럼 Rotator(p, y, r) 직접 호출 가능하도록 메타테이블 __call 설정
+		sol::table RotatorMeta = Lua.create_table();
+		RotatorMeta[sol::meta_function::call] = [](sol::object /*self*/, sol::variadic_args args) -> FRotator {
+			if (args.size() == 0) return FRotator(0.0f, 0.0f, 0.0f);
+			if (args.size() == 1) return FRotator(args.get<float>(0));
+			return FRotator(args.get<float>(0), args.get<float>(1), args.get<float>(2));
+		};
+		RotatorTable[sol::metatable_key] = RotatorMeta;
+		Lua["FRotator"] = RotatorTable;
 	}
 
 	void BindMath(sol::state& Lua)

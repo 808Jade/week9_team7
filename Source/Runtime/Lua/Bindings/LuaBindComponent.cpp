@@ -65,6 +65,13 @@ namespace LuaBindings
 					}
 				}
 			}
+
+			if (const FFunction* Func = Comp->GetClass()->FindFunction(Key.c_str()))
+			{
+				return sol::make_object(Lua, [Func, Comp](sol::variadic_args Args) {
+					Func->Invoker(Comp, nullptr);
+				});
+			}
 			return sol::make_object(Lua, sol::nil);
 		}
 
