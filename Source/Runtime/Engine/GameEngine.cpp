@@ -11,6 +11,7 @@
 #include "Render/Texture2D.h"
 #include "Render/RenderGraph/RenderGraph.h"
 #include "Render/SkyboxRenderer.h"
+#include "UObject/UObjectIterator.h"
 
 FEngineConfig UGameEngine::GetConfig() const
 {
@@ -67,6 +68,9 @@ bool UGameEngine::Init()
     }
     SkyboxRenderer->Init(SkyPath);
 
+    TextRenderer = MakeUnique<FTextRenderer>();
+    TextRenderer->Init();
+
     // 4. 게임 플레이 시작
     GameWorld->BeginPlay();
     return true;
@@ -109,6 +113,18 @@ void UGameEngine::RenderFrame()
 
     FRenderGraphBuilder Graph;
     FScenePassCallbacks Callbacks;
+
+    Callbacks.SceneText = [this, &SceneView]
+        {
+            if (!TextRenderer) return;
+            for (TObjectIterator<UTextRenderComponent> Text; Text; ++Text)
+            {
+                if (!Text || !Text->IsRegistered() || !Text->GetFont() || !Text->IsShown(SceneView.bGameView) ||
+                    Text->GetOwner()->GetWorld() != GameWorld) continue;
+                TextRenderer->OnRender(Text->GetText(), Text->GetWorldMatrix(), Text->GetTextSize(),
+                    *Text->GetFont(), SceneView.ViewProjectionMatrix);
+            }
+        };
 
     if (SceneRenderer.AddViewportPasses(Graph, GetEngineLoop().GetRenderer(),
         GameViewport->GetViewTargets(), Options, SkyboxRenderer.get(), Callbacks))

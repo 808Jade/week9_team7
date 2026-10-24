@@ -51,9 +51,9 @@ struct FSceneRenderData
 
 	static constexpr uint32 ShadowMapSize = 4096;
 	static constexpr uint32 MaxCascadeShadowCount = 4;
-	static constexpr float MaxCascadeDistance = 1000.f;
+	static constexpr float MaxCascadeDistance = 300.f;
 
-	static constexpr float CascadeBlendRatio = 0.1f;
+	static constexpr float CascadeBlendRatio = 0.15f;
 
 	struct alignas(64) FGatherChunk
 	{
@@ -310,7 +310,7 @@ struct FSceneRenderData
 		CachedShadows = LightShadows;
 	}
 
-	void Commit(const FFrustumCorners& CameraFrustumCorners, const FFrustumPlanes& CameraFrustum, float CameraNear, float CameraFar, uint32 ExpectCascadeCount, float LogRatio,
+	void Commit(const FFrustumCorners& CameraFrustumCorners, const FFrustumPlanes& CameraFrustum, float CameraNear, float CameraFar, float CameraFov, float CameraAspect, const FVector& CameraLocation, const FVector& CameraForward, uint32 ExpectCascadeCount, float LogRatio,
 		bool bCacheShadows, const FShadowInvalidationList& ShadowInvalidations, bool& bLightUpaloadSucceeded)
 	{
 		RenderQueue.Sort();
@@ -478,7 +478,8 @@ struct FSceneRenderData
 			{
 				int32 LightIndex = GetDirectionalLightOffset() + i;
 				const FLightShadowSettings& ShadowSettings = VisibleLightShadowSettings[LightIndex];
-				if (!ShadowSettings.bCastShadows) continue;bool bHasReceiver = false;
+				if (!ShadowSettings.bCastShadows) continue;
+				bool bHasReceiver = false;
 				for (const FPrimitiveSceneProxy* Proxy : VisibleProxies)
 					if (Proxy->bReceiveShadow) { bHasReceiver = true; break; }
 				if (!bHasReceiver) { CountShadowSkip(EShadowSkip::NoReceiver); continue; }
@@ -487,29 +488,16 @@ struct FSceneRenderData
 
 				FLightRenderParameters& DirectionalLight = VisibleLights[LightIndex];
 				DirectionalLight.ShadowIndex = uint32(LightShadows.Num());
-				// 텍셀 스냅은 카메라와 무관하게 고정된 라이트 공간(원점 기준)에서 해야 그림자 격자가 월드에 고정된다.
+
+				// 카메라와 무관하게 고정된 절대 라이트 공간 행렬
 				const FMatrix ViewMatrix = LookAt(FVector(0.f), DirectionalLight.Direction, UpVector);
-
-				FVector ToTL = CameraFrustumCorners.FTL() - CameraFrustumCorners.NTL();
-				FVector ToTR = CameraFrustumCorners.FTR() - CameraFrustumCorners.NTR();
-				FVector ToBL = CameraFrustumCorners.FBL() - CameraFrustumCorners.NBL();
-				FVector ToBR = CameraFrustumCorners.FBR() - CameraFrustumCorners.NBR();
-
-				FVector PrevTL = CameraFrustumCorners.NTL();
-				FVector PrevTR = CameraFrustumCorners.NTR();
-				FVector PrevBL = CameraFrustumCorners.NBL();
-				FVector PrevBR = CameraFrustumCorners.NBR();
 
 				uint32 CascadeShadowMapSize = ScaleShadowMapSize(DirectionalLightShadowMapSize, ShadowSettings.ResolutionScale);
 
-				auto CornersAt = [&](float Distance, FVector& TL, FVector& TR, FVector& BL, FVector& BR)
-					{
-						const float T = (Distance - CameraNear) / (CameraFar - CameraNear);
-						TL = CameraFrustumCorners.NTL() + ToTL * T;
-						TR = CameraFrustumCorners.NTR() + ToTR * T;
-						BL = CameraFrustumCorners.NBL() + ToBL * T;
-						BR = CameraFrustumCorners.NBR() + ToBR * T;
-					};
+				// 카메라의 순수 스칼라 불변값으로 외접구 대각선 비율 계산
+				const float TanHalfFov = std::tan(FMath::DegreesToRadians(CameraFov * 0.5f));
+				const float K = TanHalfFov * std::sqrt(1.0f + CameraAspect * CameraAspect);
+				const float K2 = K * K;
 
 				float PrevSplit = CameraNear;
 				for (int32 j = 0; j < CascadeShadowCount; j++)
@@ -517,78 +505,49 @@ struct FSceneRenderData
 					float Linear = CameraNear + (CascadeShadowFar - CameraNear) * ((j + 1) / (float)CascadeShadowCount);
 					float Log = CameraNear * std::pow(CascadeShadowFar / CameraNear, (j + 1) / (float)CascadeShadowCount);
 					float Dist = (1.f - LogRatio) * Linear + LogRatio * Log;
+					if (j == 0) Dist = FMath::Min(Dist, 10.0f);
 
-					FVector LT, RT, LB, RB;
-					CornersAt(Dist, LT, RT, LB, RB);
+					const float NearDist = PrevSplit;
+					const float FarDist = Dist;
 
-					FVector* WorldCorners[] = {
-						&PrevTL,
-						&PrevTR,
-						&PrevBL,
-						&PrevBR,
-						&LT,
-						&RT,
-						&LB,
-						&RB
-					};
+					// 최소 외접구 계산
+					float CenterZDist = 0.5f * (FarDist + NearDist) * (1.0f + K2);
+					if (CenterZDist > FarDist) CenterZDist = FarDist;
 
-					FVector CascadeCenter(0.f);
-					for (int32 k = 0; k < 8; k++)
-						CascadeCenter += *WorldCorners[k];
-					CascadeCenter *= 1.f / 8.f;
+					const float Radius = std::sqrt((FarDist - CenterZDist) * (FarDist - CenterZDist) + (K * FarDist) * (K * FarDist));
+					const FVector CascadeWorldCenter = CameraLocation + CameraForward * CenterZDist;
 
-					float RadiusSquared = 0.f;
-					float MinLightX = FLT_MAX;
-					float MaxLightX = -FLT_MAX;
-					for (int32 k = 0; k < 8; k++)
-					{
-						RadiusSquared = std::max(RadiusSquared, (*WorldCorners[k] - CascadeCenter).SizeSquared());
-						FVector4 InCascadeLightSpace = FVector4(*WorldCorners[k], 1.0f) * ViewMatrix;
-						MinLightX = std::min(MinLightX, InCascadeLightSpace.X);
-						MaxLightX = std::max(MaxLightX, InCascadeLightSpace.X);
-					}
+					// 텍셀 스내핑
+					const float Extent = Radius;
+					const float TexelSize = (2.0f * Extent) / static_cast<float>(CascadeShadowMapSize);
 
-					// 회전해도 투영 크기가 변하지 않도록 cascade를 구로 감싼다. 부동 소수점 오류 방지 위해 격자점에 snap
-					const float Radius = std::ceil(std::sqrt(RadiusSquared) * 16.f) / 16.f;
-					const float Extent = Radius * CascadeShadowMapSize / (CascadeShadowMapSize - 1.f); // 패딩 공간 주기 위해 n / n-1 배 해주기
-					const float TexelSize = 2.f * Extent / CascadeShadowMapSize;
+					// 절대 라이트 뷰 공간으로 변환
+					const FVector4 CenterInLight = FVector4(CascadeWorldCenter, 1.0f) * ViewMatrix;
 
-					FVector4 CenterInLight = FVector4(CascadeCenter, 1.f) * ViewMatrix;
+					const float SnappedCenterY = std::floor(CenterInLight.Y / TexelSize) * TexelSize;
+					const float SnappedCenterZ = std::floor(CenterInLight.Z / TexelSize) * TexelSize;
 
-					const float CenterY = std::round(CenterInLight.Y / TexelSize) * TexelSize; // 중심을 가까운 격자점에 스냅함
-					const float CenterZ = std::round(CenterInLight.Z / TexelSize) * TexelSize;
-					float NearX = MinLightX;
+					// 절두체 바깥 Caster를 수용하기 위한 깊이 여유
+					const float CasterDistance = 10.0f;
+					const float LightNearX = CenterInLight.X - Radius - CasterDistance;
+					const float LightFarX  = CenterInLight.X + Radius;
 
-					for (const FPrimitiveSceneProxy* Caster : ShadowCasterProxies)
-					{
-						const FAABB& Bounds = Caster->GetBounds();
-						const FVector4 LightCenter = FVector4(Bounds.Center, 1.f) * ViewMatrix;
-						const FVector LightExtent( // lightview 공간에서의 물체의 새로운 aabb 박스
-							std::abs(ViewMatrix.M[0][0]) * Bounds.Extent.X + std::abs(ViewMatrix.M[1][0]) * Bounds.Extent.Y + std::abs(ViewMatrix.M[2][0]) * Bounds.Extent.Z,
-							std::abs(ViewMatrix.M[0][1]) * Bounds.Extent.X + std::abs(ViewMatrix.M[1][1]) * Bounds.Extent.Y + std::abs(ViewMatrix.M[2][1]) * Bounds.Extent.Z,
-							std::abs(ViewMatrix.M[0][2]) * Bounds.Extent.X + std::abs(ViewMatrix.M[1][2]) * Bounds.Extent.Y + std::abs(ViewMatrix.M[2][2]) * Bounds.Extent.Z);
+					const FMatrix CascadeViewMatrix = ViewMatrix;
 
-						if (LightCenter.Y + LightExtent.Y < CenterY - Extent || LightCenter.Y - LightExtent.Y > CenterY + Extent ||
-							LightCenter.Z + LightExtent.Z < CenterZ - Extent || LightCenter.Z - LightExtent.Z > CenterZ + Extent ||
-							LightCenter.X - LightExtent.X > MaxLightX)
-							continue;
+					// 직교 투영 행렬의 좌우상하 경계에 스냅된 중심 좌표 직접 적용
+					const float Left   = SnappedCenterY - Extent;
+					const float Right  = SnappedCenterY + Extent;
+					const float Top    = SnappedCenterZ + Extent;
+					const float Bottom = SnappedCenterZ - Extent;
+					const float Near   = LightNearX;
+					const float Far    = LightFarX;
 
-						NearX = std::min(NearX, LightCenter.X - LightExtent.X);
-					}
-
-					// Ortho(Left, Right, Top, Bottom). Left > Right로 넘기면 X가 거울상이 되어 삼각형 감김 방향이 뒤집히고,
-					// 후면 컬링이 빛을 향한 앞면을 버려 물체의 뒷면이 깊이로 남는다(접촉부에서 그림자가 떨어지는 peter panning).
-					FMatrix CascadeProjectionMatrix = Ortho(-Extent, Extent, Extent, -Extent, 0, MaxLightX - NearX);
+					const FMatrix CascadeProjectionMatrix = Ortho(Left, Right, Top, Bottom, Near, Far);
 
 					FLightShadowRenderData Shadow{};
-					FVector NearPlaneCenterInLight = FVector(NearX, CenterY, CenterZ);
-					FVector4 NearPlaneCenterWorld = FVector4(NearPlaneCenterInLight, 1.0) * ViewMatrix.Inverse();
-					const FVector CascadeEye(NearPlaneCenterWorld.X, NearPlaneCenterWorld.Y, NearPlaneCenterWorld.Z);
-					// 회전은 ViewMatrix와 같고, 원점만 스냅된 near 평면 중심으로 옮긴다.
-					const FMatrix CascadeViewMatrix = LookAt(CascadeEye, CascadeEye + DirectionalLight.Direction, UpVector);
 					Shadow.ViewProjection = CascadeViewMatrix * CascadeProjectionMatrix;
-					Shadow.Near = NearX;
-					Shadow.Far = MaxLightX;
+					Shadow.Near = Near;
+					Shadow.Far = Far;
 					Shadow.WorldUnitsPerTexel = TexelSize;
 					ApplyShadowSettings(Shadow, ShadowSettings);
 
@@ -597,18 +556,8 @@ struct FSceneRenderData
 
 					AreaInfos.Add({ CascadeShadowMapSize, Index });
 
-					PrevTL = LT;
-					PrevTR = RT;
-					PrevBL = LB;
-					PrevBR = RB;
-
 					CascadeShadowDistances[j] = Dist;
-
-					// 다음 캐스케이드는 이 캐스케이드의 블렌드 시작점부터 덮는다.
-					const float BlendStart = Dist - (Dist - PrevSplit) * CascadeBlendRatio;
-					CornersAt(BlendStart, PrevTL, PrevTR, PrevBL, PrevBR);
 					PrevSplit = Dist;
-					//CascadeShadowMapSize /= 2;
 				}
 			}
 
