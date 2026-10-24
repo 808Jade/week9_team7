@@ -4,6 +4,7 @@
 #include <utility>
 #include <cstdint>
 #include <atomic>
+#include <memory>
 
 // 델리게이트 등록 식별 핸들 (언리얼의 FDelegateHandle 스타일)
 class FDelegateHandle
@@ -43,9 +44,34 @@ private:
 
     std::vector<FDelegateEntry> Handlers;
 
+    // 생존 토큰: 소멸(또는 대입으로 덮어써짐) 시 false.
+    // Broadcast가 지역 복사본을 들고 있어서, 콜백 안에서 이 델리게이트가 파괴돼도 안전하게 확인할 수 있다.
+    std::shared_ptr<bool> AliveToken = std::make_shared<bool>(true);
+
+    bool ContainsHandle(const FDelegateHandle& Handle) const
+    {
+        for (const auto& Entry : Handlers)
+        {
+            if (Entry.Handle == Handle) return true;
+        }
+        return false;
+    }
+
 public:
     TDelegate() = default;
-    ~TDelegate() = default;
+    ~TDelegate() { *AliveToken = false; }
+
+    TDelegate(const TDelegate& Other) : Handlers(Other.Handlers) {}
+    TDelegate& operator=(const TDelegate& Other)
+    {
+        if (this != &Other)
+        {
+            *AliveToken = false; // 진행 중인 Broadcast가 있으면 멈추게 한다
+            AliveToken = std::make_shared<bool>(true);
+            Handlers = Other.Handlers;
+        }
+        return *this;
+    }
 
     // 1. 일반 함수, 정적(static) 함수, 람다 표현식 등록용 (Handle 반환)
     FDelegateHandle Add(FFuncType InFunc)
@@ -137,10 +163,18 @@ public:
     // 6. 등록된 모든 함수 일괄 호출
     void Broadcast(Args... args)
     {
+        if (Handlers.empty()) return;
+
         // 순회 도중 리스너 내부에서 Add/Remove가 호출되어도 안전하도록 복사본 순회 (Re-entrancy 보장)
         auto EntriesCopy = Handlers;
+        const std::shared_ptr<bool> Alive = AliveToken;
         for (const auto& Entry : EntriesCopy)
         {
+            // 델리게이트가 파괴/대입됨 -> 즉시 종료
+            if (!*Alive) return;
+            // Remove/RemoveAll/Clear된 핸들러는 건너뛴다 
+            if (!ContainsHandle(Entry.Handle)) continue;
+
             if (Entry.Callback)
             {
                 Entry.Callback(args...);

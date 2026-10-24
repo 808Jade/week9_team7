@@ -10,8 +10,8 @@
 // FScriptWatcher : .lua 파일 변경 감시자 (Hot Reload)
 //
 // - 파일이 바뀌었는지 판단해서 알려주는 일만 한다.
-// - Lua / sol2 / 액터 / 컴포넌트를 모른다. (이 헤더에 sol2나 컴포넌트 헤더를 include하지 말 것)
-// - 의존 방향: ULuaScriptComponent -> FScriptWatcher (반대 방향 없음)
+// - Lua / sol2 / 액터 / 컴포넌트를 모른다. 
+// - 의존 방향: ULuaScriptComponent -> FScriptWatcher 
 // - 단일 스레드 폴링. 엔진 메인 루프(FEngineLoop::Tick)에서 월드 Tick보다 먼저 호출된다.
 // ============================================================================
 
@@ -71,6 +71,7 @@ private:
 		bool bIsTimeValid = false;
 		bool bIsWaiting = false;
 		std::filesystem::file_time_type PendingWriteTime;
+		bool bIsReadFailing = false;
 		FOnScriptFileChanged Subscribers;
 	};
 
@@ -89,6 +90,12 @@ private:
 	// 핸들 검증 -> 역참조 기록 -> 로그
 	FDelegateHandle CommitRegister(const std::wstring& InKey, FDelegateHandle InHandle, bool bCreatedFile);
 
-	// TODO(3단계): 검사 주기 누적 시간
+	// 검사 주기 누적 시간
 	float AccumulatedTime = 0.f;
+
+	// 파일의 last_write_time 변경 판정
+	void CheckFiles();
+
+	// 업데이트 된 파일 알림을 보냄
+	void BroadcastUpdates(const TArray<std::wstring>& InConfrimedList);
 };

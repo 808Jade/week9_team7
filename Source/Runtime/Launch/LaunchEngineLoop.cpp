@@ -145,7 +145,6 @@ bool FEngineLoop::Tick()
 		return true;
 	}
 
-	// Hot Reload: 월드 Tick 전에 스크립트 파일 변경을 확인한다 (액터 Tick 순회 도중 재로드 방지)
 	FScriptWatcher::Get().Tick(EngineTimer::GetDeltaTime());
 
 	{

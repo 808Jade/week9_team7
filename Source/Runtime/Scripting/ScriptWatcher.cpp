@@ -58,6 +58,7 @@ FScriptWatcher::FWatchedFile* FScriptWatcher::FindOrAddFile(const std::filesyste
 	std::error_code ErrorCode;
 	NewFile.AppliedWriteTime = std::filesystem::last_write_time(NormalizedPath, ErrorCode);
 	NewFile.bIsTimeValid = !ErrorCode;
+	NewFile.bIsReadFailing = static_cast<bool>(ErrorCode); // 여기서 이미 경고를 찍었으므로 CheckFiles가 다시 찍지 않게
 	if (ErrorCode)
 	{
 		HTR_LOG(Warning, "[ScriptWatcher] Cannot read write time yet: {} ({})", reinterpret_cast<const char*>(NormalizedPath.u8string().c_str()), ErrorCode.message());
@@ -124,11 +125,108 @@ void FScriptWatcher::Unregister(FDelegateHandle InHandle)
 
 void FScriptWatcher::Tick(float InRealDeltaTime)
 {
-	(void)InRealDeltaTime;
+	if (!(InRealDeltaTime >= 0))
+	{
+		return;
+	}
 
-	// TODO(3단계): 누적 시간이 CheckInterval을 넘을 때만 검사
-	// TODO(4단계): last_write_time(error_code 버전)으로 변경 판정 (!= 비교)
-	// TODO(5단계): 디바운스 - 다음 검사에서도 시간이 같으면 확정 후 콜백 호출
+	// FileMap이 비어있으면 return. 검사할게 없음
+	if (FileMap.IsEmpty())
+	{
+		AccumulatedTime = 0.f;
+		return;
+	}
+
+	AccumulatedTime += InRealDeltaTime;
+	// 누적 시간이 CheckInterval을 넘을 때만 검사
+	if (AccumulatedTime < CheckInterval)
+	{
+		return;
+	}
+	AccumulatedTime = 0.f;
+	
+	CheckFiles();
+}
+
+// last_write_time 변경 판정
+void FScriptWatcher::CheckFiles()
+{
+	TArray<std::wstring> ConfirmedList;
+
+	std::error_code ErrorCode;
+	for (auto& [Key, File] : FileMap)
+	{
+		fs::file_time_type LastWriteTime = fs::last_write_time(File.Path, ErrorCode);
+		if (ErrorCode)
+		{
+			// 읽기 실패: 다음 검사에서 다시 본다
+			if (!File.bIsReadFailing)
+			{
+				File.bIsReadFailing = true;
+				HTR_LOG(Warning, "[ScriptWatcher] Cannot read: {} ({})",
+					reinterpret_cast<const char*>(File.Path.u8string().c_str()), ErrorCode.message());
+			}
+			continue;
+		}
+
+		// 실패 -> 성공으로 돌아온 순간에만
+		if (File.bIsReadFailing)
+		{
+			File.bIsReadFailing = false;
+			HTR_LOG(Info, "[ScriptWatcher] Available again: {}",
+				reinterpret_cast<const char*>(File.Path.u8string().c_str()));
+		}
+
+		const bool bIsSame = File.bIsTimeValid && LastWriteTime == File.AppliedWriteTime;
+
+		// continue -> 아직 파일이 변경되었다고 확정하지 않고 대기한다.
+		if (!File.bIsWaiting)
+		{
+			if (bIsSame)
+			{
+				continue;
+			}
+			File.bIsWaiting = true;
+			File.PendingWriteTime = LastWriteTime;
+			continue;
+		}
+		if (bIsSame)
+		{
+			File.bIsWaiting = false;
+			continue;
+		}
+		if (LastWriteTime != File.PendingWriteTime)
+		{
+			File.PendingWriteTime = LastWriteTime;
+			continue;
+		}
+		const uintmax_t FileSize = fs::file_size(File.Path, ErrorCode);
+		if (ErrorCode || FileSize == 0)
+		{
+			continue;
+		}
+
+		File.AppliedWriteTime = LastWriteTime;
+		File.bIsTimeValid = true;
+		File.bIsWaiting = false;
+		ConfirmedList.Add(Key);
+	}
+
+	BroadcastUpdates(ConfirmedList);
+}
+
+// Delegate로 파일 업데이트 broadcast
+void FScriptWatcher::BroadcastUpdates(const TArray<std::wstring>& InConfrimedList)
+{
+	for (const auto& String : InConfrimedList)
+	{
+		if (FWatchedFile* File = FileMap.Find(String))
+		{
+			fs::path CopiedPath = File->Path;
+			HTR_LOG(Info, "[ScriptWatcher] Changed {}", reinterpret_cast<const char*>(File->Path.u8string().c_str()));
+			File->Subscribers.Broadcast(CopiedPath);
+		}
+	}
 }
 
 std::filesystem::path FScriptWatcher::NormalizePath(const std::filesystem::path& InPath)
