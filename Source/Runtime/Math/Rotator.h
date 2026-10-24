@@ -22,6 +22,8 @@ struct FRotator
 
 	FQuat Quaternion() const;
 
+	FVector ToVector() const;
+
 	float operator[] (int32 Index) const
 	{
 		return V[Index];

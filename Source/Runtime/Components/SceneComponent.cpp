@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 
+#include "Collision/CollisionShape.h"
+
 namespace
 {
 	void UpdateChildVisibility(USceneComponent* Root, bool bPropagate, bool bVisible, bool bHidden)
@@ -319,6 +321,11 @@ float USceneComponent::GetCollisionRadius() const
 	const FVector Extent = (Bounds.Max - Bounds.Min) * 0.5f;
 	if (Extent.SizeSquared() <= SMALL_NUMBER) return 10.0f;
 	return std::min({ Extent.X, Extent.Y, Extent.Z });
+}
+
+FCollisionShape USceneComponent::GetCollisionShape(float Inflation) const
+{
+	return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent());
 }
 
 void USceneComponent::MarkTransformDirty()

@@ -5,6 +5,8 @@
 #include "Math/Box.h"
 #include "Collision/HitResult.h"
 
+struct FCollisionShape;
+
 enum class EAttachmentRule
 {
 	KeepRelative,
@@ -83,6 +85,7 @@ public:
 
 	virtual bool MoveComponent(const FVector& Delta, const FRotator& NewRotation, bool bSweep, FHitResult* Hit = nullptr);
 	virtual float GetCollisionRadius() const;
+	virtual FCollisionShape GetCollisionShape(float Inflation = 0.0f) const;
 	void SetCollisionRadiusOverride(float Radius) { CollisionRadiusOverride = Radius; }
 
 	void MarkTransformDirty();

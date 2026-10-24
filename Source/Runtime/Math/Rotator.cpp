@@ -28,6 +28,11 @@ FQuat FRotator::Quaternion() const
 	return FQuat::MakeFromEuler(RRad, PRad, YRad);
 }
 
+FVector FRotator::ToVector() const
+{
+	return FVector(Pitch, Yaw, Roll);
+}
+
 FRotator FRotator::Identitiy = FRotator(0, 0, 0);
 
 FRotator operator+(FRotator Rot, const FVector& Vec)

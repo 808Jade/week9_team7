@@ -79,6 +79,11 @@ void UMovementComponent::StopMovementImmediately()
 	UpdateComponentVelocity();
 }
 
+bool UMovementComponent::SafeMoveUpdatedComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult& OutHit)
+{
+	return false;
+}
+
 void UMovementComponent::SetPlaneConstraintNormal(FVector PlaneNormal)
 {
 	PlaneConstraintNormal = PlaneNormal.GetSafeNormal();

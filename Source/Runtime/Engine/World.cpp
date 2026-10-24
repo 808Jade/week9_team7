@@ -15,6 +15,8 @@
 #include "UObject/UObjectIterator.h"
 
 #include "Collision/Ray.h"
+#include "Collision/CollisionDetector.h"
+#include "Collision/OverlapResult.h"
 #include "Components/BillboardComponent.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -30,6 +32,7 @@
 #include "Render/ObjectConstants.h"
 
 #include "UObject/UObjectGlobals.h"
+
 
 namespace
 {
@@ -636,7 +639,7 @@ bool UWorld::SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, 
 			const FVector Point = WorldRay.Origin + WorldRay.Direction * T;
 			const FVector Offset = Point - Bounds.Center;
 			const float X = Bounds.Extent.X > 0.0f ? Offset.X / Bounds.Extent.X : 0.0f;
-			const float Y = Bounds.Extent.Y > 0.0f ? Offset.Y / Bounds.Extent.Y : 0.0f;
+			const float Y = Bounds.Extent.Y > 0.0f ? Offset.Y / Bounds.Extent.Y : 0.0f;	
 			const float Z = Bounds.Extent.Z > 0.0f ? Offset.Z / Bounds.Extent.Z : 0.0f;
 			const float AX = std::abs(X), AY = std::abs(Y), AZ = std::abs(Z);
 			FVector Normal = AX >= AY && AX >= AZ ? FVector(X >= 0.0f ? 1.0f : -1.0f, 0.0f, 0.0f)
@@ -656,6 +659,18 @@ bool UWorld::SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, 
 			return true;
 		}, NearestT);
 	return OutHit.bBlockingHit;
+}
+
+bool UWorld::SweepSingle(FHitResult& OutHIt, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
+{
+	OutHIt = FHitResult(1.0f);
+
+	return false;
+}
+
+bool UWorld::SweepMulti(TArray<FHitResult>& OutHIt, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
+{
+	return false;
 }
 
 bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
@@ -756,6 +771,54 @@ bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 	return OutHit.HitComponent != nullptr;
 }
 
+bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVector& Pos, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
+{
+	Scene.UpdateAllTransforms();
+	
+	const float BoundingRaidus = CollisionShape.GetExtent().Size();
+	const FVector BoxExtent(BoundingRaidus);
+	const FBox QueryAABB(Pos - BoxExtent, Pos + BoxExtent);
+	const FTransform QueryTransform(Rot.ToFRotator(), Pos);
+
+	TSet<UPrimitiveComponent*> VIsitedComponents;
+
+	Scene.BVH.Query(
+		[ &QueryAABB](const FBox& NodeBounds) -> bool
+		{
+			return QueryAABB.Intersects(NodeBounds);
+		},
+		[ & ](FPrimitiveSceneProxy* Proxy)
+		{
+			UPrimitiveComponent* Component = Proxy ? Proxy->GetComponent() : nullptr;
+			if(!Component || VIsitedComponents.Contains(Component))
+			{
+				return;
+			}
+			VIsitedComponents.Add(Component);
+			if(!Component->IsShown(true) || !Component->GetOwner() ||
+				!Component->GetOwner()->GetActorEnableCollision() ||
+				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this)
+			{
+				return;
+			}
+
+			FCollisionShape ComponentShape = Component->GetCollisionShape();
+			FTransform ComponentTransform(Component->GetWorldLocation(),Component->GetWorldScale3D(), Component->GetWorldRotation());
+
+			if(FCollisionDetector::IsOverlapping(CollisionShape, QueryTransform, ComponentShape, ComponentTransform))
+			{
+				FOverlapResult OverlapResult;
+				OverlapResult.Component = Component;
+				OverlapResult.OverlappedActor = Component->GetOwner();
+				OverlapResult.bBlockingHit = false;
+				OutOverlaps.Add(OverlapResult);
+			}
+		}
+	);
+
+	return OutOverlaps.Num() > 0;
+}
+
 void UWorld::BeginPlay()
 {
 	if (WorldType != EWorldType::PIE || bBegunPlay) return;
@@ -791,6 +854,20 @@ void UWorld::BeginPlay()
 		BeginPlayList.Dequeue();
 		if (Actor) Actor->BeginPlay();
 	}
+
+	// UWorld::BeginPlay() 하단에 임시 검증 코드 삽입
+	TArray<FOverlapResult> Overlaps;
+	FCollisionShape TestSphere = FCollisionShape::MakeSphere(20.0f);
+
+	// 1. 겹치는 위치 검증 (40, 0, 0)
+	bool bHit1 = OverlapMulti(Overlaps, FVector(40.0f, 0.0f, 0.0f), FQuat::Identity(), TestSphere);
+	HTR_LOG(Info, "Overlap Test 1 (Expected: True) -> Result: {}, Count: {}", bHit1, Overlaps.Num());
+
+	Overlaps.Empty();
+
+	// 2. 떨어진 위치 검증 (300, 0, 0)
+	bool bHit2 = OverlapMulti(Overlaps, FVector(300.0f, 0.0f, 0.0f), FQuat::Identity(), TestSphere);
+	HTR_LOG(Info, "Overlap Test 2 (Expected: False) -> Result: {}, Count: {}", bHit2, Overlaps.Num());
 }
 
 void UWorld::EndPlay()

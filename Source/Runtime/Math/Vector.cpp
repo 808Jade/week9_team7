@@ -253,6 +253,26 @@ FVector& FVector::operator /= (const float& f)
 	return *this;
 }
 
+bool FVector::operator<(const FVector& V1) const
+{
+	return (X < V1.X) && (Y < V1.Y) && (Z < V1.Z);
+}
+
+bool FVector::operator<=(const FVector& V1) const
+{
+	return (X <= V1.X) && (Y <= V1.Y) && (Z <= V1.Z);
+}
+
+bool FVector::operator>(const FVector& V1) const
+{
+	return (X > V1.X) && (Y > V1.Y) && (Z > V1.Z);
+}
+
+bool FVector::operator>=(const FVector& V1) const
+{
+	return (X >= V1.X) && (Y >= V1.Y) && (Z >= V1.Z);
+}
+
 // 스트림 출력 연산자와 함께 사용할 시 괄호로 묶을 것
 FVector FVector::operator ^ (const FVector& V1) const
 {

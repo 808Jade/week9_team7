@@ -10,6 +10,13 @@ struct FOverlapResult
 {
 	bool bBlockingHit = false;
 
-	AActor* OverlappedActor;
+	AActor* OverlappedActor = nullptr;
 	UPrimitiveComponent* Component = nullptr;
+
+	FOverlapResult()
+	{
+		bBlockingHit = false;
+		OverlappedActor = nullptr;
+		Component = nullptr;
+	}
 };
