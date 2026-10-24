@@ -7,9 +7,11 @@
 #include "GameFramework/Actor.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
+#include "Engine/Level.h"
 
 #include "Input/InputSystem.h"
 #include "Core/EngineLog.h"
+
 
 namespace
 {
@@ -62,16 +64,28 @@ bool FLuaManager::Init()
 
 	// 루아 VM 초기화 및 표준 라이브러리 로드
 	Lua.open_libraries(
-		sol::lib::base, 
-		sol::lib::math, 
-		sol::lib::string, 
-		sol::lib::table, 
+		sol::lib::base,
+		sol::lib::math,
+		sol::lib::string,
+		sol::lib::table,
 		sol::lib::coroutine);
+
+	Lua.set_exception_handler([](lua_State* L, sol::optional<const std::exception&> MaybeException, sol::string_view Description) {
+		HTR_LOG(Error, "[Lua Exception] {}", Description);
+		return sol::stack::push(L, Description);
+		});
+	lua_atpanic(Lua.lua_state(), [](lua_State* L) -> int {
+		const char* Msg = lua_tostring(L, -1);
+		HTR_LOG(Error, "[Lua Panic] Fatal error: {}", Msg ? Msg : "Unknown");
+		return 0; // 에디터 강제 종료(abort) 방지
+		});
 
 	// 엔진 API 바인딩
 	BindEngineAPI();
 	bInitialized = true;
 	HTR_LOG(Info, "[LuaManager] Successfully initialized LuaJIT & Sol2!");
+
+
 	return true;
 }
 
@@ -111,8 +125,8 @@ void FLuaManager::BindVectorAPI()
 		"z", &FVector::Z,
 
 		// 멤버 함수 바인딩, 정규화, 길이, 내적, 외적
-		"Normalized", & FVector::Normalized,
-		"Length", & FVector::Length,
+		"Normalized", &FVector::Normalized,
+		"Length", &FVector::Length,
 		"Dot", [](const FVector& a, const FVector& b) { return a.Dot(b); },
 		"Cross", [](const FVector& a, const FVector& b) { return a.Cross(b); },
 		"Distance", [](const FVector& a, const FVector& b) { return FVector::Distance(a, b); },
@@ -151,6 +165,15 @@ void FLuaManager::BindVectorAPI()
 		},
 		sol::meta_function::unary_minus, [](const FVector& v) {
 			return FVector(-v.X, -v.Y, -v.Z);
+		},
+
+		// 벡터를 회전으로 변환하는 함수 바인딩
+		"ToRotator", [](const FVector& V) {
+			FRotator Rot;
+			Rot.Yaw = std::atan2(V.Y, V.X) * (180.0f / PI);
+			Rot.Pitch = std::atan2(V.Z, std::sqrt(V.X * V.X + V.Y * V.Y)) * (180.0f / PI);
+			Rot.Roll = 0.0f;
+			return Rot;
 		}
 	);
 }
@@ -163,8 +186,8 @@ void FLuaManager::BindRotatorAPI()
 		"yaw", &FRotator::Yaw,
 		"roll", &FRotator::Roll,
 
-		"Quaternion", & FRotator::Quaternion,
-		
+		"Quaternion", &FRotator::Quaternion,
+
 		sol::meta_function::addition, sol::overload(
 			[](const FRotator& a, const FRotator& b) { return FRotator(a.Pitch + b.Pitch, a.Yaw + b.Yaw, a.Roll + b.Roll); },
 			[](const FRotator& a, const FVector& b) { return FRotator(a.Pitch + b.X, a.Yaw + b.Y, a.Roll + b.Z); }
@@ -180,85 +203,126 @@ void FLuaManager::BindRotatorAPI()
 		sol::meta_function::division, sol::overload(
 			[](const FRotator& a, float b) { return FRotator(a.Pitch / b, a.Yaw / b, a.Roll / b); }
 		)
+
 	);
 }
 
 void FLuaManager::BindActorAPI()
 {
+	// 람다 변수 정의 (중복 제거, 재사용 및 컴파일 최적화)
+	auto GetLoc = &AActor::GetActorLocation;
+	auto SetLoc = [](AActor* Actor, const FVector& NewLoc) {
+		if (Actor && Actor->GetRootComponent())
+			Actor->GetRootComponent()->SetWorldLocation(NewLoc, false);
+	};
+	auto AddLoc = [](AActor* Actor, const FVector& Delta) {
+		if (Actor && Actor->GetRootComponent()) {
+			FVector cur = Actor->GetActorLocation();
+			Actor->GetRootComponent()->SetWorldLocation(cur + Delta, false);
+		}
+	};
+
+	auto GetRot = &AActor::GetActorRotation;
+	auto SetRot = [](AActor* Actor, const FRotator& NewRot) {
+		if (Actor && Actor->GetRootComponent())
+			Actor->GetRootComponent()->SetWorldRotation(NewRot, false);
+	};
+	auto AddRot = [](AActor* Actor, const FRotator& Delta) {
+		if (Actor && Actor->GetRootComponent()) {
+			FRotator cur = Actor->GetActorRotation();
+			Actor->GetRootComponent()->SetWorldRotation(cur + Delta, false);
+		}
+	};
+
+	auto GetFwd = [](AActor* Actor) -> FVector {
+		return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetForward() : ForwardVector;
+	};
+	auto GetRight = [](AActor* Actor) -> FVector {
+		return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetRight() : RightVector;
+	};
+	auto GetUp = [](AActor* Actor) -> FVector {
+		return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetUp() : UpVector;
+	};
+
+	auto GetScale = [](AActor* Actor) -> FVector {
+		return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetWorldScale3D() : FVector(1, 1, 1);
+	};
+	auto SetScale = [](AActor* Actor, const FVector& NewScale) {
+		if (Actor && Actor->GetRootComponent())
+			Actor->GetRootComponent()->SetWorldScale3D(NewScale);
+	};
+
+	auto SetVis = [](AActor* Actor, bool bVisible) {
+		if (Actor && Actor->GetRootComponent())
+			Actor->GetRootComponent()->SetVisibility(bVisible);
+	};
+	auto IsVis = [](AActor* Actor) -> bool {
+		return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->IsVisible() : false;
+	};
+
 	Lua.new_usertype<AActor>("Actor",
 		"UUID", sol::property(&AActor::GetUUID),
 		"GetName", &AActor::GetName,
 
-		// 액터 위치
-		"GetLocation", &AActor::GetActorLocation,
-		"SetLocation", [](AActor* Actor, const FVector& NewLoc) {
-			if (Actor->GetRootComponent())
-				Actor->GetRootComponent()->SetWorldLocation(NewLoc, false);
-		},
-		"Location", sol::property(
-			&AActor::GetActorLocation,
-			[](AActor* Actor, const FVector& NewLoc) {
-				if (Actor->GetRootComponent())
-					Actor->GetRootComponent()->SetWorldLocation(NewLoc, false);
+		// 액터 위치 (Short & UE 네이티브 & 프로퍼티)
+		"GetLocation", GetLoc,
+		"GetActorLocation", GetLoc,
+		"SetLocation", SetLoc,
+		"SetActorLocation", SetLoc,
+		"Location", sol::property(GetLoc, SetLoc),
+		"AddLocation", AddLoc,
+
+		// 액터 회전 (Short & UE 네이티브 & 프로퍼티)
+		"GetRotation", GetRot,
+		"GetActorRotation", GetRot,
+		"SetRotation", SetRot,
+		"SetActorRotation", SetRot,
+		"Rotation", sol::property(GetRot, SetRot),
+		"AddRotation", AddRot,
+
+		// 액터 이동 속도
+		"Velocity", sol::property(
+			[](AActor* Actor) -> FVector {
+				return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->ComponentVelocity : FVector::ZeroVector;
+			},
+			[](AActor* Actor, const FVector& NewVel) {
+				if (Actor && Actor->GetRootComponent())
+					Actor->GetRootComponent()->ComponentVelocity = NewVel;
 			}
 		),
 
-		"AddLocation", [](AActor* Actor, const FVector& Delta) {
-			if (Actor->GetRootComponent()) {
-				FVector cur = Actor->GetActorLocation();
-				Actor->GetRootComponent()->SetWorldLocation(cur + Delta, false);
-			}
-		},
+		// 방향 벡터 (Short & UE 네이티브)
+		"GetForwardVector", GetFwd,
+		"GetActorForwardVector", GetFwd,
+		"GetRightVector", GetRight,
+		"GetActorRightVector", GetRight,
+		"GetUpVector", GetUp,
+		"GetActorUpVector", GetUp,
 
-		// 액터 회전
-		"GetRotation", &AActor::GetActorRotation,
-		"SetRotation", [](AActor* Actor, const FRotator& NewRot) {
-			if (Actor->GetRootComponent())
-				Actor->GetRootComponent()->SetWorldRotation(NewRot, false);
-		},
-		"Rotation", sol::property(
-			&AActor::GetActorRotation,
-			[](AActor* Actor, const FRotator& NewRot) {
-				if (Actor->GetRootComponent())
-					Actor->GetRootComponent()->SetWorldRotation(NewRot, false);
-			}
-		),
+		// 스케일 (Short & UE 네이티브)
+		"GetScale", GetScale,
+		"GetActorScale", GetScale,
+		"GetActorScale3D", GetScale,
+		"SetScale", SetScale,
+		"SetActorScale", SetScale,
+		"SetActorScale3D", SetScale,
 
-		"AddRotation", [](AActor* Actor, const FRotator& Delta) {
-			if (Actor->GetRootComponent()) {
-				FRotator cur = Actor->GetActorRotation();
-				Actor->GetRootComponent()->SetWorldRotation(cur + Delta, false);
-			}
-		},
+		// 가시성 & 상태 (Short & UE 네이티브)
+		"SetVisibility", SetVis,
+		"SetActorHiddenInGame", [SetVis](AActor* Actor, bool bHidden) { SetVis(Actor, !bHidden); },
+		"IsVisible", IsVis,
+		"IsActorHiddenInGame", [IsVis](AActor* Actor) -> bool { return !IsVis(Actor); },
+		"IsValid", [](AActor* Actor) -> bool { return Actor != nullptr && Actor->GetWorld() != nullptr; },
 
+		// 디버그 위치 출력
 		"PrintLocation", [](AActor* Actor) {
+			if (!Actor) return;
 			FVector loc = Actor->GetActorLocation();
 			HTR_LOG(Info, "[Actor: {}] Location: X={:.2f}, Y={:.2f}, Z={:.2f}",
 				Actor->GetName(), loc.X, loc.Y, loc.Z);
 		},
 
-		"Velocity", sol::property(
-			[](AActor* Actor) -> FVector {
-				return Actor->GetRootComponent() ? Actor->GetRootComponent()->ComponentVelocity : FVector::ZeroVector;
-			},
-			[](AActor* Actor, const FVector& NewVel) {
-				if (Actor->GetRootComponent())
-					Actor->GetRootComponent()->ComponentVelocity = NewVel;
-			}
-		),
-
-		"GetForwardVector", [](AActor* Actor) -> FVector {
-			return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetForward() : ForwardVector;
-		},
-
-		"GetRightVector", [](AActor* Actor) -> FVector {
-			return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetRight() : RightVector;
-		},
-
-		"GetUpVector", [](AActor* Actor) -> FVector {
-			return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->GetTransform().GetUp() : UpVector;
-		},
-
+		// 레이캐스트
 		"LineTrace", [](AActor* Actor, float MaxDistance) -> sol::table {
 			sol::table Result = FLuaManager::Get().GetState().create_table();
 			Result["hit"] = false;
@@ -283,13 +347,29 @@ void FLuaManager::BindActorAPI()
 					Result["distance"] = Hit.Distance;
 					Result["point"] = Hit.ImpactPoint;
 					Result["actor"] = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+					Result["normal"] = Hit.ImpactNormal;
 				}
 			}
 			return Result;
 		},
 
-		// 4. 액터 파괴
-		"Destroy", & AActor::Destroy
+		// 씬 액터 검색
+		"FindActorByName", [](const AActor* Actor, const FString& Name) -> AActor* {
+			if (!Actor || !Actor->GetWorld() || !Actor->GetWorld()->GetPersistentLevel()) return nullptr;
+
+			UWorld* World = Actor->GetWorld();
+			for (AActor* FoundActor : World->GetPersistentLevel()->GetActors())
+			{
+				if (FoundActor && FoundActor->GetName() == Name)
+				{
+					return FoundActor;
+				}
+			}
+			return nullptr;
+		},
+
+		// 액터 파괴
+		"Destroy", &AActor::Destroy
 	);
 }
 
@@ -373,7 +453,7 @@ void FLuaManager::BindInputAPI()
 			return Value;
 		}
 		return 0.0f;
-	};
+		};
 
 	// 모든 키 입력 상태 확인
 	InputTable["IsAnyKeyDown"] = &FInputSystem::IsAnyKeyDown;
@@ -386,10 +466,10 @@ void FLuaManager::BindInputAPI()
 	InputTable["GetMouseY"] = &FInputSystem::GetMouseY;
 	InputTable["GetMousePosition"] = []() {
 		return std::make_tuple(FInputSystem::GetMouseX(), FInputSystem::GetMouseY());
-	};
+		};
 	InputTable["GetMouseDelta"] = []() {
 		return std::make_tuple(FInputSystem::GetMouseDeltaX(), FInputSystem::GetMouseDeltaY());
-	};
+		};
 	InputTable["GetWheelDelta"] = &FInputSystem::GetWheelDelta;
 
 

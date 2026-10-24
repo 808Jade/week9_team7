@@ -20,6 +20,11 @@ public:
 	virtual void TickComponent(float DeltaTime) override;
 	void EndPlay();
 	void OnOverlap(AActor* OtherActor);
+	void OnHit(AActor* OtherActor);
+
+	// 협업용 델리게이트 래퍼
+	void TriggerLuaOverlap(AActor* OtherActor) { OnOverlap(OtherActor); }
+	void TriggerLuaHit(AActor* OtherActor) { OnHit(OtherActor); }
 
 	std::filesystem::path GetScriptPath() const { return ScriptPath; }
 	void SetScriptPath(const std::filesystem::path& InScriptPath) { ScriptPath = InScriptPath; }
@@ -33,8 +38,23 @@ public:
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 
-
 private:
+	template<typename... Args>
+	void CallLuaFunction(const char* FunctionName, Args&&... InArgs)
+	{
+		if (!bIsLoaded) return;
+
+		sol::protected_function Function = ScriptEnv[FunctionName];
+		if (!Function.valid()) return;
+
+		auto Result = Function(std::forward<Args>(InArgs)...);
+		if (!Result.valid())
+		{
+			sol::error Error = Result;
+			HTR_LOG(Error, "[LuaScriptComponent] Error occurred while calling {}: {}", FunctionName, Error.what());
+		}
+	}
+
 	std::filesystem::path ScriptPath;
 	sol::environment ScriptEnv;
 	std::filesystem::file_time_type LastWriteTime;
