@@ -4,8 +4,7 @@
 
 namespace
 {
-	// FString(UTF-8) -> path. std::string을 path에 그대로 넣으면 ANSI(CP949)로 해석돼 한글이 깨진다.
-	// (Editor의 FLuaScriptUtils::FStringToFile과 같은 역할. Runtime은 Editor를 include할 수 없어서 따로 둔다)
+	// FString(UTF-8) -> path. std::string을 path에 그대로 넣으면 ANSI로 해석돼 한글이 깨진다.
 	std::filesystem::path Utf8ToPath(const FString& InString)
 	{
 		return std::filesystem::path(std::u8string(InString.begin(), InString.end()));
@@ -63,13 +62,12 @@ void ULuaScriptComponent::StartWatchingScript()
 		return;
 	}
 
-	// 콜백이 this를 캡처하므로, 이 컴포넌트가 사라지기 전에 반드시 StopWatchingScript가 불려야 한다
+	// 멤버 함수 바인딩(AddDynamic). 델리게이트가 this를 들고 있으므로
+	// 이 컴포넌트가 사라지기 전에 반드시 StopWatchingScript가 불려야 한다
 	ScriptWatchHandle = FScriptWatcher::Get().Register(
 		Utf8ToPath(ScriptPath),
-		[this](const std::filesystem::path& InChangedPath)
-		{
-			OnScriptFileChanged(InChangedPath);
-		});
+		this,
+		&ULuaScriptComponent::OnScriptFileChanged);
 }
 
 void ULuaScriptComponent::StopWatchingScript()
@@ -80,7 +78,7 @@ void ULuaScriptComponent::StopWatchingScript()
 	}
 
 	FScriptWatcher::Get().Unregister(ScriptWatchHandle);
-	ScriptWatchHandle = InvalidScriptWatchHandle;
+	ScriptWatchHandle.Reset();
 }
 
 void ULuaScriptComponent::OnScriptFileChanged(const std::filesystem::path& InChangedPath)

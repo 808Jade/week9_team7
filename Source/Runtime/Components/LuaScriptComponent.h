@@ -24,7 +24,7 @@ public:
 	// [계약] Lua 함수 핸들(Tick, BeginPlay 등)을 멤버로 캐싱한다면,
 	//        처음 로드와 재로드 모두 같은 '핸들 갱신 함수'를 거치게 한다. (6단계 ③)
 	bool ReloadScript();
-	bool IsWatchingScript() const { return ScriptWatchHandle != InvalidScriptWatchHandle; }
+	bool IsWatchingScript() const { return ScriptWatchHandle.IsValid(); }
 	// ==== HotReload ====
 
 protected:
@@ -38,7 +38,7 @@ private:
 	void StopWatchingScript();
 	void OnScriptFileChanged(const std::filesystem::path& InChangedPath);
 
-	FScriptWatchHandle ScriptWatchHandle = InvalidScriptWatchHandle;
+	FDelegateHandle ScriptWatchHandle;
 	// ==== HotReload ====
 
 	FString ScriptPath = "";

@@ -7,78 +7,119 @@ FScriptWatcher& FScriptWatcher::Get()
 	return Instance;
 }
 
-FScriptWatchHandle FScriptWatcher::Register(const std::filesystem::path& InPath, FOnScriptFileChanged InCallback)
+FDelegateHandle FScriptWatcher::Register(const std::filesystem::path& InPath, FOnScriptFileChanged::FFuncType InCallback)
 {
-	if (InPath.empty() || !InCallback)
+	if (!InCallback)
 	{
-		HTR_LOG(Warning, "[ScriptWatcher] Register: empty path or callback");
-		return InvalidScriptWatchHandle;
+		HTR_LOG(Warning, "[ScriptWatcher] Register: empty callback");
+		return FDelegateHandle{};
+	}
+
+	std::wstring Key;
+	bool bCreatedFile = false;
+	FWatchedFile* File = FindOrAddFile(InPath, Key, bCreatedFile);
+	if (!File)
+	{
+		return FDelegateHandle{};
+	}
+
+	const FDelegateHandle Handle = File->Subscribers.Add(std::move(InCallback));
+	return CommitRegister(Key, Handle, bCreatedFile);
+}
+
+FScriptWatcher::FWatchedFile* FScriptWatcher::FindOrAddFile(const std::filesystem::path& InPath, std::wstring& OutKey, bool& bOutCreated)
+{
+	bOutCreated = false;
+
+	if (InPath.empty())
+	{
+		HTR_LOG(Warning, "[ScriptWatcher] Register: empty path");
+		return nullptr;
 	}
 
 	const std::filesystem::path NormalizedPath = NormalizePath(InPath);
 	if (NormalizedPath.empty())
 	{
-		return InvalidScriptWatchHandle;
+		return nullptr;
 	}
 
-	const FScriptWatchHandle Handle = NextHandle++;
+	OutKey = MakeKey(NormalizedPath);
 
-	// 자료구조에 (경로, 핸들, 콜백) 저장 + 등록 시점의 수정 시간 기록
-	const std::wstring Key = MakeKey(NormalizedPath);
-
-	FWatchSubscriber Subscriber{
-	.Handle = Handle,
-	.Callback = std::move(InCallback),
-	};
-
-	if (auto File = FileMap.Find(Key))
+	if (FWatchedFile* Existing = FileMap.Find(OutKey))
 	{
-		File->Subscribers.Add(std::move(Subscriber));
+		// 이미 감시 중인 파일: 수정 시간은 건드리지 않는다 (대기 중인 변경을 덮어쓰지 않기 위해)
+		return Existing;
 	}
-	else
-	{
-		std::error_code ErrorCode;
-		FWatchedFile& NewWatchedFile = FileMap[Key];
-		NewWatchedFile.Path = NormalizedPath;
-		NewWatchedFile.AppliedWriteTime = fs::last_write_time(NormalizedPath, ErrorCode);
-		NewWatchedFile.bIsTimeValid = !ErrorCode;
-		NewWatchedFile.Subscribers.Add(std::move(Subscriber));
-	}
-	HandleMap.Add(Handle, Key);
 
-	HTR_LOG(Info, "[ScriptWatcher] Register #{}: {} (subscribers {}, files {})", Handle, reinterpret_cast<const char*>(NormalizedPath.u8string().c_str()), FileMap[Key].Subscribers.Num(), FileMap.Num());
-	return Handle;
+	// 새 파일: 등록 시점의 수정 시간을 기준으로 기록. 파일이 없거나 읽기 실패면 '시간 무효'
+	FWatchedFile& NewFile = FileMap[OutKey];
+	NewFile.Path = NormalizedPath;
+
+	std::error_code ErrorCode;
+	NewFile.AppliedWriteTime = std::filesystem::last_write_time(NormalizedPath, ErrorCode);
+	NewFile.bIsTimeValid = !ErrorCode;
+	if (ErrorCode)
+	{
+		HTR_LOG(Warning, "[ScriptWatcher] Cannot read write time yet: {} ({})", reinterpret_cast<const char*>(NormalizedPath.u8string().c_str()), ErrorCode.message());
+	}
+
+	bOutCreated = true;
+	return &NewFile;
 }
 
-void FScriptWatcher::Unregister(FScriptWatchHandle InHandle)
+FDelegateHandle FScriptWatcher::CommitRegister(const std::wstring& InKey, FDelegateHandle InHandle, bool bCreatedFile)
 {
-	if (InHandle == InvalidScriptWatchHandle)
+	if (!InHandle.IsValid())
+	{
+		HTR_LOG(Warning, "[ScriptWatcher] Register: invalid callback or instance");
+		if (bCreatedFile)
+		{
+			FileMap.Remove(InKey);
+		}
+		return FDelegateHandle{};
+	}
+
+	HandleMap.Add(InHandle.ID, InKey);
+
+	const FWatchedFile* File = FileMap.Find(InKey);
+	HTR_LOG(Info, "[ScriptWatcher] Register #{}: {} (files {}, handles {})",
+		InHandle.ID,
+		File ? reinterpret_cast<const char*>(File->Path.u8string().c_str()) : "?",
+		FileMap.Num(),
+		HandleMap.Num());
+
+	return InHandle;
+}
+
+void FScriptWatcher::Unregister(FDelegateHandle InHandle)
+{
+	if (!InHandle.IsValid())
 	{
 		return;
 	}
 
-	// 핸들로 구독자 제거, 구독자가 0명이 된 파일은 목록에서 삭제
-	if (const auto Path = HandleMap.Find(InHandle))
+	// 이미 해제된 핸들이면 조용히 무시 (소멸자 안전망에서 두 번 올 수 있음)
+	const std::wstring* KeyPtr = HandleMap.Find(InHandle.ID);
+	if (!KeyPtr)
 	{
-		if (auto File = FileMap.Find(*Path))
-		{
-			for (int32 i = 0; i < File->Subscribers.Num(); ++i)
-			{
-				if (File->Subscribers[i].Handle == InHandle)
-				{
-					File->Subscribers.RemoveAtSwap(i);
-					break;
-				}
-			}
-			if (File->Subscribers.Num() <= 0)
-			{
-				FileMap.Remove(*Path);
-			}
-		}
-		HandleMap.Remove(InHandle);
-
-		HTR_LOG(Info, "[ScriptWatcher] Unregister #{} (files {}, handles {})", InHandle, FileMap.Num(), HandleMap.Num());
+		return;
 	}
+
+	// HandleMap.Remove 후에도 키를 써야 하므로 복사해 둔다
+	const std::wstring Key = *KeyPtr;
+	HandleMap.Remove(InHandle.ID);
+
+	// 핸들로 구독자 제거, 구독자가 0명이 된 파일은 목록에서 삭제
+	if (FWatchedFile* File = FileMap.Find(Key))
+	{
+		File->Subscribers.Remove(InHandle);
+		if (!File->Subscribers.IsBound())
+		{
+			FileMap.Remove(Key);
+		}
+	}
+
+	HTR_LOG(Info, "[ScriptWatcher] Unregister #{} (files {}, handles {})", InHandle.ID, FileMap.Num(), HandleMap.Num());
 }
 
 void FScriptWatcher::Tick(float InRealDeltaTime)
