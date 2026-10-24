@@ -9,4 +9,5 @@ namespace LuaBindings
 	void BindComponent(sol::state& Lua);
 	void BindInput(sol::state& Lua);
 	void BindTime(sol::state& Lua);
+	void BindCoroutine(sol::state& Lua);
 }

@@ -61,4 +61,5 @@ void FLuaManager::BindEngine()
 	LuaBindings::BindComponent(Lua);
 	LuaBindings::BindInput(Lua);
 	LuaBindings::BindTime(Lua);
+	LuaBindings::BindCoroutine(Lua);
 }

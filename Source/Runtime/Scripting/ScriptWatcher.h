@@ -22,7 +22,7 @@ class FScriptWatcher
 public:
 	static FScriptWatcher& Get();
 
-	// 파일 감시 등록. 실패 시 무효 핸들(IsValid() == false)을 반환한다.
+	// Register: 파일 감시 등록. 실패 시 무효 핸들(IsValid() == false)을 반환한다.
 
 	// (1) 람다 / 일반 함수용 -> TDelegate::Add
 	FDelegateHandle Register(const std::filesystem::path& InPath, FOnScriptFileChanged::FFuncType InCallback);
