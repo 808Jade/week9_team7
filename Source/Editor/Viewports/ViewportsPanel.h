@@ -6,6 +6,7 @@
 #include <functional>
 
 class FGameViewportClient;
+using FViewportOverlayCallback = std::function<void(ImDrawList* DrawList, int32 ViewIndex, const ImVec2& ViewMin, const FRect& Rect)>;
 
 class FViewportsPanel : public IEditorPanel {
 public:
@@ -61,6 +62,9 @@ public:
 
 	void SetShowNoCamera(bool bValue) { bShowNoCamera = bValue; }
 
+	void SetOverlayCallback(FViewportOverlayCallback InCallback) { OverlayCallback = std::move(InCallback); }
+
+
 private:
 	int32 ActiveViewIndex = 0;
 	bool bShowNoCamera = false;
@@ -89,5 +93,5 @@ private:
 	bool bHasLayoutRequest = false;
 	ELayoutMode RequestedLayoutMode = ELayoutMode::QuadSplit;
 	int32 RequestedSingleViewIndex = 0;
-
+	FViewportOverlayCallback OverlayCallback;
 };
