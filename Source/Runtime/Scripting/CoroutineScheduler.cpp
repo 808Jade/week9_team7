@@ -2,6 +2,51 @@
 #include "Scripting/CoroutineScheduler.h"
 #include "Lua/LuaManager.h"
 
+#include <cmath>
+#include <limits>
+
+namespace
+{
+	constexpr const char* YieldTagSeconds = "seconds";
+	constexpr const char* YieldTagFrames = "frames";
+	constexpr const char* YieldTagUntil = "until";
+
+	// Value를 초로 변환
+	float ToWaitSeconds(const sol::object& Value)
+	{
+		if (Value.get_type() != sol::type::number)
+		{
+			return 0.f;
+		}
+		const double Seconds = Value.as<double>();
+		if (std::isnan(Seconds) || Seconds < 0.0)
+		{
+			return 0.f;
+		}
+		return static_cast<float>(Seconds);
+	}
+
+	// Value를 프레임으로 변환
+	int32 ToWaitFrames(const sol::object& Value)
+	{
+		if (Value.get_type() != sol::type::number)
+		{
+			return 1;
+		}
+		const double Frames = Value.as<double>();
+		if (!(Frames >= 1.0))
+		{
+			return 1;
+		}
+		constexpr double MaxFrames = static_cast<double>(std::numeric_limits<int32>::max());
+		if (Frames >= MaxFrames)
+		{
+			return (std::numeric_limits<int32>::max());
+		}
+		return static_cast<int32>(Frames);
+	}
+}
+
 FCoroutineScheduler& FCoroutineScheduler::Get()
 {
 	static FCoroutineScheduler Instance;
@@ -47,23 +92,40 @@ FCoroutineHandle FCoroutineScheduler::Start(ULuaScriptComponent* Owner, const so
 	const FCoroutineHandle Handle = Entry.Handle;
 	PendingList.Add(std::move(Entry));
 
-	return InvalidCoroutineHandle;
+	return Handle;
 }
 
 void FCoroutineScheduler::Update(float DeltaTime)
 {
-	(void)DeltaTime;
+	if (bIsUpdating)
+	{
+		HTR_LOG(Warning, "[Coroutine] Update called recursively, ignored");
+		return;
+	}
 
 	// 이전 프레임 이후 새로 시작된 코루틴을 이번 프레임 처리 대상에 포함
 	MergePending();
+	if (ActiveList.IsEmpty())
+	{
+		return;
+	}
 
 	bIsUpdating = true;
 
-	// TODO(7단계): ActiveList 순회
-	//   - bFinished 건너뛰기
-	//   - WaitType별 대기 갱신 (Seconds: dt 차감 / Frames: 1 감소 / Condition: protected 호출)
-	//   - 조건 충족 시 resume -> 결과 해석(6단계)
-	//   - 순회 중 추가는 PendingList로, 삭제는 bFinished 표시로만
+	// ActiveList 순회
+	const int32 Count = ActiveList.Num();
+	for (int32 i = 0; i < Count; ++i)
+	{
+		FCoroutineEntry& Entry = ActiveList[i];
+		if (Entry.bFinished)
+		{
+			continue;
+		}
+		if (IsReadyToResume(Entry, DeltaTime))
+		{
+			ResumeEntry(Entry);
+		}
+	}
 
 	bIsUpdating = false;
 
@@ -229,4 +291,127 @@ void FCoroutineScheduler::RemoveFinishedIfSafe()
 	{
 		RemoveFinished();
 	}
+}
+
+void FCoroutineScheduler::ResumeEntry(FCoroutineEntry& Entry)
+{
+	if (Entry.bFinished)
+	{
+		return;
+	}
+	if (!Entry.Coroutine.valid() || !Entry.Coroutine.runnable())
+	{
+		Entry.bFinished = true;
+		return;
+	}
+
+	Entry.ResetWait();
+
+	sol::protected_function_result Result = Entry.Coroutine();
+
+	if (!Result.valid())
+	{
+		sol::error Error = Result;
+		HTR_LOG(Error, "[Coroutine] {} error: {}", Entry.DebugName, Error.what());
+		Entry.bFinished = true;
+		return;
+	}
+
+	if (Entry.bFinished)
+	{
+		return;
+	}
+
+	if (Result.status() == sol::call_status::ok)
+	{
+		Entry.bFinished = true;
+		return;
+	}
+
+	ApplyYield(Entry, Result);
+}
+
+void FCoroutineScheduler::ApplyYield(FCoroutineEntry& Entry, const sol::protected_function_result& Result)
+{
+	if (Result.return_count() == 0)
+	{
+		return;
+	}
+
+	const sol::object Tag = Result.get<sol::object>(0);
+	if (Tag.get_type() != sol::type::string)
+	{
+		HTR_LOG(Warning, "[Coroutine] {}: unknown yield value, resuming next frame", Entry.DebugName);
+		return;
+	}
+
+	const std::string TagName = Tag.as<std::string>();
+	const sol::object Value = Result.return_count() > 1 ? Result.get<sol::object>(1) : sol::object();
+
+	if (TagName == YieldTagSeconds)
+	{
+		Entry.WaitType = ECoroutineWaitType::Seconds;
+		Entry.RemainingTime = ToWaitSeconds(Value);
+	}
+	else if (TagName == YieldTagFrames)
+	{
+		Entry.WaitType = ECoroutineWaitType::Frames;
+		Entry.RemainingFrames = ToWaitFrames(Value);
+	}
+	else if (TagName == YieldTagUntil)
+	{
+		if (Value.get_type() != sol::type::function)
+		{
+			HTR_LOG(Warning, "[Coroutine] {}: wait_until without a function, resuming next frame", Entry.DebugName);
+			return;
+		}
+		lua_State* MainState = FLuaManager::Get().GetState().lua_state();
+		Entry.WaitType = ECoroutineWaitType::Condition;
+		Entry.Condition = sol::protected_function(MainState, Value);
+	}
+	else
+	{
+		HTR_LOG(Warning, "[Coroutine] {}: unknown yield tag '{}', resuming next frame", Entry.DebugName, TagName);
+	}
+
+}
+
+bool FCoroutineScheduler::IsReadyToResume(FCoroutineEntry& Entry, float DelatTime)
+{
+	switch (Entry.WaitType)
+	{
+	case ECoroutineWaitType::None:
+		return true;
+
+	case ECoroutineWaitType::Seconds:
+		Entry.RemainingTime -= DelatTime;
+		return Entry.RemainingTime <= 0.f;
+
+	case ECoroutineWaitType::Frames:
+		--Entry.RemainingFrames;
+		return Entry.RemainingFrames <= 0;
+
+	case ECoroutineWaitType::Condition:
+		if (!Entry.Condition.valid())
+		{
+			return true;
+		}
+
+		sol::protected_function_result Result = Entry.Condition();
+		if (!Result.valid())
+		{
+			sol::error Error = Result;
+			HTR_LOG(Error, "[Coroutine] {} wait_until condition error: {}", Entry.DebugName, Error.what());
+			Entry.bFinished = true;
+			return false;
+		}
+		if (Entry.bFinished)
+		{
+			return false;
+		}
+
+		return Result.return_count() > 0 && Result.get<bool>(0);
+	}
+
+	return true;
 }

@@ -29,6 +29,8 @@
 #include "Core/Async/TaskPool.h"
 #include "Render/ObjectConstants.h"
 
+#include "Scripting/CoroutineScheduler.h"
+
 #include "UObject/UObjectGlobals.h"
 
 namespace
@@ -140,6 +142,8 @@ void UWorld::Tick(float DeltaTime)
 			{
 				PathTracker.Tick(Level->GetActors(), DeltaTime);
 			}
+			// Run Coroutines after actor Tick
+			FCoroutineScheduler::Get().Update(DeltaTime);
 		}
 	}
 	else
@@ -798,6 +802,13 @@ void UWorld::BeginPlay()
 void UWorld::EndPlay()
 {
 	bBegunPlay = false;
+
+	// Editor world ClearWorld must not wipe PIE coroutines
+	if (WorldType != EWorldType::Editor)
+	{
+		FCoroutineScheduler::Get().Clear();
+	}
+
 	if (PlayerController)
 	{
 		PlayerController->ClearInputState();

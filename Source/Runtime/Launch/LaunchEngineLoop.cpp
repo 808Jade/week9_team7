@@ -18,6 +18,8 @@
 #include "Core/Stats/LightweightStats.h"
 #include "Core/Async/TaskPool.h"
 #include "Scripting/ScriptWatcher.h"
+#include "Scripting/CoroutineScheduler.h"
+#include "Lua/LuaManager.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -182,6 +184,10 @@ void FEngineLoop::Exit()
 	DestroyAllObjectsExceptEngine();
 	delete GEngine;
 	GEngine = nullptr;
+
+	// 코루틴 참조는 Lua state가 살아 있을 때 해제해야 한다
+	FCoroutineScheduler::Get().Clear();
+	FLuaManager::Get().Shutdown();
 
 	DepthBuffer.reset();
 	Swapchain.reset();

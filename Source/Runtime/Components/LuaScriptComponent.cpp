@@ -99,6 +99,7 @@ ULuaScriptComponent::~ULuaScriptComponent()
 {
 	// 정상 흐름이면 OnUnregister에서 이미 해제됨. 콜백이 죽은 this를 잡고 남지 않게 한 번 더 확인
 	StopWatchingScript();
+	FCoroutineScheduler::Get().StopAllForOwner(this);
 }
 
 void ULuaScriptComponent::SetScriptPath(const FString& InPath)
@@ -251,12 +252,13 @@ void ULuaScriptComponent::OnUnregister()
 	StopWatchingScript();
 
 	// Destroy / DestroyComponent / PIE 종료 모두 여기를 거친다.
-	// 소멸자에서 Lua를 호출하면 Owner나 Lua VM이 이미 정리됐을 수 있으므로 여기서 EndPlay를 부른다.
-	// Lua BeginPlay를 끝낸 경우에만 짝이 되는 EndPlay를 부른다
 	if (bIsLoaded && bLuaBegunPlay)
 	{
 		EndPlay();
 	}
+
+	FCoroutineScheduler::Get().StopAllForOwner(this);
+
 	ScriptEnv = sol::environment();
 	bIsLoaded = false;
 	bLuaBegunPlay = false;
@@ -370,6 +372,8 @@ bool ULuaScriptComponent::ReloadScript()
 	const FString FileName = GetScriptFileName();
 	const FString OwnerName = GetOwner() ? GetOwner()->GetName() : FString("None");
 
+	const FCoroutineHandle ReloadBoundary = FCoroutineScheduler::Get().GetNextHandle();
+
 	// 문법 검사 -> 새 environment에서 실행 -> 성공 시 교체
 	if (!LoadScript(Utf8ToPath(ScriptPath)))
 	{
@@ -389,7 +393,12 @@ bool ULuaScriptComponent::ReloadScript()
 	// 성공 로그를 Lua 훅(BeginPlay / OnHotReload)보다 먼저 찍어서, 스크립트가 찍는 로그가 그 아래에 오게 한다
 	HTR_LOG(Info, "[HotReload] {} reloaded ({})", FileName, OwnerName);
 
-	// TODO(코루틴): 이 컴포넌트가 소유한 코루틴 정리 (FCoroutineScheduler 연동 시)
+	// 이 컴포넌트가 소유한 코루틴 정리
+	const int32 StoppedCount = FCoroutineScheduler::Get().StopAllForOwner(this, ReloadBoundary);
+	if (StoppedCount > 0)
+	{
+		HTR_LOG(Info, "[HotReload] {} ({}): stopped {} old coroutine(s)", FileName, OwnerName, StoppedCount);
+	}
 
 	if (!bLuaBegunPlay)
 	{

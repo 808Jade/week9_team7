@@ -128,4 +128,13 @@ private:
 
 	// Update 순회 중인지. Start/Stop/Clear가 이 값을 보고 동작을 바꾼다
 	bool bIsUpdating = false;
+
+	// 엔트리 하나를 resume하고 상태를 갱신
+	void ResumeEntry(FCoroutineEntry& Entry);
+
+	// Yield 반환값을 대기 상태로 변환
+	void ApplyYield(FCoroutineEntry& Entry, const sol::protected_function_result& Result);
+
+	// WaitType 별 대기값 갱신. 지금 resume해야하면 true
+	bool IsReadyToResume(FCoroutineEntry& Entry, float DelatTime);
 };
