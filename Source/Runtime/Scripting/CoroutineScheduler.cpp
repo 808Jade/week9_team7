@@ -392,6 +392,7 @@ bool FCoroutineScheduler::IsReadyToResume(FCoroutineEntry& Entry, float DelatTim
 		return Entry.RemainingFrames <= 0;
 
 	case ECoroutineWaitType::Condition:
+	{
 		if (!Entry.Condition.valid())
 		{
 			return true;
@@ -411,6 +412,7 @@ bool FCoroutineScheduler::IsReadyToResume(FCoroutineEntry& Entry, float DelatTim
 		}
 
 		return Result.return_count() > 0 && Result.get<bool>(0);
+	}
 	}
 
 	return true;
