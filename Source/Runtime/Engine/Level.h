@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "UObject/Object.h"
 #include "UObject/Class.h"
@@ -22,6 +22,7 @@ public:
     uint32 GetActorNum() const { return Actors.Num(); }
 
     void AddActor(AActor* Actor);
+    void RemoveActor(AActor* Actor);
     void ClearActors();
 
     using Super::Serialize;   

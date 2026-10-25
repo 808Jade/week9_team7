@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "JsonArchive.h"
 
 #include "Engine/World.h"
@@ -18,6 +18,8 @@
 #include "Serialization/StructuredArchiveSlots.h"
 #include "Serialization/Formatter/JsonArchiveOutputFormatter.h"
 #include "Serialization/Formatter/JsonArchiveInputFormatter.h"
+
+FString FJsonArchive::LastLoadedScenePath = "";
 
 namespace
 {
@@ -74,6 +76,12 @@ bool FJsonArchive::LoadWorldFromBytes(UWorld* World, const TArray<uint8>& Bytes)
 	World->Serialize(Root.EnterRecord("World"));
 	Ar.Close();
 
+	if (World->GetMainCamera())
+	{
+		World->GetMainCamera()->RegisterAllComponents();
+		World->GetMainCamera()->RegisterAllActorTickFunctions(true);
+	}
+
 	World->GetScene().BuildBVH();
 	return !Reader.IsError();
 }
@@ -109,6 +117,7 @@ bool FJsonArchive::LoadWorld(UWorld* World, const FString& Path)
 	if (File.fail())
 		return false;
 
+	LastLoadedScenePath = Path;
 	return LoadWorldFromBytes(World, Bytes);
 }
 

@@ -237,6 +237,25 @@ public:
 		return static_cast<int32>(It - mDatas.begin());
 	}
 
+	bool Contains(const ElementType& Item) const
+	{
+		return Find(Item) != -1;
+	}
+
+	int32 Remove(const ElementType& Item)
+	{
+		int32 RemovedCount = 0;
+		for (int32 i = static_cast<int32>(mDatas.size()) - 1; i >= 0; --i)
+		{
+			if (mDatas[i] == Item)
+			{
+				RemoveAt(static_cast<uint32>(i));
+				++RemovedCount;
+			}
+		}
+		return RemovedCount;
+	}
+
 	int32 Num() const;
 	int32 Max() const;
 

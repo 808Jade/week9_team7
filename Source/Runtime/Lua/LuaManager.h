@@ -3,18 +3,20 @@
 #include <sol/sol.hpp>
 #include "Core/Types.h"
 
+class UWorld;
+
 class FLuaManager
 {
 public:
-    static FLuaManager& Get()
-    {
-        static FLuaManager Instance;
-        return Instance;
-    }
+    FLuaManager() = default;
+    ~FLuaManager();
+
+    FLuaManager(const FLuaManager&) = delete;
+    FLuaManager& operator=(const FLuaManager&) = delete;
 
     bool Init();
 
-    // 엔진 종료 시 호출
+    // GameInstance::Shutdown 또는 소멸자에서 호출
     void Shutdown();
 
     // 루아 가상 머신 반환
@@ -27,11 +29,33 @@ public:
         return Lua;
     }
 
+    bool IsInitialized() const { return bInitialized; }
+
+    void SetActiveWorld(UWorld* InWorld) { ActiveWorld = InWorld; }
+    UWorld* GetActiveWorld() const { return ActiveWorld; }
+
+    // 활성 인스턴스 관리 (GameInstance 소유)
+    static FLuaManager* GetActive() { return ActiveManager; }
+    static void SetActiveManager(FLuaManager* Manager) { ActiveManager = Manager; }
+
+    // 기존 FLuaManager::Get() 호환:
+    // 활성 GameInstance의 LuaManager가 있으면 반환, 없을 경우 폴백 인스턴스 반환
+    static FLuaManager& Get()
+    {
+        if (ActiveManager)
+        {
+            return *ActiveManager;
+        }
+        static FLuaManager FallbackInstance;
+        return FallbackInstance;
+    }
+
 private:
-    FLuaManager() = default;
-    ~FLuaManager() = default;
     void BindEngine();
+
+    static FLuaManager* ActiveManager;
 
     sol::state Lua;
     bool bInitialized = false;
+    UWorld* ActiveWorld = nullptr;
 };

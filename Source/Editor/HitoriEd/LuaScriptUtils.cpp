@@ -171,27 +171,15 @@ bool FLuaScriptUtils::GenerateScript(AActor* InActor)
 }
 
 // ShellExecuteW로 외부 편집기 열기
-bool FLuaScriptUtils::OpenScript(AActor* InActor)
+bool FLuaScriptUtils::OpenScriptPath(const FString& InPath)
 {
-	if (!InActor)
+	if (InPath.empty())
 		return false;
 
-	ULuaScriptComponent* Comp = GetScriptComponent(InActor);
-	if (!Comp)
-	{
-		HTR_LOG(Warning, "OpenScript: No script component. Press Create Script first.");
-		return false;
-	}
-	if (!Comp->HasScriptPath())
-	{
-		HTR_LOG(Warning, "OpenScript: Script path is empty. Press Create Script first.");
-		return false;
-	}
-
-	fs::path AbsolutePath = MakeAbsolutePath(Comp->GetScriptPath());
+	fs::path AbsolutePath = MakeAbsolutePath(InPath);
 	if (AbsolutePath.empty())
 	{
-		HTR_LOG(Error, "OpenScript: Invalid script path: {}", Comp->GetScriptPath());
+		HTR_LOG(Error, "OpenScript: Invalid script path: {}", InPath);
 		return false;
 	}
 
@@ -205,7 +193,7 @@ bool FLuaScriptUtils::OpenScript(AActor* InActor)
 	}
 	if (!bExists)
 	{
-		HTR_LOG(Warning, "OpenScript: Cannot find script file: {} (Press Create Script to restore it from the template)", FileToFString(AbsolutePath));
+		HTR_LOG(Warning, "OpenScript: Cannot find script file: {}", FileToFString(AbsolutePath));
 		return false;
 	}
 
@@ -259,6 +247,47 @@ bool FLuaScriptUtils::OpenScript(AActor* InActor)
 		MB_OK | MB_ICONERROR
 	);
 	return false;
+}
+
+bool FLuaScriptUtils::OpenScript(AActor* InActor)
+{
+	if (!InActor)
+		return false;
+
+	ULuaScriptComponent* Comp = GetScriptComponent(InActor);
+	if (!Comp)
+	{
+		HTR_LOG(Warning, "OpenScript: No script component. Press Create Script first.");
+		return false;
+	}
+	if (!Comp->HasScriptPath())
+	{
+		HTR_LOG(Warning, "OpenScript: Script path is empty. Press Create Script first.");
+		return false;
+	}
+
+	return OpenScriptPath(Comp->GetScriptPath());
+}
+
+bool FLuaScriptUtils::AssignScript(AActor* InActor, const FString& InScriptPath)
+{
+	if (!InActor || InScriptPath.empty())
+		return false;
+
+	ULuaScriptComponent* Comp = GetScriptComponent(InActor);
+	if (!Comp)
+	{
+		Comp = Cast<ULuaScriptComponent>(InActor->AddComponent(ULuaScriptComponent::StaticClass(), NAME_None));
+		if (!Comp)
+		{
+			HTR_LOG(Error, "AssignScript: Failed to add ULuaScriptComponent to {}", InActor->GetName());
+			return false;
+		}
+	}
+
+	Comp->SetScriptPath(InScriptPath);
+	HTR_LOG(Info, "AssignScript: Assigned {} to {}", InScriptPath, InActor->GetName());
+	return true;
 }
 
 void FLuaScriptUtils::LogShellExecuteError(const char* InVerb, intptr_t InResult, const std::filesystem::path& InPath)

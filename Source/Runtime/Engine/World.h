@@ -22,6 +22,7 @@ class ULevel;
 class UBillboardComponent;
 class APawn;
 class APlayerController;
+class UGameInstance;
 
 struct FViewContext;
 
@@ -73,7 +74,7 @@ public:
 	using FBillboardTraceTransform = FMatrix(*)(const UBillboardComponent&, const void*);
 	// 현재 World의 Component에 Ray를 전달하고 가장 가까운 유효 교차를 반환한다.
 	bool LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
-		FBillboardTraceTransform ResolveBillboard = nullptr, const void* ViewContext = nullptr);
+		FBillboardTraceTransform ResolveBillboard = nullptr, const void* ViewContext = nullptr, AActor* IgnoreActor = nullptr);
 	bool SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, FHitResult& OutHit, AActor* IgnoreActor = nullptr);
 
 	void BeginPlay();
@@ -83,6 +84,10 @@ public:
 	APlayerController* GetPlayerController() const { return PlayerController; }
 	bool IsPaused() const { return bIsPaused; }
 	void SetPaused(bool bPaused) { bIsPaused = bPaused; }
+
+	// GameInstance
+	UGameInstance* GetGameInstance() const;
+	void SetGameInstance(UGameInstance* InGameInstance) { OwningGameInstance = InGameInstance; }
 
 	FScene& GetScene() { return Scene; }
 	FTickTaskManager& GetTickTaskManager() { return TickTaskManager; }
@@ -130,6 +135,8 @@ private:
 	APlayerController* PlayerController = nullptr;
 	bool bIsPaused = false;
 	bool bBegunPlay = false;
+
+	UGameInstance* OwningGameInstance = nullptr;
 
 	FPathTracker PathTracker;
 

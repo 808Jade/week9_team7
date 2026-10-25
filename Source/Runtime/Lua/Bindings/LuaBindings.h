@@ -10,4 +10,7 @@ namespace LuaBindings
 	void BindInput(sol::state& Lua);
 	void BindTime(sol::state& Lua);
 	void BindCoroutine(sol::state& Lua);
+
+	void TickTimers(float DeltaTime);
+	void ClearTimers();
 }

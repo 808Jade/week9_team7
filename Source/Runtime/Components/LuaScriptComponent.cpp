@@ -1,6 +1,8 @@
 #include "EnginePCH.h"
 #include "LuaScriptComponent.h"
 #include "Lua/LuaManager.h"
+#include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "GameFramework/Actor.h"
 #include "Scripting/CoroutineScheduler.h"
 #include <fstream>
@@ -144,7 +146,21 @@ bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 	}
 
 	// 스크립트 파일이 존재하면 Lua 상태를 가져옴
-	sol::state& LuaState = FLuaManager::Get().GetState();
+	// GameInstance가 소유한 LuaManager 우선 조회
+	FLuaManager* LuaMgr = nullptr;
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			LuaMgr = GI->GetLuaManager();
+		}
+	}
+	if (!LuaMgr)
+	{
+		LuaMgr = &FLuaManager::Get();
+	}
+
+	sol::state& LuaState = LuaMgr->GetState();
 
 	// 1) 문법 검사: 컴파일만 하고 아직 실행하지 않는다
 	sol::load_result Chunk = LuaState.load_buffer(Code.data(), Code.size(), "@" + PathString);

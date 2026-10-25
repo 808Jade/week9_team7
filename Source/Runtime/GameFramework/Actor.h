@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "UObject/Object.h"
 #include "Components/PrimitiveComponent.h"
@@ -10,6 +10,7 @@
 
 class UWorld;
 class ULevel;
+class UGameInstance;
 
 class AActor : public UObject
 {
@@ -31,6 +32,7 @@ public:
 
 	UWorld* GetWorld() const { return World; }
 	ULevel* GetLevel() const { return Level; }
+	UGameInstance* GetGameInstance() const;
 
 	const TArray<UActorComponent*>& GetComponents() const { return Components; }
 	USceneComponent* GetRootComponent() const { return RootComponent; }

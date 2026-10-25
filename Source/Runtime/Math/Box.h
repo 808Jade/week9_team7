@@ -1,10 +1,13 @@
-﻿#pragma once
+#pragma once
 
 struct FBox
 {
 	FVector Min;
 	FVector Max;
 	
+	FVector GetCenter() const { return (Min + Max) * 0.5f; }
+	FVector GetExtent() const { return (Max - Min) * 0.5f; }
+	FVector GetSize() const { return Max - Min; }
 
 	FBox GetWorldAABB(const FMatrix& M) const
 	{

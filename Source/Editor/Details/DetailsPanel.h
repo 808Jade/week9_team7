@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <format>
 #include "Editor/EditorUI/EditorPanel.h"
@@ -32,6 +32,7 @@ public:
 		TargetActor = InTargetActor;
 		TargetComponent = InTargetActor ? InTargetActor->GetRootComponent() : nullptr;
 	}
+	AActor* GetTarget() const { return TargetActor; }
 	void SetTargetComponent(UActorComponent* InTargetComponent) { TargetComponent = InTargetComponent; }
 
 	void SetSelectionCallback(DetailsSelectionCallback InCallback) { Callback = InCallback; }

@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Editor/Details/DetailsPanel.h"
 
 #include "imgui_internal.h"
@@ -693,6 +693,30 @@ namespace
 				*Value = Buffer;
 			}
 			if (CustomFont) ImGui::PopFont();
+
+			if (Property.Name == "ScriptPath")
+			{
+				if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					FLuaScriptUtils::OpenScriptPath(*Value);
+				}
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(EditorDragDrop::LuaScript))
+					{
+						const char* DroppedScriptPath = static_cast<const char*>(Payload->Data);
+						if (DroppedScriptPath)
+						{
+							*Value = DroppedScriptPath;
+							if (ULuaScriptComponent* LuaComp = Cast<ULuaScriptComponent>(Object))
+							{
+								LuaComp->SetScriptPath(*Value);
+							}
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+			}
 			break;
 		}
 		case EPropertyType::Transform:
@@ -873,13 +897,83 @@ namespace
 			strncpy_s(FileNameBuffer, sizeof(FileNameBuffer), FileName.c_str(), _TRUNCATE);
 		}
 
-		// 다른 UI와 같은 기본 폰트로 표시
+		// ?ㅻⅨ UI? 媛숈? 湲곕낯 ?고듃濡??쒖떆
+		UTexture2D* ScriptIcon = UAssetManager::GetAssetByPath<UTexture2D>("Assets/Icons/LuaScript.png");
+		if (!ScriptIcon) ScriptIcon = UAssetManager::Get().LoadTexture("Assets/Icons/LuaScript.png", false);
+		if (ScriptIcon && ScriptIcon->GetResource() && ScriptIcon->GetResource()->GetSRV())
+		{
+			ImGui::Image((ImTextureID)ScriptIcon->GetResource()->GetSRV(), ImVec2(18.0f, 18.0f));
+			ImGui::SameLine();
+		}
+
 		ImGui::InputTextWithHint("Script File", "None", FileNameBuffer, sizeof(FileNameBuffer), ImGuiInputTextFlags_ReadOnly);
 
-		// 전체 경로는 마우스를 올렸을 때 툴팁으로
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		{
+			if (bHasScriptPath)
+			{
+				FLuaScriptUtils::OpenScript(Actor);
+			}
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(EditorDragDrop::LuaScript))
+			{
+				const char* DroppedScriptPath = static_cast<const char*>(Payload->Data);
+				if (DroppedScriptPath && strlen(DroppedScriptPath) > 0)
+				{
+					FLuaScriptUtils::AssignScript(Actor, DroppedScriptPath);
+					if (ULuaScriptComponent* NewComp = FLuaScriptUtils::GetScriptComponent(Actor))
+					{
+						OutSelectedComponent = NewComp;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		// ?꾩껜 寃쎈줈??留덉슦?ㅻ? ?щ졇?????댄똻?쇰줈
 		if (bHasScriptPath && ImGui::IsItemHovered())
 		{
-			ImGui::SetTooltip("%s", ScriptComp->GetScriptPath().c_str());
+			ImGui::SetTooltip("%s\n(Double-click to open in editor)", ScriptComp->GetScriptPath().c_str());
+		}
+
+		// ?꾨줈?앺듃 Scripts/ ?대뜑 ??猷⑥븘 ?ㅽ겕由쏀듃 ?쒕∼?ㅼ슫 紐⑸줉
+		const char* CurrentComboLabel = (FileNameBuffer[0] != '\0') ? FileNameBuffer : "Select from Scripts/...";
+		if (ImGui::BeginCombo("Select Script", CurrentComboLabel))
+		{
+			std::error_code EC;
+			if (std::filesystem::exists("Scripts", EC))
+			{
+				for (const auto& Entry : std::filesystem::recursive_directory_iterator("Scripts", EC))
+				{
+					if (Entry.is_regular_file() && Entry.path().extension() == ".lua")
+					{
+						std::string RelativePath = Entry.path().generic_string();
+						std::string FileName = Entry.path().filename().string();
+						bool bSelected = (bHasScriptPath && ScriptComp->GetScriptPath() == RelativePath);
+
+						if (ImGui::Selectable(FileName.c_str(), bSelected))
+						{
+							FLuaScriptUtils::AssignScript(Actor, RelativePath);
+							if (ULuaScriptComponent* NewComp = FLuaScriptUtils::GetScriptComponent(Actor))
+							{
+								OutSelectedComponent = NewComp;
+							}
+						}
+						if (bSelected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
+						if (ImGui::IsItemHovered())
+						{
+							ImGui::SetTooltip("%s", RelativePath.c_str());
+						}
+					}
+				}
+			}
+			ImGui::EndCombo();
 		}
 
 		ImGui::PopID();

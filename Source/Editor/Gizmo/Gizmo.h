@@ -1,9 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Collision/Ray.h"
 #include "Math/Transform.h"
 #include "Components/SceneComponent.h"
 #include "Components/LocalLightComponent.h"
+#include "Containers/Array.h"
+#include <functional>
 
 class UCameraComponent;
 
@@ -31,12 +33,41 @@ public:
 	}
 	USceneComponent* GetTarget() const { return Target; }
 
+	void SetAdditionalTargets(const TArray<USceneComponent*>& InTargets) { AdditionalTargets = InTargets; }
+	const TArray<USceneComponent*>& GetAdditionalTargets() const { return AdditionalTargets; }
+
 	// Gizmo 모드(이동, 회전, 크기)
 	void SetMode(EGizmoMode InMode) { Mode = InMode; }
 	EGizmoMode GetMode() const { return Mode; }
 
 	void SetSpace(EGizmoSpace InSpace) { Space = InSpace; }
 	EGizmoSpace GetSpace() const { return Space; }
+	// Grid Snapping
+	void SetGridSnapEnabled(bool bEnable) { bGridSnapEnabled = bEnable; }
+	bool IsGridSnapEnabled() const { return bGridSnapEnabled; }
+
+	void SetGridSnapSize(float InSize) { GridSnapSize = InSize; }
+	float GetGridSnapSize() const { return GridSnapSize; }
+
+	void SetAbsoluteGridSnap(bool bAbsolute) { bAbsoluteGridSnap = bAbsolute; }
+	bool IsAbsoluteGridSnap() const { return bAbsoluteGridSnap; }
+
+	// Rotation Snapping
+	void SetRotationSnapEnabled(bool bEnable) { bRotationSnapEnabled = bEnable; }
+	bool IsRotationSnapEnabled() const { return bRotationSnapEnabled; }
+
+	void SetRotationSnapAngle(float InDegrees) { RotationSnapAngle = InDegrees; }
+	float GetRotationSnapAngle() const { return RotationSnapAngle; }
+
+	// Scale Snapping
+	void SetScaleSnapEnabled(bool bEnable) { bScaleSnapEnabled = bEnable; }
+	bool IsScaleSnapEnabled() const { return bScaleSnapEnabled; }
+
+	void SetScaleSnapStep(float InStep) { ScaleSnapStep = InStep; }
+	float GetScaleSnapStep() const { return ScaleSnapStep; }
+
+	using FOnTransformCommitted = std::function<void(const TArray<USceneComponent*>& Targets, const TArray<FTransform>& PreTransforms, const TArray<FTransform>& PostTransforms)>;
+	void SetOnTransformCommitted(FOnTransformCommitted InCallback) { OnTransformCommitted = InCallback; }
 
 	// Active View의 Ray와 행렬만 사용해 Hover·Drag 상태를 갱신한다.
 	void Update(const FRay& MouseRay, const FVector2& MousePos,
@@ -73,6 +104,8 @@ private:
 	EGizmoSpace Space = EGizmoSpace::Local;
 	FTransform Transform = FTransform();
 	USceneComponent* Target = nullptr;
+	TArray<USceneComponent*> AdditionalTargets;
+	TArray<FVector> AdditionalStartLocations;
 	bool bUseActorBounds = false;
 
 	int HoveredAxis = -1;
@@ -98,4 +131,17 @@ private:
 	float DragStartRadius = 0.0f;
 	bool ApplyScaleToLight(float Factor);
 	ULocalLightComponent* GetTargetLight() const;
+
+	bool bGridSnapEnabled = true;
+	float GridSnapSize = 1.0f;
+	bool bAbsoluteGridSnap = true;
+
+	bool bRotationSnapEnabled = true;
+	float RotationSnapAngle = 15.0f;
+
+	bool bScaleSnapEnabled = false;
+	float ScaleSnapStep = 0.25f;
+
+	TArray<FTransform> DragStartTransforms;
+	FOnTransformCommitted OnTransformCommitted;
 };
