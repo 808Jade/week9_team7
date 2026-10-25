@@ -36,24 +36,21 @@ struct FCoroutineEntry
 {
 	FCoroutineHandle Handle = InvalidCoroutineHandle;
 
-	// 코루틴 전용 Lua 스택. C++이 들고 있어야 GC가 회수하지 않는다
+	// 코루틴 전용 Lua 스택
 	sol::thread Thread;
-	// 실제 resume 대상. 반드시 Thread의 state 위에서 만든다 (5단계)
+	// 실제 resume 대상. Thread의 state 위에서 만든다
 	sol::coroutine Coroutine;
 
-	// 이 코루틴을 시작한 컴포넌트. 정리(StopAllForOwner) 식별용으로만 사용한다.
-	// nullptr 허용(전역 코루틴) -> Clear()로만 정리된다
-	// Owner는 사라지기 전에 반드시 StopAllForOwner(this)를 불러야 한다
+	// 이 코루틴을 시작한 컴포넌트. 
 	ULuaScriptComponent* Owner = nullptr;
 
-	// ---- 대기 상태 ----
-	// 대기 상태를 바꿀 때는 ResetWait()로 이전 값을 먼저 지운다
+	// 대기 상태 
 	ECoroutineWaitType WaitType = ECoroutineWaitType::None;
 	float RemainingTime = 0.f;              // Seconds 전용
 	int32 RemainingFrames = 0;              // Frames 전용
 	sol::protected_function Condition;      // Condition 전용 (에러가 나도 엔진이 죽지 않게 protected)
 
-	// 삭제 예정 표시. Update 순회 중에는 즉시 지우지 않고 이 값만 세운다
+	// 삭제 예정 표시. Update 순회 중에는 즉시 지우지 않고 이 값만 표시한다
 	bool bFinished = false;
 
 	// 에러 로그용 (예: "Scene_Enemy.lua (Enemy)")
@@ -75,9 +72,6 @@ public:
 	static FCoroutineScheduler& Get();
 
 	// 코루틴 시작.
-	// Function이 유효하지 않으면 InvalidCoroutineHandle을 반환한다.
-	// 새 엔트리는 항상 PendingList로 들어가고, 다음 Update부터 처리된다.
-	// 인자가 필요하면 Lua 쪽에서 클로저로 감싸서 넘긴다: StartCoroutine(function() f(a, b) end)
 	FCoroutineHandle Start(ULuaScriptComponent* Owner, const sol::function& Function, const FString& DebugName = "");
 
 	// 매 프레임 한 번 호출. 게임 dt를 받는다 (PIE가 아닐 때는 부르지 않는다)
@@ -89,10 +83,10 @@ public:
 	// 반환값: 정지 표시된 코루틴이 있었으면 true
 	bool Stop(FCoroutineHandle Handle);
 
-	// Owner가 시작한 코루틴 전부 정지 (Active + Pending 양쪽)
-	// Owner == nullptr이면 아무것도 하지 않는다 (실수로 전역 코루틴을 날리지 않기 위해)
+	// Owner가 시작한 코루틴 전부 정지
 	// 반환값: 정지 표시된 코루틴 개수
-	int32 StopAllForOwner(const ULuaScriptComponent* Owner);
+	// BeforeHandle이 유효하면 그보다 작은 핸들만 정지한다 (Hot Reload 시 옛 코루틴만 정리)
+	int32 StopAllForOwner(const ULuaScriptComponent* Owner, FCoroutineHandle BeforeHandle = InvalidCoroutineHandle);
 
 	// 전부 즉시 비운다. PIE 종료 / 엔진 종료 때만 사용.
 	// 반드시 FLuaManager::Shutdown()보다 먼저 불러야 한다
@@ -103,6 +97,9 @@ public:
 	int32 GetActiveCount() const;
 
 	bool IsUpdating() const { return bIsUpdating; }
+
+	// 다음에 발급될 핸들. 이 값보다 작은 핸들은 그 이전에 시작된 코루틴이다
+	FCoroutineHandle GetNextHandle() const { return NextHandle; }
 
 private:
 	FCoroutineScheduler() = default;

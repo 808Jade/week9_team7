@@ -3,6 +3,7 @@
 #include "Scripting/ScriptWatcher.h"
 #include <sol/sol.hpp>
 #include <filesystem>
+#include <memory>
 
 class ULuaScriptComponent : public UActorComponent
 {
@@ -55,6 +56,12 @@ private:
 	// 로그용 스크립트 파일 이름 
 	FString GetScriptFileName() const;
 
+	// 코루틴 로그용 이름
+	FString GetCoroutineDebugName() const;
+
+	// env에 StartCoroutine / StopAllCoroutines 주입
+	void InjectCoroutineAPI(sol::environment& Env);
+
 	FDelegateHandle ScriptWatchHandle;
 
 	// 마지막 LoadScript 실패 사유. Lua 에러면 "경로:줄번호: 메시지" 형태 그대로 담긴다
@@ -87,4 +94,7 @@ private:
 
 	// Lua BeginPlay가 에러 없이 끝났는지.
 	bool bLuaBegunPlay = false;
+
+	// 주입된 Lua 함수가 죽은 this를 쓰지 않게 하는 생존 토큰.
+	std::shared_ptr<bool> CoroutineAliveToken;
 };

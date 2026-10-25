@@ -2,6 +2,7 @@
 #include "LuaScriptComponent.h"
 #include "Lua/LuaManager.h"
 #include "GameFramework/Actor.h"
+#include "Scripting/CoroutineScheduler.h"
 #include <fstream>
 #include <sstream>
 
@@ -36,7 +37,7 @@ namespace
 	}
 
 	// C++가 LoadScript에서 매번 새로 주입하는 키. 옛 값을 옮기지 않는다
-	constexpr const char* InjectedKeys[] = { "Object", "obj", "actor", "this" };
+	constexpr const char* InjectedKeys[] = { "Object", "obj", "actor", "this", "StartCoroutine", "StopAllCoroutines"};
 
 	// 인자로 들어오는 key가 LoadScript에서 매번 새로 주입하는 키인지 확인한다. 
 	bool IsInjectedKey(const sol::object& Key)
@@ -169,6 +170,7 @@ bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 	NewEnv["obj"] = GetOwner();
 	NewEnv["actor"] = GetOwner();
 	NewEnv["this"] = GetOwner();
+	InjectCoroutineAPI(NewEnv);
 
 	// 3) 새 environment에서 실행. 실패하면 기존 ScriptEnv는 건드리지 않는다
 	sol::protected_function ChunkFunc = Chunk;
@@ -189,7 +191,7 @@ bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 		HTR_LOG(Info, "[HotReload] State migrated: {} values, {} functions replaced", MigratedCount, SkippedFunctionCount);
 	}
 
-	// 외부에서 다른 경로로 로드한 경우 경로를 갱신 (감시 대상도 같이 바뀜)
+	// 외부에서 다른 경로로 로드한 경우 경로를 갱신
 	if (PathString != ScriptPath)
 	{
 		SetScriptPath(PathString);
@@ -258,11 +260,10 @@ void ULuaScriptComponent::OnUnregister()
 	ScriptEnv = sol::environment();
 	bIsLoaded = false;
 	bLuaBegunPlay = false;
+	CoroutineAliveToken.reset();
 
 	Super::OnUnregister();
 }
-
-// ==== HotReload ====
 
 void ULuaScriptComponent::StartWatchingScript()
 {
@@ -318,6 +319,46 @@ FString ULuaScriptComponent::GetScriptFileName() const
 	return PathToUtf8(Utf8ToPath(ScriptPath).filename());
 }
 
+FString ULuaScriptComponent::GetCoroutineDebugName() const
+{
+	const FString OwnerName = GetOwner() ? GetOwner()->GetName() : FString("None");
+	return GetScriptFileName() + " (" + OwnerName + ")";
+}
+
+void ULuaScriptComponent::InjectCoroutineAPI(sol::environment& Env)
+{
+	if (!CoroutineAliveToken)
+	{
+		CoroutineAliveToken = std::make_shared<bool>(true);
+	}
+	const std::weak_ptr<bool> WeakToken = CoroutineAliveToken;
+
+	Env.set_function("StartCoroutine", [this, WeakToken](sol::object FunctionObject) -> FCoroutineHandle
+	{
+		if (WeakToken.expired())
+		{
+			HTR_LOG(Warning, "[Coroutine] StartCoroutine called after its script component was destroyed");
+			return InvalidCoroutineHandle;
+		}
+		if (FunctionObject.get_type() != sol::type::function)
+		{
+			HTR_LOG(Warning, "[Coroutine] {}: StartCoroutine expects a function, got {}",
+				GetCoroutineDebugName(), sol::type_name(FunctionObject.lua_state(), FunctionObject.get_type()));
+			return InvalidCoroutineHandle;
+		}
+		return FCoroutineScheduler::Get().Start(this, FunctionObject.as<sol::function>(), GetCoroutineDebugName());
+	});
+
+	Env.set_function("StopAllCoroutines", [this, WeakToken]() -> int32
+	{
+		if (WeakToken.expired())
+		{
+			return 0;
+		}
+		return FCoroutineScheduler::Get().StopAllForOwner(this);
+	});
+}
+
 bool ULuaScriptComponent::ReloadScript()
 {
 	if (!HasScriptPath())
@@ -366,5 +407,3 @@ bool ULuaScriptComponent::ReloadScript()
 
 	return true;
 }
-
-// ==== HotReload ====

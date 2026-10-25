@@ -1,5 +1,6 @@
 #include "EnginePCH.h"
 #include "Scripting/CoroutineScheduler.h"
+#include "Lua/LuaManager.h"
 
 FCoroutineScheduler& FCoroutineScheduler::Get()
 {
@@ -7,17 +8,45 @@ FCoroutineScheduler& FCoroutineScheduler::Get()
 	return Instance;
 }
 
+// 코루틴 시작.
 FCoroutineHandle FCoroutineScheduler::Start(ULuaScriptComponent* Owner, const sol::function& Function, const FString& DebugName)
 {
+	// Function이 유효하지 않으면 InvalidCoroutineHandle을 반환한다.
 	if (!Function.valid())
 	{
 		HTR_LOG(Warning, "[Coroutine] Start: invalid function ({})", DebugName);
 		return InvalidCoroutineHandle;
 	}
 
-	// TODO(5단계): sol::thread 생성 -> thread state 위에서 sol::coroutine 생성 -> 엔트리를 PendingList에 추가
-	(void)Owner;
-	HTR_LOG(Warning, "[Coroutine] Start is not implemented yet ({})", DebugName);
+	// sol::thread 생성 -> thread state 위에서 sol::coroutine 생성 -> 엔트리를 PendingList에 추가
+	sol::state& Lua = FLuaManager::Get().GetState();
+
+	// 코루틴 전용 스택
+	sol::thread Thread = sol::thread::create(Lua.lua_state());
+	if (!Thread.valid())
+	{
+		HTR_LOG(Error, "[Coroutine] Start: failed to create thread ({})", DebugName);
+		return InvalidCoroutineHandle;
+	}
+
+	sol::coroutine Coroutine(Thread.thread_state(), Function);
+	if (!Coroutine.valid())
+	{
+		HTR_LOG(Error, "[Coroutine] Start: failed to create coroutine ({})", DebugName);
+		return InvalidCoroutineHandle;
+	}
+
+	FCoroutineEntry Entry;
+	Entry.Handle = NextHandle++;
+	Entry.Thread = std::move(Thread);
+	Entry.Coroutine = std::move(Coroutine);
+	Entry.Owner = Owner;
+	Entry.DebugName = DebugName;
+
+	// 새 엔트리는 항상 PendingList로 들어가고, 다음 Update부터 처리된다.
+	const FCoroutineHandle Handle = Entry.Handle;
+	PendingList.Add(std::move(Entry));
+
 	return InvalidCoroutineHandle;
 }
 
@@ -77,18 +106,23 @@ bool FCoroutineScheduler::Stop(FCoroutineHandle Handle)
 	return bFound;
 }
 
-int32 FCoroutineScheduler::StopAllForOwner(const ULuaScriptComponent* Owner)
+int32 FCoroutineScheduler::StopAllForOwner(const ULuaScriptComponent* Owner, FCoroutineHandle BeforeHandle)
 {
+	// Owner == nullptr이면 아무것도 하지 않는다
 	if (!Owner)
 	{
 		return 0;
 	}
 
 	int32 Count = 0;
-	auto MarkInList = [Owner, &Count](TArray<FCoroutineEntry>& List)
+	auto MarkInList = [Owner, BeforeHandle, &Count](TArray<FCoroutineEntry>& List)
 	{
 		for (FCoroutineEntry& Entry : List)
 		{
+			if (BeforeHandle != InvalidCoroutineHandle && Entry.Handle >= BeforeHandle)
+			{
+				continue;
+			}
 			if (Entry.Owner == Owner && !Entry.bFinished)
 			{
 				Entry.bFinished = true;
