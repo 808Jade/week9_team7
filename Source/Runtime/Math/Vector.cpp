@@ -353,3 +353,29 @@ bool FVector::Coincident(const FVector& Normal1, const FVector& Normal2, float P
 	const float NormalDot = Normal1 | Normal2;
 	return NormalDot >= ParallelCosineThreshold;
 }
+
+FVector FVector::Min(const FVector& V1, const FVector& V2)
+{
+	FVectorRegister RegV1 = VectorSIMD::Load(V1.V);
+	FVectorRegister RegV2 = VectorSIMD::Load(V2.V);
+
+	FVectorRegister MinV = VectorSIMD::Min(RegV1, RegV2);
+
+	FVector Result;
+	VectorSIMD::StoreFloat3(Result.V, MinV);
+
+	return Result;
+}
+
+FVector FVector::Max(const FVector& V1, const FVector& V2)
+{
+	FVectorRegister RegV1 = VectorSIMD::Load(V1.V);
+	FVectorRegister RegV2 = VectorSIMD::Load(V2.V);
+
+	FVectorRegister MaxV = VectorSIMD::Max(RegV1, RegV2);
+
+	FVector Result;
+	VectorSIMD::StoreFloat3(Result.V, MaxV);
+
+	return Result;
+}

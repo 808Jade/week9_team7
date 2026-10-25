@@ -8,7 +8,7 @@
 
 ADefaultPawn::ADefaultPawn()
 {
-	SetActorEnableCollision(false);
+	SetActorEnableCollision(true);
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	SetRootComponent(StaticMeshComponent);
@@ -28,11 +28,14 @@ void ADefaultPawn::BeginPlay()
 	for (AProjectileActor*& Projectile : Projectiles)
 		if (!Projectile) Projectile = PawnWorld->SpawnActor<AProjectileActor>();
 }
-
+ 
 void ADefaultPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
 {
-	if (GetRootComponent())
-		GetRootComponent()->SetRelativeLocation(GetActorLocation() + WorldDirection * (ScaleValue * MoveSpeed));
+	if(GetRootComponent())
+	{
+		const FVector Delta = WorldDirection * (ScaleValue * MoveSpeed);
+		GetRootComponent()->MoveComponent(Delta, GetActorRotation(), false);
+	}
 }
 
 void ADefaultPawn::AddControllerYawInput(float Value)

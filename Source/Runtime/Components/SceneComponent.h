@@ -5,6 +5,8 @@
 #include "Math/Box.h"
 #include "Collision/HitResult.h"
 
+#define SCENECOMPONENT_QUAT_TOLERANCE		(1.e-8f) 
+
 struct FCollisionShape;
 
 enum class EAttachmentRule
@@ -84,6 +86,7 @@ public:
 	void SetWorldTransform(const FMatrix& InWorldMatrix, bool bSweep);
 
 	virtual bool MoveComponent(const FVector& Delta, const FRotator& NewRotation, bool bSweep, FHitResult* Hit = nullptr);
+	virtual bool MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit = nullptr);
 	virtual float GetCollisionRadius() const;
 	virtual FCollisionShape GetCollisionShape(float Inflation = 0.0f) const;
 	void SetCollisionRadiusOverride(float Radius) { CollisionRadiusOverride = Radius; }

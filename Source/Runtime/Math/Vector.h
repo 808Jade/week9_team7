@@ -126,6 +126,9 @@ public:
 		Result[Axis] = 1.0f;
 		return Result;
 	}
+
+	static FVector Min(const FVector& V1, const FVector& V2);
+	static FVector Max(const FVector& V1, const FVector& V2);
 };
 
 /* Global Operator */

@@ -660,14 +660,92 @@ bool UWorld::SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, 
 
 bool UWorld::SweepSingle(FHitResult& OutHIt, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
 {
-	OutHIt = FHitResult(1.0f);
+	TArray<FHitResult> Hits;
+
+	if(SweepMulti(Hits, Start, End, Rot, CollisionShape, IgnoreActor))
+	{
+		OutHIt = Hits[0];
+		return true;
+	}
 
 	return false;
 }
 
-bool UWorld::SweepMulti(TArray<FHitResult>& OutHIt, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
+bool UWorld::SweepMulti(TArray<FHitResult>& OutHit, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor)
 {
-	return false;
+	const FVector Delta = End - Start;
+	const float DeltaSize = Delta.Size();
+
+	if(DeltaSize <= KINDA_SMALL_NUMBER)
+	{
+		return false;
+	}
+
+	OutHit.Empty();
+	Scene.UpdateAllTransforms();
+
+	const FVector Direction = Delta / DeltaSize;
+
+	FRay WorldRay{ .Origin = Start, .Direction = Direction };
+
+	const float BoundingRaidus = CollisionShape.GetExtent().Size();
+	const FVector BoxExtent(BoundingRaidus);
+	const FVector SwepAABBMin = FVector::Min(Start, End);
+	const FVector SwepAABBMax = FVector::Max(Start, End);
+	const FBox SweptAABB(SwepAABBMin - BoxExtent, SwepAABBMax + BoxExtent);
+	FTransform QueryTransform(Rot.ToFRotator(), Start);
+
+	TSet<UPrimitiveComponent*> VIsitedComponents;
+	Scene.BVH.Query(
+		[ &SweptAABB ](const FBox& NodeBounds) -> bool
+		{
+			return SweptAABB.Intersects(NodeBounds);
+		},
+		[ & ](FPrimitiveSceneProxy* Proxy)
+		{
+			UPrimitiveComponent* Component = Proxy ? Proxy->GetComponent() : nullptr;
+			if(!Component || VIsitedComponents.Contains(Component))
+			{
+				return;
+			}
+			VIsitedComponents.Add(Component);
+			if(!Component->IsShown(true) || !Component->GetOwner() ||
+				!Component->GetOwner()->GetActorEnableCollision() ||
+				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this)
+			{
+				return;
+			}
+
+			FCollisionShape ComponentShape = Component->GetCollisionShape();
+			FTransform ComponentTransform(Component->GetWorldLocation(), Component->GetWorldScale3D(), Component->GetWorldRotation());
+
+			FHitResult TempHit;
+			TempHit.Init(Start, End);
+			if(FCollisionDetector::Sweep(CollisionShape, QueryTransform, ComponentShape, ComponentTransform, Direction, DeltaSize, TempHit))
+			{
+				TempHit.HitComponent = Component;
+				TempHit.HitActor = Component->GetOwner();;
+				TempHit.bBlockingHit = true;
+				OutHit.Add(TempHit);
+			}
+		}
+	);
+
+	std::sort(OutHit.begin(), OutHit.end(),
+		[](const FHitResult& A, const FHitResult& B)
+		{
+			if(A.Time != B.Time)
+			{
+				return A.Time < B.Time;
+			}
+			else
+			{
+				return A.PenetrationDepth > B.PenetrationDepth;
+			}
+		}
+	);
+	
+	return OutHit.Num() > 0;
 }
 
 bool UWorld::LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,

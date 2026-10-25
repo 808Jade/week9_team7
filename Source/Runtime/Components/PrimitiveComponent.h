@@ -23,8 +23,9 @@ enum class EPrimitiveType
 	ParticleQuad
 };
 
-DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/)
-DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/)
+DECLARE_DELEGATE(FComponentHitSignature /*OnComponentHit*/, UPrimitiveComponent* /*HitComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, FVector /*NormalImpulse*/, const FHitResult& /*SweepResult*/);
+DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/);
+DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/);
 
 class UPrimitiveComponent :public USceneComponent
 {
@@ -76,6 +77,7 @@ public:
 	virtual void OnTransformDirty() override;
 
 	virtual bool MoveComponent(const FVector& Delta, const FRotator& NewRotation, bool bSweep, FHitResult* Hit = nullptr) override;
+	virtual bool MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit = nullptr) override;
 
 	virtual void PostEditChangeProperty(const FProperty& Property) override;
 
@@ -107,6 +109,7 @@ public:
 	
 	const TArray<UPrimitiveComponent*>& GetOverlappingComponents() const;
 
+	FComponentHitSignature OnComponentHit;
 	FComponentBeginOverlapSignature OnComponentBeginOverlap;
 	FComponentEndOverlapSignature OnComponentEndOverlap;
 

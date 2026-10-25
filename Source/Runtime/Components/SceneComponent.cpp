@@ -305,13 +305,18 @@ bool USceneComponent::MoveComponent(const FVector& Delta, const FRotator& NewRot
 		if (UWorld* World = Owner->GetWorld())
 		{
 			Result.Init(Start, Destination);
-			bBlocked = World->SweepSingle(FRay(Start, Delta.Normalized()), Delta.Size(), GetCollisionRadius(), Result, Owner);
+			bBlocked = World->SweepSingle(Result, Start, Destination, NewRotation.Quaternion(), GetCollisionShape(), Owner);
 			if (bBlocked)
 				Destination = Start + Delta * Result.Time + Result.ImpactNormal * 0.001f;
 		}
 	}
 	SetWorldLocationAndRotation(Destination, NewRotation, false);
 	return !bBlocked;
+}
+
+bool USceneComponent::MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit)
+{
+	return false;
 }
 
 float USceneComponent::GetCollisionRadius() const
@@ -325,7 +330,8 @@ float USceneComponent::GetCollisionRadius() const
 
 FCollisionShape USceneComponent::GetCollisionShape(float Inflation) const
 {
-	return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent());
+	//return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent());
+	return FCollisionShape::MakeSphere(GetCollisionRadius());
 }
 
 void USceneComponent::MarkTransformDirty()

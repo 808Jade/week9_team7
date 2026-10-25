@@ -7,6 +7,7 @@
 class FSphere;
 class FBox;
 class FCapsule;
+struct FHitResult;
 
 class FCollisionDetector
 {
@@ -23,4 +24,9 @@ public:
 
 	static FContactPoint CapsuleCapsuleContactPoint(const FCapsule& Capsule1, const FTransform& Capsule1Transform, const FCapsule& Capsule2, const FTransform& Capsule2Transform, const float CullDistance = 0.0f);
 	static FContactPoint CapsuleBoxContactPoint(const FCapsule& Capsule, const FTransform& CapsuleTranform, const FBox& Box, const FTransform& BoxTransform, const float CullDistance = 0.0f);
+
+	static bool Sweep(const FCollisionShape& Shape1, const FTransform& Shape1Transform, const FCollisionShape& Shape2, const FTransform& Shape2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+
+	static bool SphereSphereSweep(const FSphere& Sphere1, const FTransform& Sphere1Transform, const FSphere& Sphere2, const FTransform& Sphere2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+	static bool SphereBoxSweep(const FSphere& Sphere, const FTransform& SphereTransform, const FBox& Box, const FTransform& BoxTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 };
