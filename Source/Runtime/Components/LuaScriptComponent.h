@@ -3,6 +3,7 @@
 #include "Scripting/ScriptWatcher.h"
 #include <sol/sol.hpp>
 #include <filesystem>
+#include <memory>
 
 class ULuaScriptComponent : public UActorComponent
 {
@@ -15,8 +16,7 @@ public:
 	ULuaScriptComponent();
 	virtual ~ULuaScriptComponent() override;
 
-	// 스크립트 파일을 새 environment에서 실행한다.
-	// 실패하면 기존 environment(이전 버전 스크립트)를 그대로 유지한다.
+	// 스크립트 파일을 새 environment에서 실행한다. 실패하면 기존 environment(이전 버전 스크립트)를 그대로 유지한다.
 	bool LoadScript(const std::filesystem::path& InScriptPath);
 
 	virtual void BeginPlay() override;
@@ -34,56 +34,67 @@ public:
 	void SetScriptPath(const FString& InPath);
 	bool HasScriptPath() const { return !ScriptPath.empty(); }
 
+	// env 교체와 로드 상태 변경은 LoadScript만 한다. 외부에는 읽기만 연다
 	sol::environment& GetScriptEnv() { return ScriptEnv; }
-	void SetScriptEnv(const sol::environment& InScriptEnv) { ScriptEnv = InScriptEnv; }
-	std::filesystem::file_time_type GetLastWriteTime() const { return LastWriteTime; }
-	void SetLastWriteTime(const std::filesystem::file_time_type& InLastWriteTime) { LastWriteTime = InLastWriteTime; }
 	bool IsLoaded() const { return bIsLoaded; }
-	void SetLoaded(bool bInIsLoaded) { bIsLoaded = bInIsLoaded; }
 
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 
-	// ==== HotReload ====
-	// [계약] 성공/실패를 반환한다. 실패하면 기존 스크립트 상태를 그대로 유지한다.
-	// [계약] 처음 로드와 재로드 모두 LoadScript를 거친다.
+	// 성공/실패를 반환한다. 실패하면 기존 스크립트 상태를 그대로 유지한다.
 	bool ReloadScript();
 	bool IsWatchingScript() const { return ScriptWatchHandle.IsValid(); }
-	// ==== HotReload ====
 
 protected:
 	virtual void OnUnregister() override;
 
 private:
-	// ==== HotReload ====
-	// 등록: BeginPlay (PIE에서만 호출됨)
-	// 해제: OnUnregister (Destroy / DestroyComponent / PIE 종료 시 모두 거침) + 소멸자(안전망)
 	void StartWatchingScript();
 	void StopWatchingScript();
 	void OnScriptFileChanged(const std::filesystem::path& InChangedPath);
 
+	// 로그용 스크립트 파일 이름 
+	FString GetScriptFileName() const;
+
+	// 코루틴 로그용 이름
+	FString GetCoroutineDebugName() const;
+
+	// env에 StartCoroutine / StopAllCoroutines 주입
+	void InjectCoroutineAPI(sol::environment& Env);
+
 	FDelegateHandle ScriptWatchHandle;
-	// ==== HotReload ====
+
+	// 마지막 LoadScript 실패 사유. Lua 에러면 "경로:줄번호: 메시지" 형태 그대로 담긴다
+	FString LastLoadError;
 
 	template<typename... Args>
-	void CallLuaFunction(const char* FunctionName, Args&&... InArgs)
+	bool CallLuaFunction(const char* FunctionName, Args&&... InArgs)
 	{
-		if (!bIsLoaded) return;
+		if (!bIsLoaded) return false;
 
 		sol::protected_function Function = ScriptEnv[FunctionName];
-		if (!Function.valid()) return;
+		if (!Function.valid()) return true;
 
 		auto Result = Function(std::forward<Args>(InArgs)...);
 		if (!Result.valid())
 		{
 			sol::error Error = Result;
 			HTR_LOG(Error, "[LuaScriptComponent] Error occurred while calling {}: {}", FunctionName, Error.what());
+			return false;
 		}
+		return true;
 	}
+
+	void CallLuaBeginPlay();
 
 	FString ScriptPath = "";
 
 	sol::environment ScriptEnv;
-	std::filesystem::file_time_type LastWriteTime;
 	bool bIsLoaded = false;
+
+	// Lua BeginPlay가 에러 없이 끝났는지.
+	bool bLuaBegunPlay = false;
+
+	// 주입된 Lua 함수가 죽은 this를 쓰지 않게 하는 생존 토큰.
+	std::shared_ptr<bool> CoroutineAliveToken;
 };

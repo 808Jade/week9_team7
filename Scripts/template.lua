@@ -1,3 +1,6 @@
+-- Coroutine: StartCoroutine(fn) / StopCoroutine(handle) / StopAllCoroutines() 
+--		      wait(sec) / wait_frames(n) / wait_until(fn)
+
 function BeginPlay()
 print("[BeginPlay] " .. obj.UUID)
 obj:PrintLocation()
@@ -18,4 +21,8 @@ obj.Location = obj.Location + obj.Velocity * dt
 end
 
 function OnHit(OtherActor)
+end
+
+-- Hot Reload
+function OnHotReload()
 end

@@ -18,6 +18,8 @@
 #include "Core/Stats/LightweightStats.h"
 #include "Core/Async/TaskPool.h"
 #include "Scripting/ScriptWatcher.h"
+#include "Scripting/CoroutineScheduler.h"
+#include "Lua/LuaManager.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -174,6 +176,10 @@ void FEngineLoop::Exit()
 	{
 		GEngine->PreExit();
 	}
+
+	// PIE 정리 후, 로그 Sink(OutputLogPanel)가 삭제되기 전에 Lua를 정리한다
+	FCoroutineScheduler::Get().Clear();
+	FLuaManager::Get().Shutdown();
 
 	// UAssetManager도 UObject이므로 일괄 삭제 전에 종료한다.
 	UAssetManager::Shutdown();
