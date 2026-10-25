@@ -29,5 +29,5 @@ private:
     UProjectileMovementComponent* ProjectileMovementComponent = nullptr;
     bool bInFlight = false;
     float RemainingLife = 0.0f;
-    float LifeTime = 5.0f;
+    float LifeTime = 100.0f;
 };

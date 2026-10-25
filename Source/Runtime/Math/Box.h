@@ -59,7 +59,7 @@ struct FBox
 		const FVector MaxDists = X - Max;
 		const FVector MinDists = Min - X;
 		
-		if(X <= MaxDists && X >= MinDists)
+		if(X <= Max && X >= Min)
 		{
 			float MaxValue = -FLT_MAX;
 			int MaxAxis = 0;

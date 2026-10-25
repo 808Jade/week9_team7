@@ -67,7 +67,7 @@ bool UMovementComponent::MoveUpdatedComponent(const FVector& Delta, const FRotat
 {
 	if (UpdatedComponent)
 	{
-		return UpdatedComponent->MoveComponent(Delta, NewRotation, bSweep, Hit);		
+		return UpdatedComponent->MoveComponent(Delta, NewRotation.Quaternion(), bSweep, Hit);
 	}
 
 	return false;

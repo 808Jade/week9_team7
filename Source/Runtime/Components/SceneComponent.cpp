@@ -254,7 +254,7 @@ void USceneComponent::SetWorldLocation(FVector NewLocation, bool bSweep)
 	{		
 		NewRelLocation = GetAttachParent()->GetWorldMatrix().Inverse().TransformPosition(NewRelLocation);
 	}
-
+	
 	SetRelativeLocation(NewRelLocation);
 }
 
@@ -316,7 +316,14 @@ bool USceneComponent::MoveComponent(const FVector& Delta, const FRotator& NewRot
 
 bool USceneComponent::MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit)
 {
-	return false;
+	if(OutHit)
+	{
+		*OutHit = FHitResult(1.0f);
+	}
+
+	SetWorldLocationAndRotation(GetWorldLocation() + Delta, NewRotation.ToFRotator(), false);
+
+	return true;
 }
 
 float USceneComponent::GetCollisionRadius() const
@@ -330,8 +337,14 @@ float USceneComponent::GetCollisionRadius() const
 
 FCollisionShape USceneComponent::GetCollisionShape(float Inflation) const
 {
-	//return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent());
-	return FCollisionShape::MakeSphere(GetCollisionRadius());
+	if(CollisionRadiusOverride >= 0.0f)
+	{
+		return FCollisionShape::MakeSphere(CollisionRadiusOverride);
+	}
+	else
+	{
+		return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent() * GetWorldScale3D().GetAbs());
+	}	
 }
 
 void USceneComponent::MarkTransformDirty()

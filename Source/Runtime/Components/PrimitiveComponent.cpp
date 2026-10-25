@@ -142,7 +142,7 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 		{
 			MyWorld->SweepMulti(Hits, TraceStart, TraceEnd, InitialRotationQuat, GetCollisionShape(), Actor);
 
-			float BlockingHitNormalDotDelta = FLT_MAX;
+			float BlockingHitNormalDotDelta = 0.0f;
 			for(const FHitResult& TestHit : Hits)
 			{
 				if(TestHit.HitComponent == this)
@@ -160,7 +160,7 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 						BlockingHitNormalDotDelta = NormalDotDelta;
 					}
 				}
-				else
+				else if(!bFilledHitResult)
 				{
 					BlockingHit = TestHit;
 					bFilledHitResult = true;
@@ -177,9 +177,13 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 			{
 				NewLocation = TraceStart + (Delta * BlockingHit.Time) + BlockingHit.ImpactNormal * KINDA_SMALL_NUMBER; // 부동소수점 계산 오류 방지 
 			}
-
-			SetWorldLocationAndRotation(NewLocation, NewRotation.ToFRotator(), false);
 		}
+		else
+		{
+			NewLocation = TraceEnd;
+		}
+
+		SetWorldLocationAndRotation(NewLocation, NewRotation.ToFRotator(), false);
 	}
 
 	UpdateOverlaps();
@@ -339,8 +343,8 @@ bool UPrimitiveComponent::UpdateOverlaps()
 
 	// Overlapupdate for children
 	TArray<USceneComponent*> AttachedChildren;
-	AttachChildren.Append(GetAttachChildren());
-	for(USceneComponent* const ChildComp : AttachChildren)
+	AttachedChildren.Append(GetAttachChildren());
+	for(USceneComponent* const ChildComp : AttachedChildren)
 	{
 		if(ChildComp == nullptr)
 		{
