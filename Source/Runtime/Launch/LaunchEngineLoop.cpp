@@ -177,6 +177,10 @@ void FEngineLoop::Exit()
 		GEngine->PreExit();
 	}
 
+	// PIE 정리 후, 로그 Sink(OutputLogPanel)가 삭제되기 전에 Lua를 정리한다
+	FCoroutineScheduler::Get().Clear();
+	FLuaManager::Get().Shutdown();
+
 	// UAssetManager도 UObject이므로 일괄 삭제 전에 종료한다.
 	UAssetManager::Shutdown();
 	FRenderResourceManager::Shutdown();
@@ -184,10 +188,6 @@ void FEngineLoop::Exit()
 	DestroyAllObjectsExceptEngine();
 	delete GEngine;
 	GEngine = nullptr;
-
-	// 코루틴 참조는 Lua state가 살아 있을 때 해제해야 한다
-	FCoroutineScheduler::Get().Clear();
-	FLuaManager::Get().Shutdown();
 
 	DepthBuffer.reset();
 	Swapchain.reset();

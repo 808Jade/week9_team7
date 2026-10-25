@@ -78,19 +78,12 @@ public:
 	void Update(float DeltaTime);
 
 	// 핸들 하나 정지.
-	// 무효 핸들이나 이미 끝난 핸들이 와도 안전하다.
-	// Update 순회 중이면 표시만 하고, 실제 제거는 순회가 끝난 뒤에 한다.
-	// 반환값: 정지 표시된 코루틴이 있었으면 true
 	bool Stop(FCoroutineHandle Handle);
 
 	// Owner가 시작한 코루틴 전부 정지
-	// 반환값: 정지 표시된 코루틴 개수
-	// BeforeHandle이 유효하면 그보다 작은 핸들만 정지한다 (Hot Reload 시 옛 코루틴만 정리)
 	int32 StopAllForOwner(const ULuaScriptComponent* Owner, FCoroutineHandle BeforeHandle = InvalidCoroutineHandle);
 
 	// 전부 즉시 비운다. PIE 종료 / 엔진 종료 때만 사용.
-	// 반드시 FLuaManager::Shutdown()보다 먼저 불러야 한다
-	//        (Lua state가 사라진 뒤 sol::thread / sol::coroutine 소멸자가 돌면 크래시)
 	void Clear();
 
 	// 디버그용: 실행 중(+대기 중) 코루틴 개수. 끝남 표시된 것은 제외
@@ -120,7 +113,6 @@ private:
 	// 지금 돌고 있는 코루틴
 	TArray<FCoroutineEntry> ActiveList;
 	// Update 도중(또는 프레임 사이)에 새로 시작된 코루틴. 다음 Update 시작 시 ActiveList로 합친다
-	// -> 순회 중인 ActiveList에 push하면 재할당으로 참조/반복자가 깨지기 때문
 	TArray<FCoroutineEntry> PendingList;
 
 	// 다음에 발급할 핸들 (0은 무효이므로 1부터)
