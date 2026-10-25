@@ -3,6 +3,17 @@
 #include "Bindings/LuaBindings.h"
 #include "Core/EngineLog.h"
 
+FLuaManager* FLuaManager::ActiveManager = nullptr;
+
+FLuaManager::~FLuaManager()
+{
+	if (ActiveManager == this)
+	{
+		ActiveManager = nullptr;
+	}
+	Shutdown();
+}
+
 bool FLuaManager::Init()
 {
 	if (bInitialized) return true;
@@ -36,9 +47,17 @@ bool FLuaManager::Init()
 void FLuaManager::Shutdown()
 {
 	if (!bInitialized) return;
-	// 루아 VM 종료
+
+	// 1. 활성 타이머 정리 (Lua 콜백이 등록된 타이머 해제)
+	LuaBindings::ClearTimers();
+
+	// 2. 가비지 컬렉션 수행
 	Lua.collect_garbage();
+
+	// 3. Lua VM 상태 초기화
+	Lua = sol::state();
 	bInitialized = false;
+	ActiveWorld = nullptr;
 	HTR_LOG(Info, "[LuaManager] Shutdown completed.");
 }
 
@@ -61,4 +80,5 @@ void FLuaManager::BindEngine()
 	LuaBindings::BindComponent(Lua);
 	LuaBindings::BindInput(Lua);
 	LuaBindings::BindTime(Lua);
+	LuaBindings::BindCoroutine(Lua);
 }

@@ -24,9 +24,7 @@ FString FLuaScriptUtils::MakeScriptPath(AActor* InActor)
 		return {};
 	}
 
-	// CurrentScenePath는 ANSI 문자열이다.
-	// fs::path은 Windows에서 ANSI로 해석하므로
-	// 씬 경로만큼은 그대로 path에 넣는 것이 맞다.
+	// CurrentScenePath는 ANSI 문자열이다. 
 	const FString ScenePathAnsi = FEditorFileUtils::GetCurrentScenePath();
 	if (ScenePathAnsi.empty())
 	{
@@ -50,7 +48,6 @@ FString FLuaScriptUtils::MakeScriptPath(AActor* InActor)
 }
 
 // 템플릿 복사 + 컴포넌트 등록
-// 원칙: 실패할 수 있는 파일 작업을 먼저 끝내고, 액터(컴포넌트) 수정은 마지막에 한다.
 bool FLuaScriptUtils::GenerateScript(AActor* InActor)
 {
 	if (!InActor)
@@ -70,7 +67,6 @@ bool FLuaScriptUtils::GenerateScript(AActor* InActor)
 	ULuaScriptComponent* Comp = GetScriptComponent(InActor);
 
 	// ---------- 1. 경로 결정 (액터는 아직 건드리지 않는다) ----------
-	// 이미 등록된 경로가 있으면 그것이 기준. 없을 때만 액터 이름으로 새로 만든다.
 	const bool bHasStoredPath = Comp && Comp->HasScriptPath();
 	const FString ScriptPath = bHasStoredPath ? Comp->GetScriptPath() : MakeScriptPath(InActor);
 	if (ScriptPath.empty())

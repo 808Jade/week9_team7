@@ -1,6 +1,7 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Actor.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "Engine/Level.h"
 #include "Components/SceneComponent.h"
 #include "Components/ParticleSubUVComponent.h"
@@ -394,4 +395,9 @@ bool AActor::TryGetActorBounds(FBox& OutBounds) const
 	}
 
 	return bHasBounds;
+}
+
+UGameInstance* AActor::GetGameInstance() const
+{
+	return World ? World->GetGameInstance() : nullptr;
 }

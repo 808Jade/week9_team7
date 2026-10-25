@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "UObject/Object.h"
 #include "UObject/Class.h"
@@ -23,6 +23,7 @@ class ULevel;
 class UBillboardComponent;
 class APawn;
 class APlayerController;
+class UGameInstance;
 
 struct FViewContext;
 
@@ -88,6 +89,10 @@ public:
 	bool IsPaused() const { return bIsPaused; }
 	void SetPaused(bool bPaused) { bIsPaused = bPaused; }
 
+	// GameInstance
+	UGameInstance* GetGameInstance() const;
+	void SetGameInstance(UGameInstance* InGameInstance) { OwningGameInstance = InGameInstance; }
+
 	FScene& GetScene() { return Scene; }
 	FTickTaskManager& GetTickTaskManager() { return TickTaskManager; }
 
@@ -134,6 +139,8 @@ private:
 	APlayerController* PlayerController = nullptr;
 	bool bIsPaused = false;
 	bool bBegunPlay = false;
+
+	UGameInstance* OwningGameInstance = nullptr;
 
 	FPathTracker PathTracker;
 

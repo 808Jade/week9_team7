@@ -14,6 +14,12 @@ bool FEditorFileUtils::NewScene(UWorld* World)
 
 	World->ClearWorld();
 
+	if (World->GetMainCamera())
+	{
+		World->GetMainCamera()->RegisterAllComponents();
+		World->GetMainCamera()->RegisterAllActorTickFunctions(true);
+	}
+
 	// 라인 트래커도 삭제
 	World->GetPathTracker().ClearPath();
 
