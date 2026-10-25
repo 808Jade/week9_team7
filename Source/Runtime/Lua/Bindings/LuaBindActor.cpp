@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "GameFramework/Actor.h"
@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraActor.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "Engine/Level.h"
 #include "Core/EngineLog.h"
 #include "Lua/LuaManager.h"
@@ -148,10 +149,14 @@ namespace LuaBindings
 		};
 
 		// Usertype 등록 (인덱스 등록 방식으로 확장성 확보)
+		sol::usertype<UGameInstance> GameInstanceType = Lua.new_usertype<UGameInstance>("GameInstance");
+		GameInstanceType["GetWorld"] = &UGameInstance::GetWorld;
+
 		sol::usertype<AActor> ActorType = Lua.new_usertype<AActor>("Actor");
 
 		ActorType["UUID"] = sol::property(&AActor::GetUUID);
 		ActorType["GetName"] = &AActor::GetName;
+		ActorType["GetGameInstance"] = &AActor::GetGameInstance;
 
 		// 액터 위치
 		ActorType["GetLocation"] = GetLoc;

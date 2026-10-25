@@ -37,4 +37,6 @@ private:
 
 	const FString FolderIconPath = "Assets/Icons/Folder.png";
 	const FString FileIconPath = "Assets/Icons/File.png";
+	const FString ScriptIconPath = "Assets/Icons/LuaScript.png";
+	const FString SceneIconPath = "Assets/Icons/World.png";
 };

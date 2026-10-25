@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Editor/ContentDrawer/ContentDrawerPanel.h"
 #include "Asset/AssetManager.h"
 #include "Text/Font.h"
@@ -156,9 +156,18 @@ void FContentDrawerPanel::OnRender()
 				UTexture2D* TextureAsset = nullptr;
 				UFont* FontAsset = nullptr;
 
+				auto GetIconTexture = [](const FString& IconPath) -> UTexture2D*
+				{
+					if (UTexture2D* Tex = UAssetManager::GetAssetByPath<UTexture2D>(IconPath))
+					{
+						return Tex;
+					}
+					return UAssetManager::Get().LoadTexture(IconPath, false);
+				};
+
 				if (bIsDirectory)
 				{
-					Thumbnail = UAssetManager::GetAssetByPath<UTexture2D>(FolderIconPath);
+					Thumbnail = GetIconTexture(FolderIconPath);
 				}
 				else
 				{
@@ -176,8 +185,30 @@ void FContentDrawerPanel::OnRender()
 
 					if (Thumbnail == nullptr)
 					{
-						Thumbnail = UAssetManager::GetAssetByPath<UTexture2D>(FileIconPath);
+						if (ExtString == ".lua")
+						{
+							Thumbnail = GetIconTexture(ScriptIconPath);
+						}
+						else if (ExtString == ".scene")
+						{
+							Thumbnail = GetIconTexture(SceneIconPath);
+						}
+
+						if (Thumbnail == nullptr)
+						{
+							Thumbnail = GetIconTexture(FileIconPath);
+						}
 					}
+				}
+
+				const float columnWidth = ImGui::GetContentRegionAvail().x;
+				const float buttonFramePadding = 4.0f;
+				const float buttonTotalWidth = thumbnailSize + buttonFramePadding * 2.0f;
+				const float buttonOffsetX = (columnWidth > buttonTotalWidth) ? (columnWidth - buttonTotalWidth) * 0.5f : 0.0f;
+
+				if (buttonOffsetX > 0.0f)
+				{
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + buttonOffsetX);
 				}
 
 				const bool bIsSelected = (SelectedEntryPath == Path);
@@ -187,10 +218,16 @@ void FContentDrawerPanel::OnRender()
 					ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.35f, 0.65f, 1.0f, 1.0f));
 				}
 
-				if (Thumbnail)
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(buttonFramePadding, buttonFramePadding));
+				if (Thumbnail && Thumbnail->GetResource() && Thumbnail->GetResource()->GetSRV())
 				{
 					ImGui::ImageButton(PathString.c_str(), (ImTextureID)Thumbnail->GetResource()->GetSRV(), { thumbnailSize, thumbnailSize });
 				}
+				else
+				{
+					ImGui::Button(FilenameString.c_str(), { thumbnailSize, thumbnailSize });
+				}
+				ImGui::PopStyleVar();
 
 				if (bIsSelected)
 				{
@@ -273,7 +310,14 @@ void FContentDrawerPanel::OnRender()
 				// 파일 이름 표시 또는 인라인 이름 변경 입력창
 				if (bIsRenaming && Path == RenamingPath)
 				{
-					ImGui::PushItemWidth(thumbnailSize + padding);
+					const float inputWidth = (std::min)(columnWidth, thumbnailSize + padding);
+					const float inputOffsetX = (columnWidth > inputWidth) ? (columnWidth - inputWidth) * 0.5f : 0.0f;
+					if (inputOffsetX > 0.0f)
+					{
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + inputOffsetX);
+					}
+
+					ImGui::PushItemWidth(inputWidth);
 					if (bFocusRenameInput)
 					{
 						ImGui::SetKeyboardFocusHere();
@@ -291,7 +335,22 @@ void FContentDrawerPanel::OnRender()
 				}
 				else
 				{
-					ImGui::TextWrapped("%s", FilenameString.c_str());
+					const ImVec2 textSize = ImGui::CalcTextSize(FilenameString.c_str());
+					if (textSize.x <= columnWidth)
+					{
+						const float textOffsetX = (columnWidth - textSize.x) * 0.5f;
+						if (textOffsetX > 0.0f)
+						{
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffsetX);
+						}
+						ImGui::TextUnformatted(FilenameString.c_str());
+					}
+					else
+					{
+						ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + columnWidth);
+						ImGui::TextWrapped("%s", FilenameString.c_str());
+						ImGui::PopTextWrapPos();
+					}
 				}
 
 				ImGui::PopID();

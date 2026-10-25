@@ -1,6 +1,8 @@
 ﻿#include "EnginePCH.h"
 #include "World.h"
 #include "Level.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 
 #include "Core/EngineStatics.h"
 #include "GameFramework/Actor/StaticMeshActor.h"
@@ -54,7 +56,20 @@ DECLARE_CYCLE_STAT("Gather - Submit", STAT_GatherSubmit);
 
 UWorld::~UWorld()
 {
+	OwningGameInstance = nullptr;
+}
 
+UGameInstance* UWorld::GetGameInstance() const
+{
+	if (OwningGameInstance) return OwningGameInstance;
+	if (GEngine)
+	{
+		if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(this))
+		{
+			return Context->OwningGameInstance;
+		}
+	}
+	return nullptr;
 }
 
 bool UWorld::Init()
@@ -125,7 +140,14 @@ void UWorld::Tick(float DeltaTime)
 	// 에디터 월드가 아니면 액터 틱을 돌린다
 	if (WorldType != EWorldType::Editor)
 	{
-		FLuaManager::Get().SetActiveWorld(this);
+		if (OwningGameInstance && OwningGameInstance->GetLuaManager())
+		{
+			OwningGameInstance->GetLuaManager()->SetActiveWorld(this);
+		}
+		else
+		{
+			FLuaManager::Get().SetActiveWorld(this);
+		}
 		LuaBindings::TickTimers(DeltaTime);
 
 		while (!BeginPlayList.IsEmpty())
@@ -170,6 +192,13 @@ void UWorld::Tick(float DeltaTime)
 void UWorld::ClearWorld()
 {
 	EndPlay();
+
+	if (MainCamera)
+	{
+		MainCamera->UnregisterAllComponents();
+		MainCamera->RegisterAllActorTickFunctions(false);
+	}
+
 	// BeginPlay 대기 중인 Actor 제거
 	while (!BeginPlayList.IsEmpty())
 	{
