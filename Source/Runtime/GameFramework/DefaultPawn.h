@@ -34,7 +34,7 @@ private:
 	UCameraComponent* CameraComponent = nullptr;
 	UStaticMeshComponent* StaticMeshComponent = nullptr;
 	float MoveSpeed = 20.0f;
-	bool bUseStaticMeshProjectiles = false;
+	bool bUseStaticMeshProjectiles = true;
 	UStaticMesh* ProjectileMesh = nullptr;
 	std::array<AProjectileActor*, ProjectilePoolSize> Projectiles{};
 	int32 NextProjectileIndex = 0;

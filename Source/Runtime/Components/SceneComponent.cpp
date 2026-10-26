@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 
+#include "Collision/CollisionShape.h"
+
 namespace
 {
 	void UpdateChildVisibility(USceneComponent* Root, bool bPropagate, bool bVisible, bool bHidden)
@@ -252,7 +254,7 @@ void USceneComponent::SetWorldLocation(FVector NewLocation, bool bSweep)
 	{		
 		NewRelLocation = GetAttachParent()->GetWorldMatrix().Inverse().TransformPosition(NewRelLocation);
 	}
-
+	
 	SetRelativeLocation(NewRelLocation);
 }
 
@@ -303,13 +305,25 @@ bool USceneComponent::MoveComponent(const FVector& Delta, const FRotator& NewRot
 		if (UWorld* World = Owner->GetWorld())
 		{
 			Result.Init(Start, Destination);
-			bBlocked = World->SweepSingle(FRay(Start, Delta.Normalized()), Delta.Size(), GetCollisionRadius(), Result, Owner);
+			bBlocked = World->SweepSingle(Result, Start, Destination, NewRotation.Quaternion(), GetCollisionShape(), Owner);
 			if (bBlocked)
 				Destination = Start + Delta * Result.Time + Result.ImpactNormal * 0.001f;
 		}
 	}
 	SetWorldLocationAndRotation(Destination, NewRotation, false);
 	return !bBlocked;
+}
+
+bool USceneComponent::MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit)
+{
+	if(OutHit)
+	{
+		*OutHit = FHitResult(1.0f);
+	}
+
+	SetWorldLocationAndRotation(GetWorldLocation() + Delta, NewRotation.ToFRotator(), false);
+
+	return true;
 }
 
 float USceneComponent::GetCollisionRadius() const
@@ -319,6 +333,18 @@ float USceneComponent::GetCollisionRadius() const
 	const FVector Extent = (Bounds.Max - Bounds.Min) * 0.5f;
 	if (Extent.SizeSquared() <= SMALL_NUMBER) return 10.0f;
 	return std::min({ Extent.X, Extent.Y, Extent.Z });
+}
+
+FCollisionShape USceneComponent::GetCollisionShape(float Inflation) const
+{
+	if(CollisionRadiusOverride >= 0.0f)
+	{
+		return FCollisionShape::MakeSphere(CollisionRadiusOverride);
+	}
+	else
+	{
+		return FCollisionShape::MakeBox(CalcLocalBounds().GetExtent() * GetWorldScale3D().GetAbs());
+	}	
 }
 
 void USceneComponent::MarkTransformDirty()

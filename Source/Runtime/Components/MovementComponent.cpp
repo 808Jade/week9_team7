@@ -67,7 +67,7 @@ bool UMovementComponent::MoveUpdatedComponent(const FVector& Delta, const FRotat
 {
 	if (UpdatedComponent)
 	{
-		return UpdatedComponent->MoveComponent(Delta, NewRotation, bSweep, Hit);		
+		return UpdatedComponent->MoveComponent(Delta, NewRotation.Quaternion(), bSweep, Hit);
 	}
 
 	return false;
@@ -79,6 +79,41 @@ void UMovementComponent::StopMovementImmediately()
 	UpdateComponentVelocity();
 }
 
+bool UMovementComponent::SafeMoveUpdatedComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult& OutHit)
+{
+	return false;
+}
+
+void UMovementComponent::SetPlaneConstraintNormal(FVector PlaneNormal)
+{
+	PlaneConstraintNormal = PlaneNormal.GetSafeNormal();
+}
+
+void UMovementComponent::SetPlaneConstraintFromVectors(FVector Forward, FVector Up)
+{
+	PlaneConstraintNormal = (Up ^ Forward).GetSafeNormal();
+}
+
+void UMovementComponent::SetPlaneConstraintOrigin(FVector PlaneOrigin)
+{
+	PlaneConstraintOrigin = PlaneOrigin;
+}
+
+void UMovementComponent::SetPlaneConstraintEnabled(bool bEnabled)
+{
+	bConstrainToPlane = bEnabled;
+}
+
+const FVector& UMovementComponent::GetPlaneConstraintNormal() const
+{
+	return PlaneConstraintNormal;
+}
+
+const FVector& UMovementComponent::GetPlaneConstraintOrigin() const
+{
+	return PlaneConstraintOrigin;
+}
+
 FVector UMovementComponent::ConstrainDirectionToPlane(FVector Direction) const
 {
 	if (bConstrainToPlane)
@@ -87,4 +122,24 @@ FVector UMovementComponent::ConstrainDirectionToPlane(FVector Direction) const
 	}
 
 	return Direction;
+}
+
+FVector UMovementComponent::ConstrainLocationToPlane(FVector Location) const
+{
+	if(bConstrainToPlane)
+	{
+		Location = FVector::PointPlaneProject(Location, PlaneConstraintOrigin, PlaneConstraintNormal);
+	}
+
+	return Location;
+}
+
+FVector UMovementComponent::ConstrainNormalToPlane(FVector Normal) const
+{
+	if(bConstrainToPlane)
+	{
+		Normal = FVector::VectorPlaneProject(Normal, PlaneConstraintNormal).GetSafeNormal();
+	}
+
+	return Normal;
 }

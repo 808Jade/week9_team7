@@ -193,6 +193,14 @@ FVector FQuat::GetUpVector() const
 	);
 }
 
+bool FQuat::Equals(const FQuat& Q, float Tolerance) const
+{
+	FQuatRegister A = VectorSIMD::Load(this->V);
+	FQuatRegister B = VectorSIMD::Load(Q.V);
+
+	return VectorSIMD::IsNearlyEqual(A, B, Tolerance);
+}
+
 /* Statics */
 
 FQuat FQuat::Identity()

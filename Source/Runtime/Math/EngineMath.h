@@ -45,13 +45,19 @@ namespace FMath
 	template <typename T>
 	static inline T Clamp(T InValue, T InMin, T InMax)
 	{
-		return Max(InMin, Min(InValue, InMax));
+		return Max(InMin, Min(InValue, InMax));	
 	}
 
 	template <typename T>
 	static inline T Log2(T InValue)
 	{
 		return static_cast<T>(std::log2(InValue));
+	}
+
+	template <typename T>
+	static inline T Square(const T A)
+	{
+		return A * A;
 	}
 
 	static inline bool IsNearlyZero(float Value, float ErrorTolerance = 1e-20f)
