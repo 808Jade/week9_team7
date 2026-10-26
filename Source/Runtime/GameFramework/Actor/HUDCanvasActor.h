@@ -44,6 +44,12 @@ public:
 	void ShowSubtitle(const FString& InText, float Duration = 3.0f);
 	void HideSubtitle();
 
+	// 설정창 (ImGui) 제어
+	void SetSettingsWindowVisible(bool bVisible);
+	bool IsSettingsWindowVisible() const { return bShowSettingsWindow; }
+	void DrawSettingsWindow();
+	void ApplyMouseSensitivity();
+
 	// 화면 페이드 연출
 	void StartFade(float TargetOpacity, float Duration);
 
@@ -100,4 +106,8 @@ private:
 
 	// 상호작용 표시 상태
 	bool bShowInteractPrompt = false;
+
+	// ImGui 인게임 설정창 상태
+	bool bShowSettingsWindow = false;
+	float MouseSensitivity = 0.1f;
 };

@@ -1,7 +1,8 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "GameFramework/PortalPlayerController.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/UIManagerActor.h"
+#include "GameFramework/Actor/HUDCanvasActor.h"
 #include "Input/InputSystem.h"
 #include "Engine/World.h"
 
@@ -176,17 +177,9 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 		return;
 	}
 
-	// 1. ESC 키: 일시정지 (UI Manager가 있으면 Pause 모드로 전환)
+	// 1. ESC 키: HUDCanvasActor의 ImGui 설정창에서 처리하므로 Controller에서는 무시
 	if (Key == static_cast<int32>(EKeyCode::Escape))
 	{
-		if (AUIManagerActor::Get())
-		{
-			AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
-		}
-		else
-		{
-			SetMouseCapture(!bMouseCaptured);
-		}
 		return;
 	}
 
@@ -197,9 +190,13 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 		return;
 	}
 
-	// 3. 마우스가 풀려있는 상태에서 뷰포트를 좌클릭하면 다시 게임 모드로 잠금
+	// 3. 마우스가 풀려있는 상태에서 뷰포트를 좌클릭하면 다시 게임 모드로 잠금 (설정창이 열려있을 때는 잠금하지 않음)
 	if (!bMouseCaptured && Key == static_cast<int32>(EKeyCode::LButton))
 	{
+		if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetHUDCanvas() && AUIManagerActor::Get()->GetHUDCanvas()->IsSettingsWindowVisible())
+		{
+			return;
+		}
 		SetMouseCapture(true);
 		return;
 	}

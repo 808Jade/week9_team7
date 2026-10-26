@@ -208,143 +208,18 @@ bool UGameEngine::Init()
 
     bImGuiInitialized = true;
 
-    // 초기 마우스 감도 동기화
-    ApplyMouseSensitivity();
-
     // 6. Start gameplay
     GameWorld->BeginPlay();
     return true;
-}
-
-void UGameEngine::SetSettingsWindowVisible(bool bVisible)
-{
-    bShowSettingsWindow = bVisible;
-
-    if (bImGuiInitialized)
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.MouseDrawCursor = bShowSettingsWindow;
-    }
-
-    if (bShowSettingsWindow)
-    {
-        // 설정창 열림: 마우스 커서 표시 및 잠금 해제
-        if (GameWorld)
-        {
-            if (APortalPlayerController* PPC = Cast<APortalPlayerController>(GameWorld->GetPlayerController()))
-            {
-                PPC->SetMouseCapture(false);
-            }
-        }
-        while (::ShowCursor(TRUE) < 1);
-        ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
-    }
-    else
-    {
-        // 설정창 닫힘 (게임 복귀): 마우스 잠금 및 커서 숨김
-        if (GameWorld)
-        {
-            if (APortalPlayerController* PPC = Cast<APortalPlayerController>(GameWorld->GetPlayerController()))
-            {
-                PPC->SetMouseCapture(true);
-            }
-        }
-        while (::ShowCursor(FALSE) >= 0);
-    }
-}
-
-void UGameEngine::ApplyMouseSensitivity()
-{
-    if (!GameWorld) return;
-
-    if (APlayerController* PC = GameWorld->GetPlayerController())
-    {
-        PC->SetLookSensitivity(MouseSensitivity);
-    }
-    if (APortalPawn* Pawn = Cast<APortalPawn>(GameWorld->GetPlayerPawn()))
-    {
-        Pawn->SetLookSensitivity(MouseSensitivity * 10.0f);
-    }
-    if (ACameraActor* Cam = GameWorld->GetMainCamera())
-    {
-        if (UCameraComponent* CamCom = Cam->GetCameraComponent())
-        {
-            CamCom->SetMouseSensitivity(MouseSensitivity);
-        }
-    }
-}
-
-void UGameEngine::DrawSettingsWindow()
-{
-    const uint32 ViewportW = GetEngineLoop().GetViewportWidth();
-    const uint32 ViewportH = GetEngineLoop().GetViewportHeight();
-
-    ImVec2 Center(ViewportW * 0.5f, ViewportH * 0.5f);
-    ImGui::SetNextWindowPos(Center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(440.0f, 240.0f), ImGuiCond_Always);
-
-    ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    if (ImGui::Begin(U8("설정 (Settings)"), nullptr, WindowFlags))
-    {
-        ImGui::Dummy(ImVec2(0.0f, 5.0f));
-        ImGui::Text(U8("마우스 조작 설정"));
-        ImGui::Separator();
-        ImGui::Dummy(ImVec2(0.0f, 5.0f));
-
-        // 마우스 감도 슬라이더
-        ImGui::Text(U8("마우스 감도:"));
-        ImGui::SameLine();
-        if (ImGui::SliderFloat("##MouseSensitivity", &MouseSensitivity, 0.01f, 1.0f, "%.2f"))
-        {
-            ApplyMouseSensitivity();
-        }
-
-        ImGui::Dummy(ImVec2(0.0f, 15.0f));
-        ImGui::Separator();
-        ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
-        // 버튼 배치
-        float ButtonWidth = 185.0f;
-        float ButtonHeight = 38.0f;
-
-        if (ImGui::Button(U8("닫기 (계속하기)"), ImVec2(ButtonWidth, ButtonHeight)))
-        {
-            SetSettingsWindowVisible(false);
-        }
-
-        ImGui::SameLine(0.0f, 20.0f);
-
-        // 종료 버튼은 붉은색 계열로 강조
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.20f, 0.20f, 1.00f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.25f, 0.25f, 1.00f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.55f, 0.15f, 0.15f, 1.00f));
-        if (ImGui::Button(U8("게임 종료"), ImVec2(ButtonWidth, ButtonHeight)))
-        {
-            GetEngineLoop().RequestExit();
-        }
-        ImGui::PopStyleColor(3);
-    }
-    ImGui::End();
 }
 
 void UGameEngine::TickInput(float DeltaTime)
 {
     if (!GameViewport) return;
 
-    // ESC 키: 설정창 토글
-    if (FInputSystem::IsKeyPressed(EKeyCode::Escape))
+    // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단
+    if (bImGuiInitialized && (ImGui::GetIO().MouseDrawCursor || ImGui::GetIO().WantCaptureMouse))
     {
-        SetSettingsWindowVisible(!bShowSettingsWindow);
-    }
-
-    // 설정창이 열려있는 동안에는 인게임 마우스 시점 회전 및 플레이어 조작 차단 (ImGui만 조작)
-    if (bShowSettingsWindow)
-    {
-        if (bImGuiInitialized)
-        {
-            ImGui::GetIO().MouseDrawCursor = true;
-        }
-        ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
         return;
     }
 
@@ -376,10 +251,18 @@ void UGameEngine::TickInput(float DeltaTime)
 }
 
 // 입력 업데이트 및 액터/컴포넌트 틱 (World->Tick(DeltaTime))
-// 백버퍼에 게임 씬 렌더링 후 ImGui 설정창 오버레이 렌더링
+// 백버퍼에 게임 씬 렌더링 후 ImGui 오버레이 렌더링
 void UGameEngine::Tick(float DeltaTime)
 {
     if (!GameWorld || !GameViewport) return;
+
+    // ImGui 프레임 시작 (Tick 내의 액터들, 예: AHUDCanvasActor가 ImGui 윈도우를 작성할 수 있도록 보장)
+    if (bImGuiInitialized)
+    {
+        ImGui_ImplDX11_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
+    }
 
     TickInput(DeltaTime);
     GameWorld->Tick(DeltaTime);
@@ -450,24 +333,15 @@ void UGameEngine::RenderFrame()
             RenderCommand::GetContext()->CopyResource(Backbuffer->GetRawPtr(), ColorTarget->GetRawPtr());
         }
 
-        // ImGui 설정창 렌더링
+        // ImGui 렌더링 (HUDCanvasActor 등 액터가 NewFrame ~ Render 사이에 제출한 ImGui 창 및 커서)
         if (bImGuiInitialized)
         {
-            ImGui_ImplDX11_NewFrame();
-            ImGui_ImplWin32_NewFrame();
-            ImGui::NewFrame();
-
-            if (bShowSettingsWindow)
-            {
-                DrawSettingsWindow();
-            }
-
             ImGui::Render();
-
-            if (bShowSettingsWindow)
+            ImDrawData* DrawData = ImGui::GetDrawData();
+            if (DrawData && (DrawData->CmdListsCount > 0 || DrawData->TotalVtxCount > 0))
             {
                 RenderCommand::BindRenderPassNoClear(Backbuffer, nullptr, Width, Height);
-                ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+                ImGui_ImplDX11_RenderDrawData(DrawData);
                 RenderCommand::EndRenderPass();
             }
         }
