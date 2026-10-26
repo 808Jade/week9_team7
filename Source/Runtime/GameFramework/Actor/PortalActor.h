@@ -54,6 +54,9 @@ public:
 	// 스케일 없는 포탈 월드 행렬 (회전 + 위치)
 	FMatrix GetPortalMatrix() const;
 
+	// 포탈 면(Plane 메시) 월드 행렬. 오일러(FRotator) 변환을 거치지 않고 행렬로 직접 조립한다.
+	FMatrix GetSurfaceMatrix() const;
+
 	// 메인 뷰 → 이 포탈을 통해 본 뷰 (FSceneRenderer에 넘김)
 	bool CalcPortalSceneView(const FSceneView& MainView, FSceneView& OutView) const;
 
