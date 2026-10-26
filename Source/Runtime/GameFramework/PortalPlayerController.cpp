@@ -67,23 +67,36 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 		SetMouseCapture(false);
 	}
 
-	if (!PossessedPawn) return;
+	APortalPawn* PortalPawn = GetPortalPawn();
+	if (!PortalPawn) return;
 
-	// 2. WASD 이동
+	// 2. 웅크리기(Ctrl) / 달리기(Shift) 입력 갱신
+	const bool bSprint = bKeyDown[static_cast<int32>(EKeyCode::LShift)] ||
+		bKeyDown[static_cast<int32>(EKeyCode::RShift)] ||
+		bKeyDown[static_cast<int32>(EKeyCode::Shift)];
+	const bool bCrouch = bKeyDown[static_cast<int32>(EKeyCode::LControl)] ||
+		bKeyDown[static_cast<int32>(EKeyCode::RControl)] ||
+		bKeyDown[static_cast<int32>(EKeyCode::Control)];
+
+	PortalPawn->SetSprinting(bSprint);
+	PortalPawn->SetCrouching(bCrouch);
+
+	// 3. WASD 수평 이동 (카메라 Pitch 무관하게 수평 평면 기준 방향 벡터)
 	const float Forward = static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::W)]) -
 		static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::S)]);
 	const float Right = static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::D)]) -
 		static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::A)]);
 
-	const FQuat Rotation = PossessedPawn->GetActorRotation().Quaternion();
-	if (Forward != 0.0f) PossessedPawn->AddMovementInput(Rotation.GetForwardVector(), Forward * DeltaTime);
-	if (Right != 0.0f) PossessedPawn->AddMovementInput(Rotation.GetRightVector(), Right * DeltaTime);
+	const FRotator ActorRot = PortalPawn->GetActorRotation();
+	const FQuat YawQuat = FRotator(0.0f, ActorRot.Yaw, 0.0f).Quaternion();
+	if (Forward != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetForwardVector(), Forward);
+	if (Right != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetRightVector(), Right);
 
-	// 3. 마우스 시선 회전 (bMouseCaptured 및 포커스 상태일 때만 1인칭 회전 & 중앙 재고정)
+	// 4. 마우스 시선 회전 (bMouseCaptured 및 포커스 상태일 때만 1인칭 회전 & 화면 중앙 재고정)
 	if (bMouseCaptured && bIsAppFocused)
 	{
-		PossessedPawn->AddControllerYawInput(MouseAxisX * LookSensitivity);
-		PossessedPawn->AddControllerPitchInput(MouseAxisY * LookSensitivity);
+		PortalPawn->AddControllerYawInput(MouseAxisX * LookSensitivity);
+		PortalPawn->AddControllerPitchInput(MouseAxisY * LookSensitivity);
 
 		// 마우스를 창 중앙으로 재고정하여 화면 밖 탈출 방지
 		RECT rc;
@@ -109,14 +122,21 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 
 	if (!bPressed) return;
 
-	// 윈도우 키나 Tab 키 입력 시 마우스 잠금 해제 (커서 보임)
+	// 1. ESC 키: 일시정지 / 마우스 커서 잠금 토글
+	if (Key == static_cast<int32>(EKeyCode::Escape))
+	{
+		SetMouseCapture(!bMouseCaptured);
+		return;
+	}
+
+	// 2. 윈도우 키나 Tab 키 입력 시 마우스 잠금 해제 (커서 보임)
 	if (Key == static_cast<int32>(EKeyCode::LWin) || Key == static_cast<int32>(EKeyCode::RWin) || Key == static_cast<int32>(EKeyCode::Tab))
 	{
 		SetMouseCapture(false);
 		return;
 	}
 
-	// 마우스가 풀려있는 상태에서 뷰포트를 좌클릭하면 다시 게임 모드로 잠금
+	// 3. 마우스가 풀려있는 상태에서 뷰포트를 좌클릭하면 다시 게임 모드로 잠금
 	if (!bMouseCaptured && Key == static_cast<int32>(EKeyCode::LButton))
 	{
 		SetMouseCapture(true);
@@ -126,24 +146,29 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	APortalPawn* PortalPawn = GetPortalPawn();
 	if (!PortalPawn) return;
 
-	// Space 키: 점프
+	// 4. Space 키: 점프
 	if (Key == static_cast<int32>(EKeyCode::Space))
 	{
 		PortalPawn->Jump();
 	}
-	// 마우스 좌클릭: 주요 액션 (큐브 들고 있으면 던지기, 빈손이면 포탈 발사)
+	// 5. 마우스 좌클릭: 주요 액션 (큐브 들고 있으면 던지기, 빈손이면 포탈 발사)
 	else if (Key == static_cast<int32>(EKeyCode::LButton) && bMouseCaptured)
 	{
 		PortalPawn->PrimaryAction();
 	}
-	// 마우스 우클릭: 포탈 타입 변경 (Blue <-> Orange 모드 토글)
+	// 6. 마우스 우클릭: 포탈 타입 변경 (Blue <-> Orange 모드 토글)
 	else if (Key == static_cast<int32>(EKeyCode::RButton) && bMouseCaptured)
 	{
 		PortalPawn->TogglePortalType();
 	}
-	// E 키: 상호작용 (큐브 잡기/놓기)
+	// 7. E 키: 상호작용 (큐브 잡기/놓기)
 	else if (Key == static_cast<int32>(EKeyCode::E))
 	{
 		PortalPawn->Interact();
+	}
+	// 8. Z 키 또는 마우스 휠 클릭(MButton): 줌(Zoom) 기능 토글
+	else if (Key == static_cast<int32>(EKeyCode::Z) || Key == static_cast<int32>(EKeyCode::MButton))
+	{
+		PortalPawn->ToggleZoom();
 	}
 }

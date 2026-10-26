@@ -18,6 +18,7 @@
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
 #include "GameFramework/Actor/PortalGunActor.h"
+#include "GameFramework/Actor/MapCubeActor.h"
 
 class FViewportsPanel;
 
@@ -42,7 +43,7 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[10] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun" };
+	const char* Items[11] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun", "MapCube" };
 
 	FGizmo* Gizmo = nullptr;
 	int32 GizmoSelectedIndex = 0;
@@ -65,7 +66,8 @@ public:
 		APlayerStart::StaticClass(),
 		APortalPawn::StaticClass(),
 		APortalCubeActor::StaticClass(),
-		APortalGunActor::StaticClass()
+		APortalGunActor::StaticClass(),
+		AMapCubeActor::StaticClass()
 	};
 
 private:
@@ -75,4 +77,3 @@ private:
     void DrawCameraProperties();
 	std::function<bool()> IsPlayingQuery;
 };
-

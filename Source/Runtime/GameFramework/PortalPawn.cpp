@@ -1,9 +1,11 @@
 #include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
+#include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
+#include "Engine/Level.h"
 
 APortalPawn::APortalPawn()
 {
@@ -27,8 +29,54 @@ APortalPawn::APortalPawn()
 void APortalPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	VerticalVelocity = 0.0f;
+	Velocity = FVector::ZeroVector;
+	PendingInputVector = FVector::ZeroVector;
 	bIsGrounded = false;
+	bIsCrouched = false;
+	bIsSprinting = false;
+	bIsZooming = false;
+	CurrentEyeHeight = EyeHeight;
+	CurrentLandingDip = 0.0f;
+	CurrentBobX = 0.0f;
+	CurrentBobZ = 0.0f;
+	BobTimer = 0.0f;
+	MaxPreservedFlingSpeed = SprintSpeed;
+	TeleportCooldownTimer = 0.0f;
+
+	InitialSpawnLocation = GetActorLocation();
+	InitialSpawnRotation = GetActorRotation();
+
+	// 씬에 PlayerStart가 존재하면 시작 위치와 회전을 PlayerStart에 맞춤
+	if (GetWorld() && GetWorld()->GetPersistentLevel())
+	{
+		for (AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
+		{
+			if (APlayerStart* Start = Cast<APlayerStart>(Actor))
+			{
+				InitialSpawnLocation = Start->GetSpawnLocation();
+				InitialSpawnRotation = Start->GetSpawnRotation();
+				if (GetRootComponent())
+				{
+					GetRootComponent()->SetWorldLocationAndRotation(InitialSpawnLocation, FRotator(0.0f, InitialSpawnRotation.Yaw, 0.0f), false);
+				}
+				if (CameraComponent)
+				{
+					CameraComponent->SetRelativeRotation(FRotator(InitialSpawnRotation.Pitch, 0.0f, 0.0f));
+				}
+				break;
+			}
+		}
+	}
+
+	if (CameraComponent)
+	{
+		DefaultFOV = CameraComponent->GetFieldOfView();
+		if (DefaultFOV <= 0.0f)
+		{
+			DefaultFOV = 60.0f;
+		}
+		CurrentFOV = DefaultFOV;
+	}
 
 	// 게임 시작 시 포탈건 액터 스폰 및 카메라에 장착
 	if (GetWorld() && !PortalGun)
@@ -55,51 +103,365 @@ void APortalPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 중력 및 바닥 충돌
-	if (bEnableGravity && GetRootComponent())
+	// 0. 추락사(KillZ) 감지 및 리스폰
+	if (GetActorLocation().Z < KillZ)
 	{
-		VerticalVelocity -= Gravity * DeltaTime;
-		const FVector DeltaZ = FVector(0.0f, 0.0f, VerticalVelocity * DeltaTime);
+		Respawn();
+		return;
+	}
 
-		if (VerticalVelocity > 0.0f)
-		{
-			GetRootComponent()->MoveComponent(DeltaZ, GetActorRotation(), false);
-			bIsGrounded = false;
-		}
-		else
-		{
-			FHitResult Hit;
-			const bool bMoved = GetRootComponent()->MoveComponent(DeltaZ, GetActorRotation(), true, &Hit);
+	// 0-A. 포탈 재진입 핑퐁 방지 쿨다운 타이머 감소
+	if (TeleportCooldownTimer > 0.0f)
+	{
+		TeleportCooldownTimer -= DeltaTime;
+	}
 
-			if (!bMoved && Hit.ImpactNormal.Z > 0.5f)
+	// 1. 카메라 FOV 줌 보간
+	if (CameraComponent)
+	{
+		const float TargetFOV = bIsZooming ? ZoomedFOV : DefaultFOV;
+		CurrentFOV += (TargetFOV - CurrentFOV) * FMath::Clamp(DeltaTime * 15.0f, 0.0f, 1.0f);
+		CameraComponent->SetFieldOfView(CurrentFOV);
+	}
+
+	// 1-A. 카메라 Roll 수평 복구 (Roll Uprighting: 포탈 통과 후 기울어진 시야를 수평으로 부드럽게 세움)
+	if (CameraComponent)
+	{
+		FRotator CamRot = CameraComponent->GetRelativeRotation();
+		if (std::abs(CamRot.Roll) > 0.01f)
+		{
+			CamRot.Roll += (0.0f - CamRot.Roll) * FMath::Clamp(DeltaTime * 10.0f, 0.0f, 1.0f);
+			if (std::abs(CamRot.Roll) < 0.01f)
 			{
-				bIsGrounded = true;
-				VerticalVelocity = 0.0f;
+				CamRot.Roll = 0.0f;
+			}
+			CameraComponent->SetRelativeRotation(CamRot);
+		}
+	}
+
+	// 2. 웅크리기(Crouch) 높이 및 콜라이더 반경 보간
+	const float TargetEyeHeight = bIsCrouched ? CrouchEyeHeight : EyeHeight;
+	const float TargetRadius = bIsCrouched ? CrouchRadius : CollisionRadius;
+	CurrentEyeHeight += (TargetEyeHeight - CurrentEyeHeight) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
+
+	if (SphereComponent)
+	{
+		SphereComponent->SetSphereRadius(TargetRadius);
+	}
+
+	// 3. 착지 충격 반동 (Landing Dip) 복구
+	if (CurrentLandingDip > 0.001f)
+	{
+		CurrentLandingDip += (0.0f - CurrentLandingDip) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		CurrentLandingDip = 0.0f;
+	}
+
+	// 4. 헤드 밥빙 (Head Bobbing) 계산
+	const float HorizSpeedSq = Velocity.X * Velocity.X + Velocity.Y * Velocity.Y;
+	if (bEnableHeadBob && bIsGrounded && HorizSpeedSq > 0.25f)
+	{
+		const float HorizSpeed = sqrtf(HorizSpeedSq);
+		BobTimer += DeltaTime * 10.0f * (HorizSpeed / MoveSpeed);
+		if (BobTimer > 6.2831853f)
+		{
+			BobTimer -= 6.2831853f;
+		}
+
+		const float TargetBobZ = sinf(BobTimer * 2.0f) * BobAmountVertical;
+		const float TargetBobX = cosf(BobTimer) * BobAmountHorizontal;
+
+		CurrentBobZ += (TargetBobZ - CurrentBobZ) * FMath::Clamp(DeltaTime * 15.0f, 0.0f, 1.0f);
+		CurrentBobX += (TargetBobX - CurrentBobX) * FMath::Clamp(DeltaTime * 15.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		CurrentBobZ += (0.0f - CurrentBobZ) * FMath::Clamp(DeltaTime * 10.0f, 0.0f, 1.0f);
+		CurrentBobX += (0.0f - CurrentBobX) * FMath::Clamp(DeltaTime * 10.0f, 0.0f, 1.0f);
+	}
+
+	// 카메라 최종 상대 위치 갱신 (기본 눈높이 - 착지 충격 반동 + 헤드 밥빙)
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeLocation({ CurrentBobX, 0.0f, CurrentEyeHeight - CurrentLandingDip + CurrentBobZ });
+	}
+
+	// 5. 목표 이동 속도 및 방향 계산
+	float TargetMaxSpeed = MoveSpeed;
+	if (bIsCrouched)
+	{
+		TargetMaxSpeed = CrouchSpeed;
+	}
+	else if (bIsSprinting)
+	{
+		TargetMaxSpeed = SprintSpeed;
+	}
+
+	FVector WishDir = PendingInputVector;
+	WishDir.Z = 0.0f;
+	const float WishSpeedSq = WishDir.SizeSquared();
+	if (WishSpeedSq > 1.0f)
+	{
+		WishDir = WishDir.GetSafeNormal();
+	}
+	PendingInputVector = FVector::ZeroVector;
+
+	// 6. 지상 vs 공중 물리 가속 및 감속 (마찰력 & 브레이킹)
+	if (bIsGrounded)
+	{
+		// 착지 시 공중 플링 제한 속도를 기본 달리기 속도로 리셋
+		MaxPreservedFlingSpeed = SprintSpeed;
+
+		const float GroundAcceleration = 25.0f;
+		const FVector DesiredVelocity = WishDir * TargetMaxSpeed;
+
+		const float HorizSpeed = sqrtf(HorizSpeedSq);
+
+		if (WishSpeedSq < 0.0001f)
+		{
+			// 입력 없음 -> 브레이킹 감속으로 즉시 정지 (칼정지)
+			if (HorizSpeed > 0.001f)
+			{
+				const float Drop = (BrakingDeceleration + HorizSpeed * GroundFriction) * DeltaTime;
+				const float NewSpeed = FMath::Max(0.0f, HorizSpeed - Drop);
+				if (NewSpeed > 0.0f)
+				{
+					const float Scale = NewSpeed / HorizSpeed;
+					Velocity.X *= Scale;
+					Velocity.Y *= Scale;
+				}
+				else
+				{
+					Velocity.X = 0.0f;
+					Velocity.Y = 0.0f;
+				}
 			}
 			else
 			{
+				Velocity.X = 0.0f;
+				Velocity.Y = 0.0f;
+			}
+		}
+		else
+		{
+			// 키 입력 방향으로 신속하게 가속
+			const float AccelFactor = FMath::Clamp(GroundAcceleration * DeltaTime, 0.0f, 1.0f);
+			Velocity.X += (DesiredVelocity.X - Velocity.X) * AccelFactor;
+			Velocity.Y += (DesiredVelocity.Y - Velocity.Y) * AccelFactor;
+		}
+
+		// 지상 유지 중 바닥 스냅 하향 속도
+		if (bEnableGravity)
+		{
+			Velocity.Z = -2.0f;
+		}
+	}
+	else
+	{
+		// 공중: 중력 적용
+		if (bEnableGravity)
+		{
+			Velocity.Z -= Gravity * DeltaTime;
+		}
+
+		// 공중 제어 (Air Control): Quake/Source/Unreal 표준 공중 가속
+		// 목표 최고 속도(TargetMaxSpeed)를 초과하여 비정상 가속되는 현상을 엄격히 방지
+		if (WishSpeedSq >= 0.0001f)
+		{
+			const FVector HorizVel(Velocity.X, Velocity.Y, 0.0f);
+			const float CurrentSpeedInDir = FVector::Dot(HorizVel, WishDir);
+			const float AddSpeed = TargetMaxSpeed - CurrentSpeedInDir;
+
+			// 이미 해당 방향 속도가 TargetMaxSpeed 이상이면 추가 가속 금지!
+			if (AddSpeed > 0.0f)
+			{
+				float AccelSpeed = AirAcceleration * TargetMaxSpeed * DeltaTime;
+				if (AccelSpeed > AddSpeed)
+				{
+					AccelSpeed = AddSpeed;
+				}
+				Velocity.X += WishDir.X * AccelSpeed;
+				Velocity.Y += WishDir.Y * AccelSpeed;
+			}
+		}
+
+		// 일반 점프 시 공중 수평 속도가 최대 허용 속도(SprintSpeed 또는 포탈 플링 속도)를 넘지 않도록 제한
+		const float CurrentHorizSpeedSq = Velocity.X * Velocity.X + Velocity.Y * Velocity.Y;
+		const float MaxAllowedSpeed = FMath::Max(TargetMaxSpeed, MaxPreservedFlingSpeed);
+		if (CurrentHorizSpeedSq > (MaxAllowedSpeed * MaxAllowedSpeed))
+		{
+			const float CurrentHorizSpeed = sqrtf(CurrentHorizSpeedSq);
+			if (CurrentHorizSpeed > 0.001f)
+			{
+				const float Scale = MaxAllowedSpeed / CurrentHorizSpeed;
+				Velocity.X *= Scale;
+				Velocity.Y *= Scale;
+			}
+		}
+	}
+
+	// 7. 물리 이동 및 충돌 해결 (Sweep, Step-Up & Wall Slide)
+	if (GetRootComponent())
+	{
+		// 7-A. 수평 이동, 계단 넘기(Step-Up), 벽면 미끄러짐(Wall Slide)
+		const FVector HorizontalDelta(Velocity.X * DeltaTime, Velocity.Y * DeltaTime, 0.0f);
+		if (HorizontalDelta.SizeSquared() > 1e-8f)
+		{
+			FHitResult Hit;
+			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), true, &Hit);
+
+			if (Hit.bBlockingHit)
+			{
+				bool bSteppedUp = false;
+
+				// 지상 상태이고 수직 계단/문턱(Hit.ImpactNormal.Z < 0.5f)을 만났을 때 Step-Up 시도
+				if (bIsGrounded && MaxStepHeight > 0.0f && Hit.ImpactNormal.Z < 0.5f)
+				{
+					const FVector PreStepLocation = GetActorLocation();
+
+					// 1) 위로 MaxStepHeight 만큼 올라가기
+					FHitResult UpHit;
+					GetRootComponent()->MoveComponent(FVector(0.0f, 0.0f, MaxStepHeight), GetActorRotation(), true, &UpHit);
+
+					// 2) 전방으로 HorizontalDelta 만큼 전진
+					FHitResult FwdHit;
+					GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), true, &FwdHit);
+
+					// 3) 다시 아래로 MaxStepHeight 만큼 내려앉아 계단 윗면에 착지
+					FHitResult DownHit;
+					GetRootComponent()->MoveComponent(FVector(0.0f, 0.0f, -MaxStepHeight), GetActorRotation(), true, &DownHit);
+
+					// 4) 아래로 내려앉았을 때 걸을 수 있는 바닥(ImpactNormal.Z > 0.5f)에 착지했는지 검증
+					if (DownHit.bBlockingHit && DownHit.ImpactNormal.Z > 0.5f)
+					{
+						bSteppedUp = true;
+					}
+					else
+					{
+						// 계단이 아니거나 위가 막혀 있음 -> 원래 위치로 롤백
+						GetRootComponent()->SetWorldLocation(PreStepLocation, false);
+					}
+				}
+
+				// Step-Up이 아니거나 실패한 경우 일반 벽면 미끄러짐(Wall Slide) 수행
+				if (!bSteppedUp)
+				{
+					const float RemainingTime = 1.0f - Hit.Time;
+					if (RemainingTime > 0.0f)
+					{
+						const FVector SlideDelta = FVector::VectorPlaneProject(HorizontalDelta * RemainingTime, Hit.ImpactNormal);
+						FHitResult SlideHit;
+						GetRootComponent()->MoveComponent(SlideDelta, GetActorRotation(), true, &SlideHit);
+					}
+
+					// 속도 벡터를 벽면과 평행하도록 투영하되, 벽면 마찰력(WallFriction)을 적용해 감속
+					const FVector ProjectedVel = FVector::VectorPlaneProject(FVector(Velocity.X, Velocity.Y, 0.0f), Hit.ImpactNormal);
+					const float FrictionScale = FMath::Clamp(1.0f - WallFriction, 0.0f, 1.0f);
+					Velocity.X = ProjectedVel.X * FrictionScale;
+					Velocity.Y = ProjectedVel.Y * FrictionScale;
+				}
+			}
+		}
+
+		// 7-B. 수직 이동 및 바닥/천장 충돌 (착지 충격 반동 감지)
+		const FVector VerticalDelta(0.0f, 0.0f, Velocity.Z * DeltaTime);
+		if (VerticalDelta.SizeSquared() > 1e-8f)
+		{
+			FHitResult Hit;
+			GetRootComponent()->MoveComponent(VerticalDelta, GetActorRotation(), true, &Hit);
+
+			if (Hit.bBlockingHit)
+			{
+				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
+				{
+					// 착지 충격 반동 (Landing Dip): 낙하 속도에 비례해 카메라를 아래로 살짝 쿵 내려앉힘
+					const float ImpactSpeed = -Velocity.Z;
+					if (ImpactSpeed > 2.0f)
+					{
+						const float TargetDip = FMath::Clamp((ImpactSpeed - 2.0f) * 0.025f, 0.04f, 0.2f);
+						CurrentLandingDip = FMath::Max(CurrentLandingDip, TargetDip);
+					}
+
+					// 바닥 착지 성공!
+					bIsGrounded = true;
+					Velocity.Z = 0.0f;
+				}
+				else if (Velocity.Z > 0.0f && Hit.ImpactNormal.Z < -0.5f)
+				{
+					// 천장 충돌 시 상승 속도 중단
+					Velocity.Z = 0.0f;
+				}
+			}
+			else
+			{
+				// 허공을 통과함 -> 낙하 중 (공중 상태)
 				bIsGrounded = false;
 			}
 		}
 	}
 }
 
-void APortalPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
+void APortalPawn::Respawn()
 {
+	FVector TargetLocation = InitialSpawnLocation;
+	FRotator TargetRotation = InitialSpawnRotation;
+
+	// 씬에서 PlayerStart 탐색
+	if (GetWorld() && GetWorld()->GetPersistentLevel())
+	{
+		for (AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
+		{
+			if (APlayerStart* Start = Cast<APlayerStart>(Actor))
+			{
+				TargetLocation = Start->GetSpawnLocation();
+				TargetRotation = Start->GetSpawnRotation();
+				break;
+			}
+		}
+	}
+
+	// 위치 및 회전 재설정
 	if (GetRootComponent())
 	{
-		const FVector Delta = WorldDirection * (ScaleValue * MoveSpeed);
-		FHitResult Hit;
-		GetRootComponent()->MoveComponent(Delta, GetActorRotation(), true, &Hit);
+		GetRootComponent()->SetWorldLocationAndRotation(TargetLocation, FRotator(0.0f, TargetRotation.Yaw, 0.0f), false);
 	}
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeRotation(FRotator(TargetRotation.Pitch, 0.0f, 0.0f));
+	}
+
+	// 물리 및 연출 상태 초기화
+	Velocity = FVector::ZeroVector;
+	PendingInputVector = FVector::ZeroVector;
+	bIsGrounded = false;
+	CurrentLandingDip = 0.0f;
+	CurrentBobX = 0.0f;
+	CurrentBobZ = 0.0f;
+	BobTimer = 0.0f;
+	MaxPreservedFlingSpeed = SprintSpeed;
+	TeleportCooldownTimer = 0.0f;
+
+	// 들고 있던 큐브가 있다면 내려놓기
+	if (PortalGun && PortalGun->GetHeldCube())
+	{
+		PortalGun->Interact();
+	}
+}
+
+void APortalPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
+{
+	PendingInputVector += WorldDirection * ScaleValue;
 }
 
 void APortalPawn::AddControllerYawInput(float Value)
 {
 	if (!GetRootComponent()) return;
 
+	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
 	FRotator Rotation = GetActorRotation();
-	Rotation.Yaw += Value * LookSensitivity;
+	Rotation.Yaw += Value * LookSensitivity * ZoomScale;
 	GetRootComponent()->SetRelativeRotation(Rotation);
 }
 
@@ -107,8 +469,9 @@ void APortalPawn::AddControllerPitchInput(float Value)
 {
 	if (!CameraComponent) return;
 
+	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
 	FRotator CamRot = CameraComponent->GetRelativeRotation();
-	CamRot.Pitch = FMath::Clamp(CamRot.Pitch + Value * LookSensitivity, -89.0f, 89.0f);
+	CamRot.Pitch = FMath::Clamp(CamRot.Pitch + Value * LookSensitivity * ZoomScale, -89.0f, 89.0f);
 	CameraComponent->SetRelativeRotation(CamRot);
 }
 
@@ -116,13 +479,38 @@ void APortalPawn::Jump()
 {
 	if (bIsGrounded)
 	{
-		VerticalVelocity = JumpVelocity;
+		Velocity.Z = JumpVelocity;
 		bIsGrounded = false;
 		if (GetRootComponent())
 		{
-			GetRootComponent()->MoveComponent(FVector(0.0f, 0.0f, 0.02f), GetActorRotation(), false);
+			GetRootComponent()->MoveComponent(FVector(0.0f, 0.0f, 0.05f), GetActorRotation(), false);
 		}
 	}
+}
+
+void APortalPawn::TeleportThroughPortal(const FVector& NewLocation, const FRotator& NewRotation, const FVector& NewVelocity)
+{
+	if (GetRootComponent())
+	{
+		GetRootComponent()->SetWorldLocationAndRotation(NewLocation, FRotator(0.0f, NewRotation.Yaw, 0.0f), false);
+	}
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeRotation(FRotator(NewRotation.Pitch, 0.0f, NewRotation.Roll));
+	}
+	Velocity = NewVelocity;
+
+	// 포탈 플링으로 획득한 고속 관성을 공중에서 보존할 수 있도록 한도 갱신
+	const float FlingHorizSpeed = sqrtf(NewVelocity.X * NewVelocity.X + NewVelocity.Y * NewVelocity.Y);
+	MaxPreservedFlingSpeed = FMath::Max(SprintSpeed, FlingHorizSpeed);
+
+	if (Velocity.Z > 0.0f)
+	{
+		bIsGrounded = false;
+	}
+
+	// 핑퐁 재진입 방지 쿨다운 가동
+	TeleportCooldownTimer = TeleportCooldownDuration;
 }
 
 void APortalPawn::PostEditChangeProperty(const FProperty& Property)
@@ -139,7 +527,6 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 	}
 }
 
-// 포탈건으로 모든 무기 동작 위임
 void APortalPawn::PrimaryAction()
 {
 	if (PortalGun)

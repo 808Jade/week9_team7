@@ -54,9 +54,9 @@ void APortalCubeActor::Tick(float DeltaTime)
 		FHitResult Hit;
 
 		// bSweep = true로 바닥 및 벽과 충돌 검사
-		const bool bMoved = GetRootComponent()->MoveComponent(Delta, GetActorRotation(), true, &Hit);
+		GetRootComponent()->MoveComponent(Delta, GetActorRotation(), true, &Hit);
 
-		if (!bMoved)
+		if (Hit.bBlockingHit)
 		{
 			// 바닥에 닿았을 때
 			if (Hit.ImpactNormal.Z > 0.5f)
