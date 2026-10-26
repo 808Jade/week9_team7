@@ -121,43 +121,6 @@ bool UGameEngine::Init()
     FXAARenderer = MakeUnique<FFXAARenderer>();
     FXAARenderer->Init(Renderer);
 
-    APawn* PlayerPawn = GameWorld->GetPlayerPawn();
-    if (!PlayerPawn)
-    {
-        if (ULevel* PersistentLevel = GameWorld->GetPersistentLevel())
-        {
-            for (AActor* Actor : PersistentLevel->GetActors())
-            {
-                if (APawn* Pawn = Cast<APawn>(Actor))
-                {
-                    PlayerPawn = Pawn;
-                    break;
-                }
-            }
-        }
-    }
-    if (!PlayerPawn)
-    {
-        ACameraActor* MainCamera = GameWorld->GetMainCamera();
-        FTransform Transform = MainCamera ? MainCamera->GetActorTransform() : FTransform::Identity;
-        PlayerPawn = GameWorld->SpawnActor<ADefaultPawn>(NAME_None, &Transform);
-    }
-    GameWorld->SetPlayerPawn(PlayerPawn);
-
-    APlayerController* PlayerController = GameWorld->GetPlayerController();
-    if (!PlayerController)
-    {
-        if (Cast<APortalPawn>(PlayerPawn))
-            PlayerController = GameWorld->SpawnActor<APortalPlayerController>();
-        else
-            PlayerController = GameWorld->SpawnActor<APlayerController>();
-    }
-    GameWorld->SetPlayerController(PlayerController);
-
-    if (PlayerController && PlayerPawn)
-    {
-        PlayerController->Possess(PlayerPawn);
-    }
     // 5. Start gameplay
     GameWorld->BeginPlay();
     return true;
