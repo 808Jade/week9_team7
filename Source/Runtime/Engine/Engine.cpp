@@ -83,8 +83,11 @@ void UEngine::DestroyWorldContext(UWorld* InWorld)
 			{
 				ACameraActor* Camera = InWorld->GetMainCamera();
 				const bool bOwnsCamera = Camera && !Camera->GetLevel();
-				InWorld->SetMainCamera(nullptr);
+				// ClearWorld가 MainCamera의 컴포넌트를 Unregister하므로, 카메라 해제는 그 다음에 해야 한다.
+				// 순서가 반대면 MainCamera가 이미 nullptr라 카메라 컴포넌트가 등록된 채로 delete되어
+				// ~UActorComponent의 "Delete Without Unregister" assert가 터진다.
 				InWorld->ClearWorld();
+				InWorld->SetMainCamera(nullptr);
 				for (ULevel* Level : InWorld->GetLevels()) delete Level;
 				if (bOwnsCamera) delete Camera;
 				delete InWorld;
