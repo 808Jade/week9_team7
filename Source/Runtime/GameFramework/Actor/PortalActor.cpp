@@ -92,6 +92,16 @@ FMatrix APortalActor::GetPortalMatrix() const
 	return M;
 }
 
+FMatrix APortalActor::GetSurfaceMatrix() const
+{
+	// PortalMesh->GetWorldMatrix()는 부모 * 자식 회전을 FRotator로 되돌리는데,
+	// 면을 세우는 Pitch 90° 때문에 결과가 짐벌락(Pitch = ±90°)에 걸려 Yaw/Roll이 atan2(0, 0) 노이즈가 된다.
+	// → 특정 방향 벽에서 면이 틀어져 벽에 반쯤 묻힘. 로컬 행렬 * 포탈 행렬로 직접 곱해서 피한다.
+	const FMatrix Local = FTransform(FRotator(90.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f),
+		FVector(PortalHeight, PortalWidth, 1.0f)).GetLocalMatrix();   // 법선 +Z → +X, 크기
+	return Local * GetPortalMatrix();   // 행 벡터: 로컬 → 포탈 월드
+}
+
 bool APortalActor::CalcVirtualCamera(const FVector& CamLocation, const FRotator& CamRotation,
 	FPortalCameraPose& Out) const
 {
@@ -217,7 +227,7 @@ void APortalActor::DrawPortalSurfaces(UWorld* World, const FSceneView& MainView)
 		FTexture2D* Texture = Portal->IsActive() ? Portal->GetPortalTexture() : nullptr;
 		FPortalSurfaceRenderer::Get().Draw(
 			Portal->PortalMesh->GetStaticMesh(),
-			Portal->PortalMesh->GetWorldMatrix(),
+			Portal->GetSurfaceMatrix(),
 			MainView.ViewProjectionMatrix,
 			Texture,
 			Portal->PortalColor);
