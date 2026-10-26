@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "../Core/Types.h"
+#include "EngineMath.h"
 #include "MathUtility.h"
 
 struct FVector {
@@ -83,6 +84,11 @@ public:
 	FVector& operator /= (const FVector& V1);
 	FVector& operator /= (const float& f);
 
+	bool operator < (const FVector& V1) const;
+	bool operator <= (const FVector& V1) const;
+	bool operator > (const FVector& V1) const;
+	bool operator >= (const FVector& V1) const;
+
 	FVector operator ^ (const FVector& V1) const;
 	float operator | (const FVector& V) const;
 
@@ -110,8 +116,19 @@ public:
 	static FVector Zero();*/
 
 	FVector ProjectOnToNormal(const FVector& Normal) const;
+	static FVector PointPlaneProject(const FVector& Point, const FVector& PlaneBase, const FVector& PlaneNormal);
 	static FVector VectorPlaneProject(const FVector& V, const FVector& PlaneNormal);
 	static bool Coincident(const FVector& Normal1, const FVector& Normal2, float ParallelCosineThreshold = THRESH_NORMALS_ARE_PARALLEL);
+
+	static FVector AxisVector(const int32 Axis)
+	{
+		FVector Result(0.0f);
+		Result[Axis] = 1.0f;
+		return Result;
+	}
+
+	static FVector Min(const FVector& V1, const FVector& V2);
+	static FVector Max(const FVector& V1, const FVector& V2);
 };
 
 /* Global Operator */

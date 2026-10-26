@@ -8,6 +8,8 @@ struct FBox
 	FVector GetCenter() const { return (Min + Max) * 0.5f; }
 	FVector GetExtent() const { return (Max - Min) * 0.5f; }
 	FVector GetSize() const { return Max - Min; }
+	FBox() : Min(FVector::ZeroVector), Max(FVector::ZeroVector) {}
+	FBox(const FVector& InMin, const FVector& InMax) : Min(InMin), Max(InMax) {}
 
 	FBox GetWorldAABB(const FMatrix& M) const
 	{
@@ -45,5 +47,78 @@ struct FBox
 		Max.X = std::max(Max.X, Other.Max.X);
 		Max.Y = std::max(Max.Y, Other.Max.Y);
 		Max.Z = std::max(Max.Z, Other.Max.Z);
+	}
+
+	FVector GetCenter() { return (Min + Max) * 0.5f; }
+	FVector GetExtent() { return (Max - Min) * 0.5f; }
+
+	FVector FindClosestPoint(const FVector& StartPoint, const FVector& Extent);
+
+	float PhiWithNormal(const FVector& X, FVector& Normal) const
+	{
+		const FVector MaxDists = X - Max;
+		const FVector MinDists = Min - X;
+		
+		if(X <= Max && X >= Min)
+		{
+			float MaxValue = -FLT_MAX;
+			int MaxAxis = 0;
+
+			for(int i = 0; i < 3;i++)
+			{
+				float TempMax = FMath::Max(MaxDists[i], MinDists[i]);
+				if(MaxValue < TempMax)
+				{
+					MaxAxis = i;
+					MaxValue = TempMax;
+				}
+			}
+
+			Normal = MaxDists[MaxAxis] > MinDists[MaxAxis] ? FVector::AxisVector(MaxAxis) : -FVector::AxisVector(MaxAxis);
+			return MaxValue;
+		}
+		else
+		{
+			for(int i = 0; i < 3; i++)
+			{
+				if(MaxDists[i] > 0)
+				{
+					Normal[i] = MaxDists[i];
+				}
+				else if(MinDists[i] > 0)
+				{
+					Normal[i] = -MinDists[i];
+				}
+				else
+				{
+					Normal[i] = 0;
+				}
+			}
+			float Phi = Normal.Size();
+			Normal = Normal.GetSafeNormal();
+			if(Phi < KINDA_SMALL_NUMBER)
+			{
+				for(int i = 0; i < 3;i++)
+				{
+					if(Normal[i] > 0)
+					{
+						Normal[i] = 1;
+					}
+					else if(Normal[i] < 0)
+					{
+						Normal[i] = -1;
+					}
+				}
+				Normal.Normalized();
+			}
+			return Phi;
+		}
+	}
+
+	bool Intersects(const FBox& Other) const
+	{
+		return (Min.X <= Other.Max.X && Max.X >= Other.Min.X) &&
+			(Min.Y <= Other.Max.Y && Max.Y >= Other.Min.Y) &&
+			(Min.Z <= Other.Max.Z && Max.Z >= Other.Min.Z);
 	}
 };

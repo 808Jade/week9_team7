@@ -37,3 +37,33 @@ struct FLODSphere
         return Result;
     }
 };
+
+class FSphere
+{
+public:
+    FSphere() : Center(0.0f, 0.0f, 0.0f), Radius(0.0f) {}
+    FSphere(const FVector& InCenter, const float InRadius) : Center(InCenter), Radius(InRadius) {}
+    FSphere(const FSphere& Other) : Center(Other.GetCenter()), Radius(Other.GetRadius()) {}
+
+    const FVector& GetCenter() const
+    {
+        return Center;
+    }
+    void SetCenter(const FVector& InCenter)
+    {
+        Center = InCenter;
+    }
+
+    const float GetRadius() const
+    {
+        return Radius;
+    }
+    void SetRadius(const float InRadius)
+    {
+        Radius = InRadius;
+    }
+
+private:
+    FVector Center;
+    float Radius;
+};
