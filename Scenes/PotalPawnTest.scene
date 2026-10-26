@@ -139,124 +139,6 @@
                     }
                 },
                 {
-                    "Class": "APortalPawn",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "USphereComponent",
-                            "Name": "SphereComponent",
-                            "Parent": "",
-                            "Properties": {
-                                "CurrentCollisionResponse": 2,
-                                "Radius": 1.0,
-                                "ShapeColor": 4288517599,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 6.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UCameraComponent",
-                            "Name": "CameraComponent",
-                            "Parent": "SphereComponent",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 1.600000023841858
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        }
-                    ],
-                    "Name": "APortalPawn_0",
-                    "Properties": {
-                        "AirAcceleration": 2.0,
-                        "BrakingDeceleration": 35.0,
-                        "CollisionRadius": 1.0,
-                        "CrouchEyeHeight": 0.550000011920929,
-                        "CrouchRadius": 0.3499999940395355,
-                        "CrouchSpeed": 3.0,
-                        "EyeHeight": 1.600000023841858,
-                        "Gravity": 9.800000190734863,
-                        "GroundFriction": 12.0,
-                        "JumpVelocity": 5.5,
-                        "KillZ": -40.0,
-                        "LookSensitivity": 1.0,
-                        "MaxStepHeight": 0.30000001192092896,
-                        "MoveSpeed": 6.0,
-                        "SprintSpeed": 9.0,
-                        "Velocity": {
-                            "X": 0.0,
-                            "Y": 0.0,
-                            "Z": 0.0
-                        },
-                        "WallFriction": 0.25,
-                        "bActorEnableCollision": true,
-                        "bEnableGravity": true,
-                        "bEnableHeadBob": true
-                    }
-                },
-                {
                     "Class": "ADirectionalLightActor",
                     "Components": [
                         {
@@ -612,9 +494,9 @@
                                         "Yaw": 0.0
                                     },
                                     "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
                                     }
                                 },
                                 "bAutoActivate": true,
@@ -623,13 +505,39 @@
                                 "bReceiveShadow": true,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 1.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": true,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
                         }
                     ],
                     "Name": "APortalCubeActor_0",
                     "Properties": {
-                        "Gravity": 9.800000190734863,
-                        "bActorEnableCollision": true,
-                        "bEnableGravity": true
+                        "bActorEnableCollision": true
                     }
                 },
                 {
@@ -1118,6 +1026,128 @@
                         "bActorEnableCollision": true,
                         "bAutoOpenOnOverlap": true,
                         "bIsOpen": false
+                    }
+                },
+                {
+                    "Class": "APortalPawn",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponet",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 1.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 5.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UCameraComponent",
+                            "Name": "CameraComponent",
+                            "Parent": "BoxComponet",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 1.100000023841858
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "APortalPawn_1",
+                    "Properties": {
+                        "AirAcceleration": 2.0,
+                        "BrakingDeceleration": 35.0,
+                        "CollisionRadius": 0.5,
+                        "CrouchEyeHeight": 0.550000011920929,
+                        "CrouchRadius": 0.3499999940395355,
+                        "CrouchSpeed": 3.0,
+                        "EyeHeight": 1.100000023841858,
+                        "Gravity": 9.800000190734863,
+                        "GroundFriction": 12.0,
+                        "JumpVelocity": 5.5,
+                        "KillZ": -40.0,
+                        "LookSensitivity": 1.0,
+                        "MaxStepHeight": 0.30000001192092896,
+                        "MoveSpeed": 6.0,
+                        "SprintSpeed": 9.0,
+                        "Velocity": {
+                            "X": 0.0,
+                            "Y": 0.0,
+                            "Z": 0.0
+                        },
+                        "WallFriction": 0.25,
+                        "bActorEnableCollision": true,
+                        "bEnableGravity": true,
+                        "bEnableHeadBob": true
                     }
                 }
             ],
