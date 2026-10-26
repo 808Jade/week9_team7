@@ -1098,6 +1098,10 @@ bool UEditorEngine::RenderScene(FSceneViewTargets& Targets, const FSceneView& Sc
 		return false;
 
 	FScenePassCallbacks Callbacks;
+	Callbacks.PortalSurfaces = [TargetWorld, &SceneView]
+	{
+		APortalActor::DrawPortalSurfaces(TargetWorld, SceneView);
+	};
 	Callbacks.FireBall = [this, TargetWorld, &SceneView, DepthTarget, ColorTarget]
 	{
 		RenderFireBall(TargetWorld, SceneView, DepthTarget, ColorTarget);

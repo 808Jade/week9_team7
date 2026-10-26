@@ -614,6 +614,10 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 	bHasFog = false;
 	bFXAAPassSucceeded = true;
 
+	if (!Options.bShowWorldNormal && Options.bDrawPrimitives && Callbacks.PortalSurfaces &&
+		!Graph.AddRasterPass(MakeViewportPass("PortalSurface", SceneColor, Depth), Callbacks.PortalSurfaces))
+		return false;
+
 	if (!Options.bShowWorldNormal && Options.bDrawPrimitives && Callbacks.FireBall)
 	{
 		FRenderGraphRasterPassDesc Pass = MakeViewportPass("FireBall", SceneColor);

@@ -33,6 +33,7 @@ struct FSceneOverlayCallbacks
 
 struct FScenePassCallbacks // 기본 도형 다 그려진 후 그려져야 될 목록들
 {
+	std::function<void()> PortalSurfaces;
 	std::function<void()> FireBall;
 	std::function<bool()> HeightFog;
 	std::function<FConstantBuffer*(bool)> TranslucentFogConstants;

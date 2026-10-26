@@ -118,6 +118,10 @@ void UGameEngine::RenderFrame()
 
     FRenderGraphBuilder Graph;
     FScenePassCallbacks Callbacks;
+    Callbacks.PortalSurfaces = [this, &SceneView] 
+        {
+            APortalActor::DrawPortalSurfaces(GameWorld, SceneView);
+        };
 
     Callbacks.SceneText = [this, &SceneView]
         {
