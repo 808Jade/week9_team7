@@ -98,6 +98,8 @@ public:
 	APortalGunActor* GetPortalGun() const { return PortalGun; }
 	USphereComponent* GetSphereComponent() const { return SphereComponent; }
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+	float GetLookSensitivity() const { return LookSensitivity; }
+	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임

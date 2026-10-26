@@ -21,6 +21,8 @@ public:
 	virtual void InputKey(int32 Key, bool bDown);
 	virtual void InputAxis(EGameInputAxis Axis, float Delta);
 	virtual void ClearInputState();
+	float GetLookSensitivity() const { return LookSensitivity; }
+	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 protected:
 	APawn* PossessedPawn = nullptr;
 	bool bKeyDown[256]{};

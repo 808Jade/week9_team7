@@ -21,7 +21,7 @@ ATitleCanvasActor::ATitleCanvasActor()
 	// 2. 메인 타이틀 텍스트 (화면 상단 30% 위치, 중앙에서 0.25 왼쪽 가로 정렬, Layer 20)
 	TitleText = CreateDefaultSubobject<UUITextComponent>("TitleLogoText");
 	TitleText->SetupAttachment(GetRootComponent());
-	TitleText->SetText("PORTAL");
+	TitleText->SetText("PORTAL3");
 	TitleText->SetFontSize(72.0f);
 	TitleText->SetCenterHorizontally(true);
 	TitleText->SetRelativeX(0.25f);

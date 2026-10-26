@@ -4,14 +4,30 @@
 
 UUIImageComponent::UUIImageComponent()
 {
-	Mesh = UAssetManager::GetAssetByPath<UStaticMesh>("ParticleQuad");
-	Material = UMaterial::CreateInstance(UAssetManager::GetAssetByPath<UMaterial>("UIMaterial"));
-	Texture = UAssetManager::GetAssetByPath<UTexture2D>("WhiteTexture");
+	EnsureMaterial();
+}
+
+void UUIImageComponent::EnsureMaterial()
+{
+	if (!Mesh)
+	{
+		Mesh = UAssetManager::GetAssetByPath<UStaticMesh>("ParticleQuad");
+	}
+	if (!Material)
+	{
+		Material = UMaterial::CreateInstance(UAssetManager::GetAssetByPath<UMaterial>("UIMaterial"));
+		if (Material)
+		{
+			Material->Textures.Empty();
+			Material->Textures.Add(Texture ? Texture : UAssetManager::GetAssetByPath<UTexture2D>("WhiteTexture"));
+		}
+	}
 }
 
 void UUIImageComponent::SetTexture(UTexture2D* InTexture)
 {
 	Texture = InTexture;
+	EnsureMaterial();
 	if (Material)
 	{
 		if (Material->Textures.IsEmpty())
@@ -23,6 +39,7 @@ void UUIImageComponent::SetTexture(UTexture2D* InTexture)
 
 void UUIImageComponent::SubmitToRenderQueue(FRenderQueue& RenderQueue, const FViewContext& ViewContext)
 {
+	EnsureMaterial();
 	if (!Mesh || !Material)
 		return;
 

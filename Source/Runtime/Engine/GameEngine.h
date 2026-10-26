@@ -22,6 +22,11 @@ public:
 
 	void RenderFrame();
 
+	void SetSettingsWindowVisible(bool bVisible);
+	bool IsSettingsWindowVisible() const { return bShowSettingsWindow; }
+	void DrawSettingsWindow();
+	void ApplyMouseSensitivity();
+
 private:
 	UGameInstance* GameInstance = nullptr;
 	UWorld* GameWorld = nullptr;
@@ -31,4 +36,9 @@ private:
 	TUniquePtr<FSkyboxRenderer> SkyboxRenderer;
 	TUniquePtr<FTextRenderer> TextRenderer;
 	TUniquePtr<FFXAARenderer> FXAARenderer;
+
+	// ImGui 및 설정창 상태
+	bool bImGuiInitialized = false;
+	bool bShowSettingsWindow = false;
+	float MouseSensitivity = 0.1f;
 };

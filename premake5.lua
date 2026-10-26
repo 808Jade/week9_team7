@@ -1,4 +1,4 @@
-﻿workspace "Hitori"
+workspace "Hitori"
 	architecture "x64"
 	startproject "HitoriEditor"
 
@@ -149,6 +149,8 @@ project "HitoriEngine"
 		"%{IncludeDir.DDSLoader}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGui}/backends",
 	}
 
 	libdirs
@@ -205,6 +207,8 @@ project "HitoriEditor"
 		"%{IncludeDir.json}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGui}/backends",
 	}
 
 	libdirs
@@ -247,7 +251,7 @@ project "HitoriGame"
 	pchheader "EnginePCH.h"
 	pchsource "Source/Programs/HitoriGame/GamePCH.cpp"
 
-	links { "HitoriEngine" }
+	links { "HitoriEngine", "ImGui" }
 
 	files
 	{
@@ -264,6 +268,8 @@ project "HitoriGame"
 		"%{IncludeDir.DDSLoader}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGui}/backends",
 	}
 
 	libdirs
