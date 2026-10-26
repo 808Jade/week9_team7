@@ -62,10 +62,16 @@ public:
 	static void RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkyboxRenderer* Skybox,
 		const FSceneView& MainView, const FSceneRenderOptions& MainOptions);
 
+	static void DrawPortalSurfaces(UWorld* World, const FSceneView& MainView); 
+
+	bool IsPlaced() const { return bPlaced; }
+
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
 	APortalActor* LinkedPortal = nullptr;
 	bool bPlaced = false;
+
+	FVector4 PortalColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	FSceneViewTargets ViewTargets;   // 포탈 카메라가 그린 결과 (Color + Depth)
 	FSceneRenderData  RenderData;    // 포탈 뷰 전용 렌더 큐/그림자 캐시

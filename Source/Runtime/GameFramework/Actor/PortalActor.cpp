@@ -6,6 +6,7 @@
 #include "Math/Frustum.h"
 #include "Render/SceneRenderer.h"
 #include "Render/RenderCommand.h"
+#include "Render/PortalSurfaceRenderer.h"
 #include "Engine/Level.h"
 #include <cmath>
 
@@ -61,8 +62,7 @@ APortalActor::APortalActor()
 	PortalMesh->SetStaticMesh(UAssetManager::GetAssetByPath<UStaticMesh>("Plane"));
 	PortalMesh->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f)); // 법선 +Z → +X
 	PortalMesh->SetRelativeScale3D(FVector(PortalHeight, PortalWidth, 1.0f));
-	PortalMesh->SetHiddenInGame(true); // 처음엔 숨김
-	PortalMesh->SetCastShadow(false); // 포탈 면은 그림자를 만들지 않는다
+	PortalMesh->SetVisibility(false);   // 일반 경로에선 영구히 안 그림
 }
 
 void APortalActor::SpawnPair(UWorld* World, APortalActor*& OutBlue, APortalActor*& OutOrange)
@@ -71,6 +71,8 @@ void APortalActor::SpawnPair(UWorld* World, APortalActor*& OutBlue, APortalActor
 	OutOrange = World->SpawnActor<APortalActor>();
 	OutBlue->LinkedPortal = OutOrange;
 	OutOrange->LinkedPortal = OutBlue;
+	OutBlue->PortalColor = FVector4(0.10f, 0.45f, 1.00f, 1.0f);   // 추가
+	OutOrange->PortalColor = FVector4(1.00f, 0.50f, 0.10f, 1.0f);   // 추가
 }
 
 void APortalActor::PlaceAt(const FVector& Location, const FVector& Normal)
@@ -80,7 +82,6 @@ void APortalActor::PlaceAt(const FVector& Location, const FVector& Normal)
 
 	SetActorLocation(Location + Normal * 0.01f);   // 벽과 Z-fighting 방지
 	SetActorRotation(FRotator(Pitch, Yaw, 0.0f));
-	PortalMesh->SetHiddenInGame(false);
 	bPlaced = true;
 }
 
@@ -202,4 +203,23 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 	}
 
 	Occlusion.bEnabled = bPrevOcclusion;
+}
+
+void APortalActor::DrawPortalSurfaces(UWorld* World, const FSceneView& MainView)
+{
+	if (!World || !World->GetPersistentLevel()) return;
+
+	for (AActor* Actor : World->GetPersistentLevel()->GetActors())
+	{
+		APortalActor* Portal = Cast<APortalActor>(Actor);
+		if (!Portal || !Portal->bPlaced) continue;
+
+		FTexture2D* Texture = Portal->IsActive() ? Portal->GetPortalTexture() : nullptr;
+		FPortalSurfaceRenderer::Get().Draw(
+			Portal->PortalMesh->GetStaticMesh(),
+			Portal->PortalMesh->GetWorldMatrix(),
+			MainView.ViewProjectionMatrix,
+			Texture,
+			Portal->PortalColor);
+	}
 }

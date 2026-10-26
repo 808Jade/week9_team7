@@ -7,6 +7,7 @@
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 #include "Collision/Ray.h"
+#include "Collision/HitResult.h"
 
 APortalGunActor::APortalGunActor()
 {
@@ -28,16 +29,14 @@ APortalGunActor::APortalGunActor()
 void APortalGunActor::BeginPlay()
 {
 	Super::BeginPlay();
-	HeldCube = nullptr;
-	CurrentPortalType = EPortalType::Blue;
+	HeldCube = nullptr;	
 }
 
 void APortalGunActor::EndPlay()
 {
 	Super::EndPlay();
 	if (HeldCube)
-	{
-		HeldCube->OnDropped(FVector::ZeroVector);
+	{		
 		HeldCube = nullptr;
 	}
 }
@@ -58,93 +57,59 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 	}
 }
 
+void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult)
+{
+	const int32 PortalTypeIndex = static_cast<int32>(PortalToFire);
+}
+
+void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
+{
+	if(!CubeToGrab)
+	{
+		return;
+	}
+
+	HTR_LOG(Warning, "Hold");
+
+	HeldCube = CubeToGrab;
+	HeldCube->OnGrabbed();
+}
+
+void APortalGunActor::Unhold()
+{
+	if(HeldCube)
+	{
+		HTR_LOG(Warning, "Unhold");
+
+		HeldCube->OnDropped(FVector::ZeroVector);
+		HeldCube = nullptr;
+	}
+}
+
 void APortalGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 들고 있는 큐브 위치를 카메라 전방으로 갱신
-	if (HeldCube && OwnerPawn)
+	if(IsHoldingCube() && OwnerPawn)
 	{
 		UCameraComponent* Cam = OwnerPawn->GetCameraComponent();
-		if (Cam)
+		if(!Cam)
 		{
-			const FVector CamLoc = Cam->GetWorldLocation();
-			const FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-			const FVector TargetLocation = CamLoc + CamForward * HoldDistance;
-
-			HeldCube->SetActorLocation(TargetLocation, false);
-			HeldCube->SetActorRotation(OwnerPawn->GetActorRotation(), false);
+			return;
 		}
-	}
-}
+		
+		FVector CamLoc = Cam->GetWorldLocation();
+		FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+		FVector TargetLocation = CamLoc + (CamForward * HoldDistance);
+		FRotator TargetRotation = Cam->GetWorldRotation();
 
-void APortalGunActor::PrimaryAction()
-{
-	if (HeldCube)
-	{
-		ThrowCube();
-	}
-	else
-	{
-		FirePortal();
-	}
-}
-
-void APortalGunActor::TogglePortalType()
-{
-	CurrentPortalType = (CurrentPortalType == EPortalType::Blue) ? EPortalType::Orange : EPortalType::Blue;
-	HTR_LOG(Info, "[PortalGun] Switched to: {}", CurrentPortalType == EPortalType::Blue ? "BLUE (Primary)" : "ORANGE (Secondary)");
-}
-
-void APortalGunActor::ThrowCube()
-{
-	if (!HeldCube) return;
-
-	UCameraComponent* Cam = OwnerPawn ? OwnerPawn->GetCameraComponent() : nullptr;
-	const FVector CamForward = Cam ? 
-		Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized() : 
-		GetActorRotation().Quaternion().GetForwardVector().Normalized();
-
-	const FVector ThrowVelocity = CamForward * ThrowStrength + FVector(0.0f, 0.0f, 2.0f);
-	HeldCube->OnDropped(ThrowVelocity);
-	HeldCube = nullptr;
-}
-
-void APortalGunActor::FirePortal()
-{
-	HTR_LOG(Info, "[PortalGun] Firing {} Portal!", CurrentPortalType == EPortalType::Blue ? "BLUE" : "ORANGE");
-	// TODO: 여기에 화면 중앙 LineTrace 및 포탈 벽면 배치 로직 연결
-}
-
-void APortalGunActor::Interact()
-{
-	// 1. 이미 큐브를 들고 있다면 -> 발밑에 살포시 내려놓기
-	if (HeldCube)
-	{
-		HeldCube->OnDropped(FVector::ZeroVector);
-		HeldCube = nullptr;
-		return;
-	}
-
-	// 2. 빈손이면 -> 전방 큐브 탐색
-	if (!OwnerPawn || !OwnerPawn->GetCameraComponent() || !GetWorld()) return;
-
-	UCameraComponent* Cam = OwnerPawn->GetCameraComponent();
-	const FVector CamLoc = Cam->GetWorldLocation();
-	const FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-
-	FRay Ray{ .Origin = CamLoc, .Direction = CamForward };
-	FHitResult Hit;
-
-	if (GetWorld()->LineTraceSingle(Ray, Hit, nullptr, nullptr, OwnerPawn))
-	{
-		if (Hit.HitActor && Hit.Distance <= PickupRange)
+		float DistanceToTarget = FVector::Distance(HeldCube->GetActorLocation(), TargetLocation);
+		if(DistanceToTarget > MaxBreakDistance)
 		{
-			if (APortalCubeActor* Cube = Cast<APortalCubeActor>(Hit.HitActor))
-			{
-				HeldCube = Cube;
-				HeldCube->OnPickedUp(OwnerPawn);
-			}
+			Unhold();
+			return;
 		}
+
+		HeldCube->UpdateHoldPhysics(TargetLocation, TargetRotation, DeltaTime);
 	}
 }

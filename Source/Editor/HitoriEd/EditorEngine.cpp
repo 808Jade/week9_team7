@@ -854,7 +854,7 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 		return;
 	}
 	constexpr EKeyCode Keys[] = { EKeyCode::W, EKeyCode::A, EKeyCode::S, EKeyCode::D,
-		EKeyCode::Space, EKeyCode::Shift };
+		EKeyCode::Space, EKeyCode::Shift, EKeyCode::E, EKeyCode::Control, EKeyCode::Z, EKeyCode::Tab };
 	for (EKeyCode Key : Keys)
 	{
 		if (FInputSystem::IsKeyPressed(Key))
@@ -868,10 +868,10 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 			else GameViewport.InputKey(nullptr, static_cast<int32>(Key), false);
 		}
 	}
-	constexpr EMouseButton MouseButtons[] = { EMouseButton::Left, EMouseButton::Right };
+	constexpr EMouseButton MouseButtons[] = { EMouseButton::Left, EMouseButton::Right, EMouseButton::Middle };
 	for (EMouseButton Button : MouseButtons)
 	{
-		const int32 Key = Button == EMouseButton::Left ? static_cast<int32>(EKeyCode::LButton) : static_cast<int32>(EKeyCode::RButton);
+		const int32 Key = Button == EMouseButton::Left ? static_cast<int32>(EKeyCode::LButton) : (Button == EMouseButton::Right ? static_cast<int32>(EKeyCode::RButton) : static_cast<int32>(EKeyCode::MButton));
 		if (FInputSystem::IsMousePressed(Button))
 		{
 			if (GameViewport.IsSIEMode()) GameViewport.GetKeyInputBySIEMode(Key, true);
@@ -1098,6 +1098,10 @@ bool UEditorEngine::RenderScene(FSceneViewTargets& Targets, const FSceneView& Sc
 		return false;
 
 	FScenePassCallbacks Callbacks;
+	Callbacks.PortalSurfaces = [TargetWorld, &SceneView]
+	{
+		APortalActor::DrawPortalSurfaces(TargetWorld, SceneView);
+	};
 	Callbacks.FireBall = [this, TargetWorld, &SceneView, DepthTarget, ColorTarget]
 	{
 		RenderFireBall(TargetWorld, SceneView, DepthTarget, ColorTarget);

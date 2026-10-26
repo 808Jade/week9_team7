@@ -1,11 +1,16 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
+#include "GameFramework/Actor/PortalCubeActor.h"
+#include "Collision/Ray.h"
+#include "Collision/HitResult.h"
+#include "UObject/Casts.h"
 
 APortalPawn::APortalPawn()
 {
@@ -13,13 +18,17 @@ APortalPawn::APortalPawn()
 	SetActorEnableCollision(true);
 
 	// 1. 루트 구 콜라이더
-	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-	SetRootComponent(SphereComponent);
-	SphereComponent->SetSphereRadius(CollisionRadius);
+	//SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
+	//SetRootComponent(SphereComponent);
+	//SphereComponent->SetSphereRadius(CollisionRadius);
+
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponet");
+	SetRootComponent(BoxComponent);
+	BoxComponent->SetBoxExtent(FVector(0.5f, 0.5f, 1.5f));
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
-	CameraComponent->SetupAttachment(SphereComponent);
+	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
 	CameraComponent->SetRelativeRotation({ 0.0f, 0.0f, 0.0f });
 
@@ -444,9 +453,9 @@ void APortalPawn::Respawn()
 	TeleportCooldownTimer = 0.0f;
 
 	// 들고 있던 큐브가 있다면 내려놓기
-	if (PortalGun && PortalGun->GetHeldCube())
+	if (PortalGun && PortalGun->IsHoldingCube())
 	{
-		PortalGun->Interact();
+		PortalGun->Unhold();
 	}
 }
 
@@ -529,24 +538,76 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 
 void APortalPawn::PrimaryAction()
 {
-	if (PortalGun)
-	{
-		PortalGun->PrimaryAction();
-	}
+
 }
 
 void APortalPawn::TogglePortalType()
 {
-	if (PortalGun)
-	{
-		PortalGun->TogglePortalType();
-	}
+
 }
 
 void APortalPawn::Interact()
 {
-	if (PortalGun)
+	HTR_LOG(Warning, "Start Interact");
+
+	if (!PortalGun)
 	{
-		PortalGun->Interact();
+		HTR_LOG(Warning, "Interact Failed: PortalGun is null");
+		return;
+	}
+
+	if (PortalGun->IsHoldingCube())
+	{
+		PortalGun->Unhold();
+		return;
+	}
+
+	if (!CameraComponent || !GetWorld())
+	{
+		HTR_LOG(Warning, "Interact Failed: No Camera or World");
+		return;
+	}
+
+	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	const FVector RayOrigin = CameraComponent->GetWorldLocation() + (RayDir * 0.5f);
+	const FRay WorldRay{ RayOrigin, RayDir };
+
+	FHitResult HitResult;
+	const bool bHit = GetWorld()->LineTraceSingle(WorldRay, HitResult, nullptr, nullptr, this);
+
+	if (bHit && HitResult.HitComponent)
+	{
+		AActor* HitActor = HitResult.HitComponent->GetOwner();
+		if (HitActor == PortalGun)
+		{
+			HTR_LOG(Warning, "Interact Hit: PortalGun itself hit, ignored");
+			return;
+		}
+
+		HTR_LOG(Warning, "Interact Hit: {}", HitActor ? HitActor->GetName() : "Unknown");
+
+		const float TotalDistance = HitResult.Distance + 0.5f;
+		const float MaxRange = PortalGun->GetPickUpRange();
+
+		if (TotalDistance <= MaxRange)
+		{
+			if (APortalCubeActor* Cube = Cast<APortalCubeActor>(HitActor))
+			{
+				HTR_LOG(Warning, "Try Hold Cube: {}", Cube->GetName());
+				PortalGun->Hold(Cube);
+			}
+			else
+			{
+				HTR_LOG(Warning, "Interact Hit actor is not APortalCubeActor");
+			}
+		}
+		else
+		{
+			HTR_LOG(Warning, "Interact Out of Range: Dist={} > Max={}", TotalDistance, MaxRange);
+		}
+	}
+	else
+	{
+		HTR_LOG(Warning, "Interact Hit nothing");
 	}
 }

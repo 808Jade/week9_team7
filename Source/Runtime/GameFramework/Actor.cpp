@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "Actor.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
@@ -340,7 +340,7 @@ void AActor::OnDefaultSubobjectCreated(UObject* Subobject)
 	if (UActorComponent* Component = Cast<UActorComponent>(Subobject))
 	{
 		Component->SetOwner(this);
-		Components.Add(Component);
+		Components.AddUnique(Component);
 	}
 }
 

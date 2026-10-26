@@ -1,0 +1,5 @@
+# MTL file for pedestal_button_base
+newmtl acmat_0
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd switch.png

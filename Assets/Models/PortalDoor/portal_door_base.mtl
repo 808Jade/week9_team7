@@ -1,0 +1,10 @@
+﻿# MTL file for portal_door_base
+newmtl portal_door_02.001
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd portal_door_02_upscayl_8x_ultramix-balance.png
+
+newmtl portal_door_02
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd portal_door_02_upscayl_8x_ultramix-balance.png
