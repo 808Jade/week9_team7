@@ -67,7 +67,7 @@ APortalActor::APortalActor()
 
 	PortalTrigger = CreateDefaultSubobject<UBoxComponent>("PortalTrigger");
 	PortalTrigger->SetupAttachment(GetRootComponent());
-	PortalTrigger->SetBoxExtent(FVector(1.0f, PortalWidth * 0.45f, PortalHeight * 0.45f));
+	PortalTrigger->SetBoxExtent(FVector(1.0f, PortalWidth * 0.25f, PortalHeight * 0.25f));
 	PortalTrigger->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
 }
 
