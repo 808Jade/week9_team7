@@ -178,6 +178,11 @@ void FViewportsPanel::OnRender() {
 
 		DrawList->AddImage(DisplayTarget->GetSRV(), ViewMin, ViewMax);
 
+		if (OverlayCallback)
+		{
+			OverlayCallback(DrawList, ViewIndex, ViewMin, Rect);
+		}
+
 		// 마우스 클릭 시 활성 뷰포트 설정
 		const bool bViewHovered = bHovered && ImGui::IsMouseHoveringRect(ViewMin, ViewMax);
 		if (bViewHovered && (ImGui::IsMouseClicked(ImGuiMouseButton_Left) ||

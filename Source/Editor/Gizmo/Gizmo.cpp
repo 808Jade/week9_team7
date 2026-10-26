@@ -300,7 +300,7 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 		else
 		{
 			float dx = MousePos.X - DragStartMousePos.X;
-			float dy = DragStartMousePos.Y - MousePos.Y;   // ?붾㈃ Y???꾨옒媛 +
+			float dy = DragStartMousePos.Y - MousePos.Y;   // 화면 Y는 아래가 +
 			float scaleDelta = (dx + dy) * 0.005f;
 
 			float factor = 1.0f + scaleDelta;
@@ -390,7 +390,7 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 		}
 		if (factor < 0.01f) factor = 0.01f;
 
-		// 議곕챸?대㈃ ?ш린??radius留?諛섏쁺?섍퀬 return
+		// 조명이면 여기서 radius만 반영하고 return
 		if (ApplyScaleToLight(factor)) return;
 
 		FVector NewScale = DragStartScale;
@@ -402,7 +402,7 @@ void FGizmo::UpdateDrag(const FRay& MouseRay, const FVector2& MousePos)
 	}
 }
 
-// ?쒕옒洹?異뺤쓣 鍮꾩썙 議곗옉??醫낅즺?쒕떎.
+// 드래그 축을 비워 조작을 종료한다.
 void FGizmo::EndDrag()
 {
 	if (DraggingAxis >= 0)

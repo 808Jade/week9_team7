@@ -34,6 +34,7 @@ public:
 	}
 	AActor* GetTarget() const { return TargetActor; }
 	void SetTargetComponent(UActorComponent* InTargetComponent) { TargetComponent = InTargetComponent; }
+	UActorComponent* GetTargetComponent() const { return TargetComponent; }
 
 	void SetSelectionCallback(DetailsSelectionCallback InCallback) { Callback = InCallback; }
 	void SetDeleteComponentCallback(DetailsDeleteComponentCallback InCallback) { DeleteCallback = InCallback; }
