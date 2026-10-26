@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Editor/EditorUI/EditorPanel.h"
 
 #include "Editor/Gizmo/Gizmo.h"
@@ -15,6 +15,8 @@
 #include "GameFramework/Actor/FireBallActor.h"
 #include "GameFramework/Actor/ProjectileActor.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/Actor/StandButtonActor.h"
+#include "GameFramework/Actor/WeightedButtonActor.h"
 
 class FViewportsPanel;
 
@@ -39,7 +41,7 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[7] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart"};
+	const char* Items[9] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "StandButton", "WeightedButton"};
 
 	FGizmo* Gizmo = nullptr;
 	int32 GizmoSelectedIndex = 0;
@@ -60,6 +62,8 @@ public:
 		AFireBallActor::StaticClass(),
 		AProjectileActor::StaticClass(),
 		APlayerStart::StaticClass(),
+		AStandButtonActor::StaticClass(),
+		AWeightedButtonActor::StaticClass(),
 	};
 
 private:
