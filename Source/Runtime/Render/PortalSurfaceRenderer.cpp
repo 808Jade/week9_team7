@@ -4,6 +4,7 @@
 #include "Render/RenderResourceManager.h"
 #include "Render/Texture2D.h"
 #include "Asset/AssetManager.h"
+#include <chrono>
 
 bool FPortalSurfaceRenderer::EnsureInit()
 {
@@ -25,11 +26,14 @@ void FPortalSurfaceRenderer::Draw(UStaticMesh* Mesh, const FMatrix& World, const
 {
 	if (!Mesh || !Mesh->IndexBuffer || !EnsureInit()) return;
 
+	static const auto StartTime = std::chrono::steady_clock::now();
+	const float Seconds = std::chrono::duration<float>(std::chrono::steady_clock::now() - StartTime).count();
+
 	FPortalSurfaceConstants Constants{};
 	Constants.World = World;
 	Constants.ViewProjection = ViewProjection;
 	Constants.PortalColor = PortalColor;
-	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, Seconds, 0.0f, 0.0f); // y = 시간
 
 	RenderCommand::BindPipelineState(PipelineState);
 	RenderCommand::BindMesh(Mesh);
