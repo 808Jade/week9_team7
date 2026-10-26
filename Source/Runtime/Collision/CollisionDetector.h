@@ -30,4 +30,9 @@ public:
 	static bool SphereSphereSweep(const FSphere& Sphere1, const FTransform& Sphere1Transform, const FSphere& Sphere2, const FTransform& Sphere2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 	static bool SphereBoxSweep(const FSphere& Sphere, const FTransform& SphereTransform, const FBox& Box, const FTransform& BoxTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 	static bool SphereCapsuleSweep(const FSphere& Sphere, const FTransform& SphereTransform, const FCapsule& Capsule, const FTransform& CapsuleTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+
+	static bool BoxBoxSweep(const FBox& Box1, const FTransform& Box1Transform, const FBox& Box2, const FTransform& Box2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+
+	static bool CapsuleCapsuleSweep(const FCapsule& Capsule1, const FTransform& Capsule1Transform, const FCapsule& Capsule2, const FTransform& Capsule2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+	static bool CapsuleBoxSweep(const FCapsule& Capsule, const FTransform& CapsuleTransform, const FBox& Box, const FTransform& BoxTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 };

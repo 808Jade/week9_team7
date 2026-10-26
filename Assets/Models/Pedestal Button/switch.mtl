@@ -1,0 +1,5 @@
+# MTL file for switch
+newmtl acmat_0
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd switch.png

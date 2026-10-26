@@ -34,6 +34,8 @@ DECLARE_DELEGATE(FComponentHitSignature /*OnComponentHit*/, UPrimitiveComponent*
 DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/);
 DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/);
 
+DEFINE_PROPERTY_TYPE(ECollisionResponse, Int)
+
 class UPrimitiveComponent :public USceneComponent
 {
 	DECLARE_CLASS(UPrimitiveComponent, USceneComponent)
@@ -43,6 +45,7 @@ class UPrimitiveComponent :public USceneComponent
 	REFLECT_START(ClassName)
 		PROPERTY(bCastShadow)
 		PROPERTY(bReceiveShadow)
+		PROPERTY(CurrentCollisionResponse)
 		REFLECT_END()
 public:
 	UPrimitiveComponent();

@@ -1,0 +1,15 @@
+# MTL file for arm_interior
+newmtl arm_interior_192_bose
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd arm_interior_192_bose.jpeg
+
+newmtl arm_motionplatform
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd arm_motionplatform.jpeg
+
+newmtl arm_glasstop
+Kd 1.0 1.0 1.0
+d 0.8
+map_Kd arm_glasstop.jpeg

@@ -4,6 +4,7 @@
 #include "Components/FireBallComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 
@@ -11,8 +12,13 @@ AProjectileActor::AProjectileActor()
 {
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bStartWithTickEnabled = false;    
+
     SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
     SetRootComponent(SphereComponent);
+
+    //BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponent");
+    //SetRootComponent(BoxComponent);
+
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMeshComponent");
     StaticMeshComponent->SetupAttachment(GetRootComponent());
     // 이동용 루트는 표시 상태와 분리한다. 숨겨진 메쉬를 부모로 두면 FireBall 자식도 함께 숨겨진다.    
