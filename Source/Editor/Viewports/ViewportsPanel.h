@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Editor/EditorUI/EditorPanel.h"
-#include "Editor/Viewports/EditorViewportClient.h" 
+#include "Editor/Viewports/EditorViewportClient.h"
 #include "Editor/LevelViewportLayout.h"
 #include <functional>
 
@@ -27,6 +27,8 @@ public:
 
 	FVector2 GetContentSize() const { return {ContentSize.x, ContentSize.y}; }
 	FVector2 GetLocalMousePosition() const;
+	// GetLocalMousePosition과 같은 기준(OS 커서 좌표)의 콘텐츠 원점
+	FVector2 GetContentOrigin() const { return {ContentOrigin.x, ContentOrigin.y}; }
 	bool IsHovered() const;
 	bool IsFocused() const { return bFocused; }
 

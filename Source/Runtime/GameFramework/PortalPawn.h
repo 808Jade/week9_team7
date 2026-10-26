@@ -8,6 +8,7 @@ class UBoxComponent;
 class UCameraComponent;
 class APortalGunActor;
 class APlayerStart;
+enum class EPortalType : int32;   // 정의: PortalGunActor.h
 
 class APortalPawn : public APawn
 {
@@ -83,7 +84,8 @@ public:
 	void SetTeleportCooldown(float Duration = 0.2f) { TeleportCooldownTimer = Duration; }
 
 	// 포탈건 액터로 명령 위임
-	virtual void PrimaryAction();
+	virtual void PrimaryAction();     // 좌클릭: 파란 포탈
+	virtual void SecondaryAction();   // 우클릭: 주황 포탈
 	virtual void TogglePortalType();
 	virtual void Interact();
 
@@ -92,6 +94,9 @@ public:
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 
 private:
+	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
+	void FirePortal(EPortalType Type);
+
 	// 컴포넌트
 	USphereComponent* SphereComponent = nullptr; // 루트 물리 콜라이더
 	UBoxComponent* BoxComponent = nullptr;
