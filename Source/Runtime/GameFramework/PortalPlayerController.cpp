@@ -131,15 +131,15 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	{
 		PortalPawn->Jump();
 	}
-	// 마우스 좌클릭: 포탈 발사 (마우스가 게임에 잠겨 있을 때만 발사)
+	// 마우스 좌클릭: 주요 액션 (큐브 들고 있으면 던지기, 빈손이면 포탈 발사)
 	else if (Key == static_cast<int32>(EKeyCode::LButton) && bMouseCaptured)
 	{
-		PortalPawn->FirePortal();
+		PortalPawn->PrimaryAction();
 	}
-	// 마우스 우클릭: 포탈 발사 (마우스가 게임에 잠겨 있을 때만 발사)
+	// 마우스 우클릭: 포탈 타입 변경 (Blue <-> Orange 모드 토글)
 	else if (Key == static_cast<int32>(EKeyCode::RButton) && bMouseCaptured)
 	{
-		PortalPawn->FirePortal();
+		PortalPawn->TogglePortalType();
 	}
 	// E 키: 상호작용 (큐브 잡기/놓기)
 	else if (Key == static_cast<int32>(EKeyCode::E))

@@ -4,12 +4,7 @@
 
 class USphereComponent;
 class UCameraComponent;
-
-enum class PortalType : int32
-{
-	Blue = 0,
-	Orange = 1
-};
+class APortalGunActor;
 
 class APortalPawn : public APawn
 {
@@ -29,6 +24,7 @@ public:
 	APortalPawn();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	// 이동 및 시선 회전 입력
@@ -41,10 +37,12 @@ public:
 	void Jump();
 	bool IsGrounded() const { return bIsGrounded; }
 
-	virtual void FirePortal();
-	virtual void PortalTypeChanged() { CurrentPortalType = CurrentPortalType == PortalType::Blue ? PortalType::Orange : PortalType::Blue; }
+	// 포탈건 액터로 명령 위임
+	virtual void PrimaryAction();
+	virtual void TogglePortalType();
 	virtual void Interact();
 
+	APortalGunActor* GetPortalGun() const { return PortalGun; }
 	USphereComponent* GetSphereComponent() const { return SphereComponent; }
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 
@@ -54,17 +52,18 @@ private:
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
 
 	// 이동 & 시선 파라미터
-	float MoveSpeed = 15.0f;
+	float MoveSpeed = 6.0f;
 	float LookSensitivity = 1.0f;
-	float CollisionRadius = 1.0f;
-	float EyeHeight = 1.6f; // 구 중심에서 카메라 눈높이까지의 높이(Z)
+	float CollisionRadius = 0.5f;
+	float EyeHeight = 1.1f;
 
 	// 중력, 점프
 	bool bEnableGravity = true;
 	float Gravity = 9.8f;
-	float JumpVelocity = 10.0f;
+	float JumpVelocity = 5.5f;
 	float VerticalVelocity = 0.0f;
 	bool bIsGrounded = false;
 
-	PortalType CurrentPortalType = PortalType::Blue;
+	// 보유 중인 포탈건 액터
+	APortalGunActor* PortalGun = nullptr;
 };
