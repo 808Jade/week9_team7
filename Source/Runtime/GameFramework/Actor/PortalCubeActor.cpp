@@ -84,5 +84,6 @@ void APortalCubeActor::UpdateHoldPhysics(const FVector& TargetLocation, const FR
 	
 	const FVector DampingForce = -CurrentVelocity * DampingRatio;
 
+	ProjectileMovementComponent->MaxSpeed = 7.0f;
 	ProjectileMovementComponent->AddForce(SpringForce + DampingForce);
 }

@@ -4,6 +4,7 @@
 #include "Math/Vector.h"
 
 class USphereComponent;
+class UBoxComponent;
 class UCameraComponent;
 class APortalGunActor;
 class APlayerStart;
@@ -93,6 +94,7 @@ public:
 private:
 	// 컴포넌트
 	USphereComponent* SphereComponent = nullptr; // 루트 물리 콜라이더
+	UBoxComponent* BoxComponent = nullptr;
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
 
 	// 이동 파라미터

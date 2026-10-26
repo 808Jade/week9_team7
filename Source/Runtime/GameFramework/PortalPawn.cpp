@@ -3,6 +3,7 @@
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
@@ -17,13 +18,17 @@ APortalPawn::APortalPawn()
 	SetActorEnableCollision(true);
 
 	// 1. 루트 구 콜라이더
-	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-	SetRootComponent(SphereComponent);
-	SphereComponent->SetSphereRadius(CollisionRadius);
+	//SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
+	//SetRootComponent(SphereComponent);
+	//SphereComponent->SetSphereRadius(CollisionRadius);
+
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponet");
+	SetRootComponent(BoxComponent);
+	BoxComponent->SetBoxExtent(FVector(0.5f, 0.5f, 1.5f));
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
-	CameraComponent->SetupAttachment(SphereComponent);
+	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
 	CameraComponent->SetRelativeRotation({ 0.0f, 0.0f, 0.0f });
 
