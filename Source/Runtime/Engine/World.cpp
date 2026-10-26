@@ -12,6 +12,8 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/DefaultPawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PortalPawn.h"
+#include "GameFramework/PortalPlayerController.h"
 #include "Input/InputSystem.h"
 
 #include "UObject/UObjectIterator.h"
@@ -920,6 +922,39 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 void UWorld::BeginPlay()
 {
 	if ((WorldType != EWorldType::PIE && WorldType != EWorldType::Game) || bBegunPlay) return;
+
+	if (!PlayerPawn)
+	{
+		for (ULevel* Level : Levels)
+		{
+			if (!Level) continue;
+			for (AActor* Actor : Level->GetActors())
+			{
+				if (APawn* Pawn = Cast<APawn>(Actor))
+				{
+					PlayerPawn = Pawn;
+					break;
+				}
+			}
+			if (PlayerPawn) break;
+		}
+	}
+	if (!PlayerPawn)
+	{
+		FTransform Transform = MainCamera ? MainCamera->GetActorTransform() : FTransform::Identity;
+		PlayerPawn = SpawnActor<ADefaultPawn>(NAME_None, &Transform);
+	}
+	if (!PlayerController)
+	{
+		if (Cast<APortalPawn>(PlayerPawn))
+			PlayerController = SpawnActor<APortalPlayerController>();
+		else
+			PlayerController = SpawnActor<APlayerController>();
+	}
+	if (PlayerController && PlayerPawn)
+	{
+		PlayerController->Possess(PlayerPawn);
+	}
 	
 
 	
