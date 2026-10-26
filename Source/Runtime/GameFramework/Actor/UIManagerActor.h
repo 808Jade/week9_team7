@@ -4,6 +4,7 @@
 class AHUDCanvasActor;
 class ATitleCanvasActor;
 class APauseCanvasActor;
+class AEndingCanvasActor;
 class ACanvasActor;
 
 enum class EUIMode : uint8
@@ -11,7 +12,8 @@ enum class EUIMode : uint8
 	None,
 	Title,
 	InGame,
-	Pause
+	Pause,
+	Ending
 };
 
 class AUIManagerActor : public AActor
@@ -30,7 +32,7 @@ public:
 	// 어디서든 한 줄로 UI 매니저에 접근할 수 있는 정적 함수
 	static AUIManagerActor* Get() { return Instance; }
 
-	// UI 모드 변경 (InGame, Title, Pause)
+	// UI 모드 변경 (Title, InGame, Pause, Ending)
 	void SetUIMode(EUIMode NewMode);
 	EUIMode GetCurrentUIMode() const { return CurrentMode; }
 
@@ -44,14 +46,31 @@ public:
 	void SetPauseCanvas(APauseCanvasActor* InCanvas);
 	APauseCanvasActor* GetPauseCanvas() const { return PauseCanvas; }
 
+	void SetEndingCanvas(AEndingCanvasActor* InCanvas);
+	AEndingCanvasActor* GetEndingCanvas() const { return EndingCanvas; }
+
+	// 게임 진행 시간 및 타이머 제어
+	float GetElapsedTime() const;
+	FString GetFormattedTime() const;
+	void ResetTimer();
+	void StartTimer();
+	void StopTimer();
+
+	// 크로스헤어 상태 제어
+	void SetCrosshairState(const FString& InState);
+	FString GetCrosshairState() const;
+	void SetCrosshairSize(float InWidth, float InHeight);
+	void SetCrosshairVisibility(bool bVisible);
+
 private:
 	void AutoDiscoverCanvases();
 
 	static AUIManagerActor* Instance;
 
-	EUIMode CurrentMode = EUIMode::InGame;
+	EUIMode CurrentMode = EUIMode::Title; // 기본 시작 모드는 타이틀(시작) 화면
 
 	AHUDCanvasActor* HUDCanvas = nullptr;
 	ATitleCanvasActor* TitleCanvas = nullptr;
 	APauseCanvasActor* PauseCanvas = nullptr;
+	AEndingCanvasActor* EndingCanvas = nullptr;
 };

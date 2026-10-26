@@ -38,6 +38,7 @@ public:
 	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult);
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
+	void ResetPortals();
 
 	UStaticMeshComponent* GetGunMeshComponent() const { return GunMeshComponent; }
 	const bool IsHoldingCube() { return HeldCube != nullptr; }

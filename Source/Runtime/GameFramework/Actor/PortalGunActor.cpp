@@ -99,6 +99,18 @@ void APortalGunActor::Unhold()
 	}
 }
 
+void APortalGunActor::ResetPortals()
+{
+	if (BluePortal)
+	{
+		BluePortal->ResetPortal();
+	}
+	if (OrangePortal)
+	{
+		OrangePortal->ResetPortal();
+	}
+}
+
 void APortalGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 
 #include "Editor/HitoriEd/EditorEngine.h"
 #include "Editor/HitoriEd/EditorUndoManager.h"
@@ -1434,6 +1434,7 @@ void UEditorEngine::DrawPIEWindows()
 // ImGui를 정리한다. UObject 일괄 삭제와 공용 자원·Device 정리는 FEngineLoop가 이어서 한다.
 void UEditorEngine::PreExit()
 {
+	FEditorUndoManager::Get().Clear();
 	EndPlayMap();
 	EditorWorld->ClearWorld();
 	// PIE 창이 열린 채 종료하면 Device가 살아 있을 때 Swapchain과 타깃을 먼저 정리한다.

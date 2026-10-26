@@ -29,7 +29,27 @@ void UUIImageComponent::SubmitToRenderQueue(FRenderQueue& RenderQueue, const FVi
 	const float ViewportWidth = static_cast<float>(ViewContext.Width);
 	const float ViewportHeight = static_cast<float>(ViewContext.Height);
 
-	UIConstants.Rect = FVector4(PosX, PosY, Width, Height);
+	float ActualX = PosX;
+	float ActualY = PosY;
+	float ActualW = Width;
+	float ActualH = Height;
+
+	if (bMatchViewportSize)
+	{
+		// 뷰포트 전체 화면에 맞춤 (좌상단 0,0 ~ 가로/세로 전체)
+		ActualX = 0.0f;
+		ActualY = 0.0f;
+		ActualW = ViewportWidth;
+		ActualH = ViewportHeight;
+	}
+	else if (bCenterOnViewport)
+	{
+		// 뷰포트 중앙에 정확히 배치 (정중앙 + Offset)
+		ActualX = (ViewportWidth - Width) * 0.5f + OffsetX;
+		ActualY = (ViewportHeight - Height) * 0.5f + OffsetY;
+	}
+
+	UIConstants.Rect = FVector4(ActualX, ActualY, ActualW, ActualH);
 	UIConstants.ViewportSize = FVector4(ViewportWidth, ViewportHeight, 0.0f, 0.0f);
 	UIConstants.Color = FLinearColor(
 		Color.R / 255.0f,
