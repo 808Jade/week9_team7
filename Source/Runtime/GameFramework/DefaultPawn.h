@@ -7,7 +7,6 @@ class UCameraComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
 class AProjectileActor;
-class APortalActor;
 
 class ADefaultPawn : public APawn
 {
@@ -39,6 +38,4 @@ private:
 	UStaticMesh* ProjectileMesh = nullptr;
 	std::array<AProjectileActor*, ProjectilePoolSize> Projectiles{};
 	int32 NextProjectileIndex = 0;
-	APortalActor* BluePortal = nullptr; 
-	APortalActor* OrangePortal = nullptr; 
 };

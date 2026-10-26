@@ -36,8 +36,25 @@ public:
     static inline int32 GetMouseDeltaX() { return DeltaX; }
     static inline int32 GetMouseDeltaY() { return DeltaY; }
 
-    static inline int32 GetWheelDelta() 
-    { 
+    // 마우스 잠금 시 커서를 되돌릴 지점(스크린 좌표). 지정하지 않으면 컨트롤러가 창 중앙을 쓴다.
+    // 에디터 PIE가 매 프레임 PIE 뷰 중앙으로 지정한다.
+    static inline void SetMouseLockCenter(int32 ScreenX, int32 ScreenY)
+    {
+        bHasMouseLockCenter = true;
+        MouseLockCenterX = ScreenX;
+        MouseLockCenterY = ScreenY;
+    }
+    static inline void ClearMouseLockCenter() { bHasMouseLockCenter = false; }
+    static inline bool GetMouseLockCenter(int32& OutX, int32& OutY)
+    {
+        if (!bHasMouseLockCenter) return false;
+        OutX = MouseLockCenterX;
+        OutY = MouseLockCenterY;
+        return true;
+    }
+
+    static inline int32 GetWheelDelta()
+    {
         int32 Delta = WheelDelta;
         WheelDelta = 0;
         return Delta;
@@ -57,4 +74,7 @@ private:
     static inline int32 DeltaX = 0, DeltaY = 0;
 
     static inline int32 WheelDelta = 0;
+
+    static inline bool bHasMouseLockCenter = false;
+    static inline int32 MouseLockCenterX = 0, MouseLockCenterY = 0;
 };

@@ -538,7 +538,48 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 
 void APortalPawn::PrimaryAction()
 {
+	// 큐브를 들고 있으면 놓기 (던지기 구현 시 교체)
+	if (PortalGun && PortalGun->IsHoldingCube())
+	{
+		PortalGun->Unhold();
+		return;
+	}
+	FirePortal(EPortalType::Blue);
+}
 
+void APortalPawn::SecondaryAction()
+{
+	if (PortalGun && PortalGun->IsHoldingCube())
+	{
+		return;
+	}
+	FirePortal(EPortalType::Orange);
+}
+
+void APortalPawn::FirePortal(EPortalType Type)
+{
+	if (!PortalGun || !CameraComponent || !GetWorld())
+	{
+		return;
+	}
+
+	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	const FRay WorldRay{ CameraComponent->GetWorldLocation(), RayDir };
+
+	// LineTraceSingle은 ImpactNormal을 채우지 않으므로 반지름 0 SweepSingle 사용
+	FHitResult Hit;
+	if (!GetWorld()->SweepSingle(WorldRay, 1000.0f, 0.0f, Hit, this))
+	{
+		return;
+	}
+
+	// 움직이는 큐브에는 포탈을 붙이지 않는다
+	if (Hit.HitComponent && Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()))
+	{
+		return;
+	}
+
+	PortalGun->FirePortal(Type, Hit);
 }
 
 void APortalPawn::TogglePortalType()
