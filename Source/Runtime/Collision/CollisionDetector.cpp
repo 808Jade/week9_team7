@@ -30,6 +30,17 @@ FContactPoint FCollisionDetector::ComputeContactPoint(const FCollisionShape& Sha
         Result.ContactNormal = -Result.ContactNormal;
         return Result;
     }
+    // Box-Box
+    if(Shape1.IsBox() && Shape2.IsBox())
+    {
+        const FVector& InMax1 = Shape1.GetBox();
+        const FVector& InMin1 = -Shape1.GetBox();
+
+        const FVector& InMax2 = Shape2.GetBox();
+        const FVector& InMin2 = -Shape2.GetBox();
+
+        return BoxBoxContactPoint(FBox(InMin1, InMax1), Shape1Transform, FBox(InMin2, InMax2), Shape2Transform, CullDistance);
+    }
 
     return FContactPoint();
 }
@@ -93,6 +104,84 @@ FContactPoint FCollisionDetector::SphereBoxContactPoint(const FSphere& Sphere, c
     return Result;
 }
 
+FContactPoint FCollisionDetector::BoxBoxContactPoint(const FBox& Box1, const FTransform& Box1Transform, const FBox& Box2, const FTransform& Box2Transform, const float CullDistance)
+{
+    FContactPoint Result;
+
+    const FVector Center1 = Box1Transform.Location;
+    const FVector Center2 = Box2Transform.Location;
+    const FVector Extent1 = Box1.GetExtent();
+    const FVector Extent2 = Box2.GetExtent();
+
+    const FVector Axis1[3] = { Box1Transform.GetForward(), Box1Transform.GetRight(), Box1Transform.GetUp() };
+    const FVector Axis2[3] = { Box2Transform.GetForward(), Box2Transform.GetRight(), Box2Transform.GetUp() };
+    FVector CandidateAxes[15] = {};
+
+    const FVector D = Center1 - Center2;
+
+    // Make candidate axes
+    for(int i = 0; i < 3; i++)
+    {
+        CandidateAxes[i] = Axis1[i];
+        CandidateAxes[i + 3] = Axis2[i];
+
+        for(int j = 0;j < 3;j++)
+        {
+            CandidateAxes[6 + i * 3 + j] = FVector::Cross(Axis1[i], Axis2[j]).Normalized();
+        }
+    }
+
+    // Loop candidate axes
+    float MaxPhi = -FLT_MAX;
+    FVector BestL;
+    float BestR1;
+    for(int i = 0; i < 15;i++)
+    {
+        if(CandidateAxes[i].SizeSquared() <= KINDA_SMALL_NUMBER)
+        {
+            continue;
+        }
+
+        const FVector L = CandidateAxes[i].Normalized();
+        
+        float Dist = std::abs((FVector::Dot(D, L)));
+        float R1 = 0.0f;
+        float R2 = 0.0f;
+        for(int j = 0; j < 3; j++)
+        {
+            R1 += Extent1.V[j] * std::abs(FVector::Dot(Axis1[j], L));
+            R2 += Extent2.V[j] * std::abs(FVector::Dot(Axis2[j], L));
+        }
+        float R = R1 + R2;
+        
+        float PhiL = Dist - R;
+        if(PhiL > CullDistance)
+        {
+            return FContactPoint();
+        }
+
+        if(PhiL > MaxPhi)
+        {
+            MaxPhi = PhiL;
+            BestL = L;
+            BestR1 = R1;
+        }
+    }
+
+    if(FVector::Dot(D, BestL) < 0.0f)
+    {
+        BestL = -BestL;
+    }
+
+    const FVector LocationWorld = Center1 - BestL * BestR1;
+    Result.ContactPoints[0] = Box1Transform.InverseTransformPosition(LocationWorld);
+    Result.ContactPoints[1] = Box2Transform.InverseTransformPosition(LocationWorld - BestL * MaxPhi);
+    Result.ContactNormal = BestL;
+    Result.ContactDepth = MaxPhi;
+
+    return Result;
+}
+
 bool FCollisionDetector::Sweep(const FCollisionShape& Shape1, const FTransform& Shape1Transform, const FCollisionShape& Shape2, const FTransform& Shape2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit)
 {
     // Sphere-Sphere
@@ -121,6 +210,17 @@ bool FCollisionDetector::Sweep(const FCollisionShape& Shape1, const FTransform& 
         OutHit.ImpactPoint = Shape2Transform.Location - OutHit.Normal * Shape2.GetSphereRadius();
 
         return Result;
+    }
+    // Box-Box
+    if(Shape1.IsBox() && Shape2.IsBox())
+    {
+        const FVector& InMax1 = Shape1.GetBox();
+        const FVector& InMin1 = -Shape1.GetBox();
+
+        const FVector& InMax2 = Shape2.GetBox();
+        const FVector& InMin2 = -Shape2.GetBox();
+
+        return BoxBoxSweep(FBox(InMin1, InMax1), Shape1Transform, FBox(InMin2, InMax2), Shape2Transform, SweepDir, SweepLength, OutHit);
     }
 
     return false;
@@ -287,4 +387,135 @@ bool FCollisionDetector::SphereBoxSweep(const FSphere& Sphere, const FTransform&
     OutHit.ImpactPoint = OutHit.Location - OutHit.Normal * Sphere.GetRadius();
 
     return true;
+}
+
+bool FCollisionDetector::BoxBoxSweep(const FBox& Box1, const FTransform& Box1Transform, const FBox& Box2, const FTransform& Box2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit)
+{
+    const FVector Center1 = Box1Transform.Location;
+    const FVector Center2 = Box2Transform.Location;
+    const FVector Extent1 = Box1.GetExtent();
+    const FVector Extent2 = Box2.GetExtent();
+
+    const FVector Axis1[3] = { Box1Transform.GetForward(), Box1Transform.GetRight(), Box1Transform.GetUp() };
+    const FVector Axis2[3] = { Box2Transform.GetForward(), Box2Transform.GetRight(), Box2Transform.GetUp() };
+    FVector CandidateAxes[15] = {};
+
+    const FVector D = Center1 - Center2;
+
+    // Make candidate axes
+    for(int i = 0; i < 3; i++)
+    {
+        CandidateAxes[i] = Axis1[i];
+        CandidateAxes[i + 3] = Axis2[i];
+
+        for(int j = 0;j < 3;j++)
+        {
+            CandidateAxes[6 + i * 3 + j] = FVector::Cross(Axis1[i], Axis2[j]).Normalized();
+        }
+    }
+
+    float LastestStartTime = 0.0f;
+    float EaliestEndtime = FLT_MAX;
+    bool bInitiallyOverlapping = true;
+    float MinPenetration = FLT_MAX;
+    FVector InitialNormal(0.0f);
+    FVector HitNormal(0.0f);  
+
+    for(int i = 0; i < 15;i++)
+    {
+        if(CandidateAxes[i].SizeSquared() <= KINDA_SMALL_NUMBER)
+        {
+            continue;
+        }
+        float Time1, Time2;
+        const FVector L = CandidateAxes[i].Normalized();
+
+        float R1 = 0.0f;
+        float R2 = 0.0f;
+        for(int j = 0; j < 3; j++)
+        {
+            R1 += Extent1.V[j] * std::abs(FVector::Dot(Axis1[j], L));
+            R2 += Extent2.V[j] * std::abs(FVector::Dot(Axis2[j], L));
+        }
+        float R = R1 + R2;
+
+        const float S0 = FVector::Dot(D, L);
+        const float AbsS0 = std::abs(S0);
+        const float V = FVector::Dot(SweepDir, L);
+
+        if(AbsS0 < R && R - AbsS0 < MinPenetration)
+        {
+            InitialNormal = S0 >= 0 ? L : -L;
+            MinPenetration = R - AbsS0;
+        }
+        else if(AbsS0 >= R)
+        {
+            bInitiallyOverlapping = false;
+        }
+
+        const bool bParallel = FMath::IsNearlyZero(V);
+        if(bParallel)
+        {
+            if(AbsS0 > R)
+            {
+                return false;
+            }
+            else
+            {
+                Time1 = 0.0f;
+                Time2 = FLT_MAX;
+            }
+        }
+        else
+        {
+            const float InvV = 1.0f / V;
+            Time1 = (-R - S0) * InvV;
+            Time2 = (R - S0) * InvV;
+        }
+
+        FVector CurNormal = V > 0 ? -L : L;
+
+        if(Time1 > Time2)
+        {
+            std::swap(Time1, Time2);
+        }
+
+        if(Time1 > LastestStartTime || (AbsS0 >= R && Time1 >= LastestStartTime))
+        {
+            HitNormal = CurNormal;
+        }
+        LastestStartTime = FMath::Max(LastestStartTime, Time1);
+        EaliestEndtime = FMath::Min(EaliestEndtime, Time2);
+
+        if(LastestStartTime > EaliestEndtime)
+        {
+            return false; // Outside
+        }
+
+        if(LastestStartTime > SweepLength || EaliestEndtime < 0.0f)
+        {
+            return false; // Outside
+        }
+    }
+
+    if(bInitiallyOverlapping)
+    {
+        OutHit.bStartPentrating = true;
+        OutHit.Time = 0.0f;
+        OutHit.Distance = 0.0f;
+        OutHit.Location = Center1;
+        OutHit.PenetrationDepth = MinPenetration;
+        OutHit.Normal = InitialNormal;
+        OutHit.ImpactNormal = OutHit.Normal;
+        return true;
+    }
+    else
+    {
+        OutHit.Distance = LastestStartTime;
+        OutHit.Time = LastestStartTime / SweepLength;
+        OutHit.Location = Center1 + SweepDir * LastestStartTime;
+        OutHit.Normal = HitNormal;
+        OutHit.ImpactNormal = OutHit.Normal;
+        return true;
+    }
 }

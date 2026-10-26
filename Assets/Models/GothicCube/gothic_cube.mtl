@@ -1,0 +1,6 @@
+# MTL file for gothic_cube
+newmtl material0
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd g-cube.jpg
+map_bump g-cube_normal.jpg
