@@ -29,4 +29,5 @@ public:
 
 	static bool SphereSphereSweep(const FSphere& Sphere1, const FTransform& Sphere1Transform, const FSphere& Sphere2, const FTransform& Sphere2Transform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 	static bool SphereBoxSweep(const FSphere& Sphere, const FTransform& SphereTransform, const FBox& Box, const FTransform& BoxTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
+	static bool SphereCapsuleSweep(const FSphere& Sphere, const FTransform& SphereTransform, const FCapsule& Capsule, const FTransform& CapsuleTransform, const FVector& SweepDir, const float SweepLength, FHitResult& OutHit);
 };

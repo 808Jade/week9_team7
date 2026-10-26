@@ -186,10 +186,7 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 		SetWorldLocationAndRotation(NewLocation, NewRotation.ToFRotator(), false);
 	}
 
-	if(CurrentCollisionResponse != ECollisionResponse::NoCollision)
-	{
-		UpdateOverlaps();
-	}
+	UpdateOverlaps();
 
 	if(BlockingHit.bBlockingHit && BlockingHit.HitComponent)
 	{
@@ -221,6 +218,7 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 
 void UPrimitiveComponent::PostEditChangeProperty(const FProperty& Property)
 {
+	Super::PostEditChangeProperty(Property);
 	if (Property.Name == "bCastShadow" ||
 		Property.Name == "bReceiveShadow")
 	{

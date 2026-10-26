@@ -126,5 +126,5 @@ public:
 private:
 	TArray<UPrimitiveComponent*> OverlappingComponents;
 	
-	ECollisionResponse CurrentCollisionResponse = ECollisionResponse::Block;
+	ECollisionResponse CurrentCollisionResponse = ECollisionResponse::NoCollision;
 };
