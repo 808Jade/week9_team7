@@ -1,6 +1,7 @@
 #include "EnginePCH.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 #include "Math/Frustum.h"
@@ -55,7 +56,7 @@ namespace
 
 APortalActor::APortalActor()
 {
-	SetActorEnableCollision(false);   // 포탈건 레이가 기존 포탈에 맞지 않고 뒤의 벽에 맞도록
+	SetActorEnableCollision(true);   // 포탈건 레이가 기존 포탈에 맞지 않고 뒤의 벽에 맞도록
 
 	PortalMesh = CreateDefaultSubobject<UStaticMeshComponent>("PortalMeshComponent");
 	PortalMesh->SetupAttachment(GetRootComponent());
@@ -63,6 +64,11 @@ APortalActor::APortalActor()
 	PortalMesh->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f)); // 법선 +Z → +X
 	PortalMesh->SetRelativeScale3D(FVector(PortalHeight, PortalWidth, 1.0f));
 	PortalMesh->SetVisibility(false);   // 일반 경로에선 영구히 안 그림
+
+	PortalTrigger = CreateDefaultSubobject<UBoxComponent>("PortalTrigger");
+	PortalTrigger->SetupAttachment(GetRootComponent());
+	PortalTrigger->SetBoxExtent(FVector(1.0f, PortalWidth * 0.45f, PortalHeight * 0.45f));
+	PortalTrigger->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
 }
 
 void APortalActor::SpawnPair(UWorld* World, APortalActor*& OutBlue, APortalActor*& OutOrange)
@@ -222,4 +228,55 @@ void APortalActor::DrawPortalSurfaces(UWorld* World, const FSceneView& MainView)
 			Texture,
 			Portal->PortalColor);
 	}
+}
+
+FMatrix APortalActor::GetTeleportMatrix() const
+{
+	if(!LinkedPortal)
+	{
+		return FMatrix::Identity;
+	}
+
+	static const FMatrix Flip(
+		-1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
+
+	return GetPortalMatrix().Inverse() * Flip * LinkedPortal->GetPortalMatrix();
+}
+
+bool APortalActor::IsPointWithinPortalBounds(const FVector& Point) const
+{
+	const FVector Local = GetPortalMatrix().Inverse().TransformPosition(Point);
+
+	return (std::abs(Local.Y) <= (PortalWidth * 0.5f)) &&
+		(std::abs(Local.Z) <= (PortalHeight * 0.5f));
+}
+
+bool APortalActor::Checkcrossing(const FVector& PrevPos, const FVector& CurPos) const
+{
+	if(!IsActive())
+	{
+		return false;
+	}
+
+	const float DPrev = GetDistanceToPlane(PrevPos);
+	const float DCur = GetDistanceToPlane(CurPos);
+
+	if(DPrev > 0.0f && DCur <= 0.0f)
+	{
+		// 평면과 교차한 지점 계산
+		const float T = DPrev / (DPrev - DCur);
+		const FVector IntersectPoint = PrevPos + (CurPos - PrevPos) * T;
+		return IsPointWithinPortalBounds(IntersectPoint);
+	}
+
+	return false;
+}
+
+float APortalActor::GetDistanceToPlane(const FVector& Point) const
+{
+	const FVector Normal = GetPortalNormal();
+	return FVector::Dot(Point - GetActorLocation(), Normal);
 }

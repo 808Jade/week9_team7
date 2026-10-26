@@ -1,6 +1,7 @@
 ﻿#include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
+#include "GameFramework/Actor/PortalActor.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
@@ -56,19 +57,19 @@ void APortalPawn::BeginPlay()
 	InitialSpawnRotation = GetActorRotation();
 
 	// 씬에 PlayerStart가 존재하면 시작 위치와 회전을 PlayerStart에 맞춤
-	if (GetWorld() && GetWorld()->GetPersistentLevel())
+	if(GetWorld() && GetWorld()->GetPersistentLevel())
 	{
-		for (AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
+		for(AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
 		{
-			if (APlayerStart* Start = Cast<APlayerStart>(Actor))
+			if(APlayerStart* Start = Cast<APlayerStart>(Actor))
 			{
 				InitialSpawnLocation = Start->GetSpawnLocation();
 				InitialSpawnRotation = Start->GetSpawnRotation();
-				if (GetRootComponent())
+				if(GetRootComponent())
 				{
 					GetRootComponent()->SetWorldLocationAndRotation(InitialSpawnLocation, FRotator(0.0f, InitialSpawnRotation.Yaw, 0.0f), false);
 				}
-				if (CameraComponent)
+				if(CameraComponent)
 				{
 					CameraComponent->SetRelativeRotation(FRotator(InitialSpawnRotation.Pitch, 0.0f, 0.0f));
 				}
@@ -77,10 +78,10 @@ void APortalPawn::BeginPlay()
 		}
 	}
 
-	if (CameraComponent)
+	if(CameraComponent)
 	{
 		DefaultFOV = CameraComponent->GetFieldOfView();
-		if (DefaultFOV <= 0.0f)
+		if(DefaultFOV <= 0.0f)
 		{
 			DefaultFOV = 60.0f;
 		}
@@ -88,13 +89,20 @@ void APortalPawn::BeginPlay()
 	}
 
 	// 게임 시작 시 포탈건 액터 스폰 및 카메라에 장착
-	if (GetWorld() && !PortalGun)
+	if(GetWorld() && !PortalGun)
 	{
 		PortalGun = GetWorld()->SpawnActor<APortalGunActor>();
-		if (PortalGun)
+		if(PortalGun)
 		{
 			PortalGun->AttachToPawn(this);
 		}
+	}
+
+	if(BoxComponent)
+	{
+		BoxComponent->SetCurrentCollisionResponse(ECollisionResponse::Block);
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APortalPawn::OnBeginOverlap);
+		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &APortalPawn::OnEndOverlap);
 	}
 }
 
@@ -315,13 +323,35 @@ void APortalPawn::Tick(float DeltaTime)
 	if (GetRootComponent())
 	{
 		// 7-A. 수평 이동, 계단 넘기(Step-Up), 벽면 미끄러짐(Wall Slide)
+		const FVector PreMoveLocation = GetActorLocation();
+		APortalActor* TargetPortal = (CurrentOverlappingPortal && CurrentOverlappingPortal->IsActive()) ? CurrentOverlappingPortal : nullptr;
+
+		const bool bInPortal = (TargetPortal != nullptr);
+
+		bool bInWallPortal = false;
+		bool bInFloorPortal = false;
+
+		if(TargetPortal)
+		{
+			const FVector Normal = TargetPortal->GetPortalNormal();
+			if(std::abs(Normal.Z) > 0.7f)
+			{
+				bInFloorPortal = true; // 바닥 또는 천장 포탈
+			}
+			else
+			{
+				bInWallPortal = true;  // 일반 벽 포탈
+			}
+		}
+
 		const FVector HorizontalDelta(Velocity.X * DeltaTime, Velocity.Y * DeltaTime, 0.0f);
 		if (HorizontalDelta.SizeSquared() > 1e-8f)
 		{
 			FHitResult Hit;
-			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), true, &Hit);
+			const bool bSweepHoriz = !bInWallPortal;
+			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), !bInPortal, &Hit);
 
-			if (Hit.bBlockingHit)
+			if (bSweepHoriz && Hit.bBlockingHit)
 			{
 				bool bSteppedUp = false;
 
@@ -379,9 +409,10 @@ void APortalPawn::Tick(float DeltaTime)
 		if (VerticalDelta.SizeSquared() > 1e-8f)
 		{
 			FHitResult Hit;
-			GetRootComponent()->MoveComponent(VerticalDelta, GetActorRotation(), true, &Hit);
+			const bool bSweepVert = !bInFloorPortal;
+			GetRootComponent()->MoveComponent(VerticalDelta, GetActorRotation(), bSweepVert, &Hit);
 
-			if (Hit.bBlockingHit)
+			if (bSweepVert && Hit.bBlockingHit)
 			{
 				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
 				{
@@ -403,10 +434,38 @@ void APortalPawn::Tick(float DeltaTime)
 					Velocity.Z = 0.0f;
 				}
 			}
+			else if(bInFloorPortal)
+			{
+				// 바닥 포탈 구멍에 들어섰으므로 착지 상태 해제 (낙하 가속)
+				bIsGrounded = false;
+			}
 			else
 			{
-				// 허공을 통과함 -> 낙하 중 (공중 상태)
 				bIsGrounded = false;
+			}
+		}
+
+		if(TargetPortal && TargetPortal->IsActive() && CanTeleport())
+		{
+			const FVector PostMoveLocation = GetActorLocation();
+
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation))
+			{
+				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
+				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
+
+				FVector NewLocation = TelportMatrix.TransformPosition(PostMoveLocation);
+				NewLocation += ExitPortal->GetPortalNormal() * 0.10f;
+
+				FVector NewVelocity = TelportMatrix.TransformVector(Velocity);
+				
+				FRotator CamWorldRot = GetActorRotation() + CameraComponent->GetRelativeRotation();
+				FMatrix NewCamWorldMat = CamWorldRot.Quaternion().ToFMatrix() * TelportMatrix;
+				FRotator NewCamRotation = MatrixToRotator(NewCamWorldMat);
+
+				TeleportThroughPortal(NewLocation, NewCamRotation, NewVelocity);
+				SetTeleportCooldown(0.15f);
+				CurrentOverlappingPortal = nullptr;
 			}
 		}
 	}
@@ -574,12 +633,34 @@ void APortalPawn::FirePortal(EPortalType Type)
 	}
 
 	// 움직이는 큐브에는 포탈을 붙이지 않는다
-	if (Hit.HitComponent && Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()))
+	if (Hit.HitComponent)
 	{
-		return;
+		if(Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()) || Cast<APortalActor>(Hit.HitComponent->GetOwner()))
+		{
+			return;
+		}
 	}
 
 	PortalGun->FirePortal(Type, Hit);
+}
+
+void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(APortalActor* Portal = Cast<APortalActor>(OtherActor))
+	{
+		if(Portal->IsActive())
+		{
+			CurrentOverlappingPortal = Portal;
+		}
+	}
+}
+
+void APortalPawn::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp)
+{
+	if(OtherActor == CurrentOverlappingPortal)
+	{
+		CurrentOverlappingPortal = nullptr;
+	}
 }
 
 void APortalPawn::TogglePortalType()
