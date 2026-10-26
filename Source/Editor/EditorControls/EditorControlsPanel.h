@@ -72,7 +72,7 @@ public:
 		APortalCubeActor::StaticClass(),
 		APortalGunActor::StaticClass(),
 		APortalActor::StaticClass(),
-		AMapCubeActor::StaticClass()
+		AMapCubeActor::StaticClass(),
 		AStandButtonActor::StaticClass(),
 		AWeightedButtonActor::StaticClass(),
 		ADoorActor::StaticClass(),
