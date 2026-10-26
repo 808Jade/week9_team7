@@ -69,8 +69,6 @@ void AWeightedButtonActor::PressButton()
     if (!bIsPressed)
     {
         Super::PressButton();
-        OnButtonPressed.Broadcast(true);
-
         HTR_LOG(Info, "[WeightedButton] Pressed! (Objects: {})", OverlappingActors.Num());
     }
 }
@@ -80,8 +78,6 @@ void AWeightedButtonActor::ReleaseButton()
     if (bIsPressed)
     {
         Super::ReleaseButton();
-        OnButtonPressed.Broadcast(false);
-
         HTR_LOG(Info, "[WeightedButton] Released!");
     }
 }

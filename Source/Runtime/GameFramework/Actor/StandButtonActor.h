@@ -1,8 +1,6 @@
 #pragma once
 #include "ButtonActorBase.h"
 
-DECLARE_DELEGATE(FOnButtonPressed, bool)
-
 class AStandButtonActor : public AButtonActorBase
 {
     DECLARE_CLASS(AStandButtonActor, AButtonActorBase)
@@ -21,8 +19,6 @@ public:
 
     virtual void PressButton() override;
     virtual void ReleaseButton() override;
-
-    FOnButtonPressed OnButtonPressed;
 
 protected:
     float ResetDelay = 3.0f;

@@ -46,18 +46,35 @@ void AStandButtonActor::BeginPlay()
 void AStandButtonActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (bIsPressed && ResetDelay > 0.0f)
+    {
+        CurrentResetTimer += DeltaTime;
+        if (CurrentResetTimer >= ResetDelay)
+        {
+            ReleaseButton();
+            CurrentResetTimer = 0.0f;
+        }
+    }
 }
 
 void AStandButtonActor::Interact(AActor* Interactor)
 {
+    if (!bIsPressed)
+    {
+        PressButton();
+        CurrentResetTimer = 0.0f;
+    }
 }
 
 void AStandButtonActor::PressButton()
 {
     Super::PressButton();
+    HTR_LOG(Info, "[StandButton] Pressed!");
 }
 
 void AStandButtonActor::ReleaseButton()
 {
     Super::ReleaseButton();
+    HTR_LOG(Info, "[StandButton] Released (Reset)!");
 }

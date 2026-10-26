@@ -55,10 +55,18 @@ void AButtonActorBase::Tick(float DeltaTime)
 
 void AButtonActorBase::PressButton()
 {
-    bIsPressed = true;
+    if (!bIsPressed)
+    {
+        bIsPressed = true;
+        OnButtonPressed.Broadcast(true);
+    }
 }
 
 void AButtonActorBase::ReleaseButton()
 {
-    bIsPressed = false;
+    if (bIsPressed)
+    {
+        bIsPressed = false;
+        OnButtonPressed.Broadcast(false);
+    }
 }

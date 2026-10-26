@@ -1,8 +1,5 @@
 #pragma once
 #include "ButtonActorBase.h"
-#include "Core/Delegate.h"
-
-DECLARE_DELEGATE(FOnButtonPressed, bool)
 
 class AWeightedButtonActor : public AButtonActorBase
 {
@@ -18,8 +15,6 @@ public:
     virtual void ReleaseButton() override;
 
     int32 GetOverlappingActorCount() const { return OverlappingActors.Num(); }
-
-    FOnButtonPressed OnButtonPressed;
 
 protected:
     // TriggerBox 오버랩 콜백

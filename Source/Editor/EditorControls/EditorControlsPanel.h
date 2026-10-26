@@ -17,6 +17,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/Actor/StandButtonActor.h"
 #include "GameFramework/Actor/WeightedButtonActor.h"
+#include "GameFramework/Actor/DoorActor.h"
 
 class FViewportsPanel;
 
@@ -41,7 +42,7 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[9] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "StandButton", "WeightedButton"};
+	const char* Items[10] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "StandButton", "WeightedButton", "Door"};
 
 	FGizmo* Gizmo = nullptr;
 	int32 GizmoSelectedIndex = 0;
@@ -64,6 +65,7 @@ public:
 		APlayerStart::StaticClass(),
 		AStandButtonActor::StaticClass(),
 		AWeightedButtonActor::StaticClass(),
+		ADoorActor::StaticClass(),
 	};
 
 private:
@@ -73,4 +75,3 @@ private:
     void DrawCameraProperties();
 	std::function<bool()> IsPlayingQuery;
 };
-

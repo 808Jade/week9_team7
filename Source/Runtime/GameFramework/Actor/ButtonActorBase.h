@@ -2,6 +2,9 @@
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
+#include "Core/Delegate.h"
+
+DECLARE_DELEGATE(FOnButtonPressed, bool)
 
 class AButtonActorBase : public AActor
 {
@@ -25,9 +28,11 @@ public:
 
 	bool IsPressed() const { return bIsPressed; }
 
+	FOnButtonPressed OnButtonPressed;
+
 protected:
 	bool bIsPressed = false;
-	float PressDepth = 0.1f;       // 눌리는 깊이 (기본 5.0f)
+	float PressDepth = 0.1f;       // 눌리는 깊이 (기본 0.1f)
 	float InterpSpeed = 10.0f;     // 눌리고 복구되는 보간 속도
 	FVector InitialButtonLocation = FVector::ZeroVector; // 초기 버튼 높이
 
