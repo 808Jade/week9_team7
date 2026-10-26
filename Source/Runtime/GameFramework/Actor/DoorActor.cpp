@@ -127,20 +127,26 @@ void ADoorActor::Tick(float DeltaTime)
     float Alpha = std::clamp(OpenSpeed * DeltaTime, 0.0f, 1.0f);
 
     FVector CurrentLeft = LeftDoorMesh->GetRelativeLocation();
-    CurrentLeft.Y += (TargetLeftLoc.Y - CurrentLeft.Y) * Alpha;
-    if (std::abs(CurrentLeft.Y - TargetLeftLoc.Y) < 0.001f)
+    if (std::abs(CurrentLeft.Y - TargetLeftLoc.Y) > 0.0001f)
     {
-        CurrentLeft.Y = TargetLeftLoc.Y;
+        CurrentLeft.Y += (TargetLeftLoc.Y - CurrentLeft.Y) * Alpha;
+        if (std::abs(CurrentLeft.Y - TargetLeftLoc.Y) < 0.001f)
+        {
+            CurrentLeft.Y = TargetLeftLoc.Y;
+        }
+        LeftDoorMesh->SetRelativeLocation(CurrentLeft);
     }
-    LeftDoorMesh->SetRelativeLocation(CurrentLeft);
 
     FVector CurrentRight = RightDoorMesh->GetRelativeLocation();
-    CurrentRight.Y += (TargetRightLoc.Y - CurrentRight.Y) * Alpha;
-    if (std::abs(CurrentRight.Y - TargetRightLoc.Y) < 0.001f)
+    if (std::abs(CurrentRight.Y - TargetRightLoc.Y) > 0.0001f)
     {
-        CurrentRight.Y = TargetRightLoc.Y;
+        CurrentRight.Y += (TargetRightLoc.Y - CurrentRight.Y) * Alpha;
+        if (std::abs(CurrentRight.Y - TargetRightLoc.Y) < 0.001f)
+        {
+            CurrentRight.Y = TargetRightLoc.Y;
+        }
+        RightDoorMesh->SetRelativeLocation(CurrentRight);
     }
-    RightDoorMesh->SetRelativeLocation(CurrentRight);
 
     // 자식 컴포넌트인 LeftDoorCollision과 RightDoorCollision은
     // 부모인 LeftDoorMesh / RightDoorMesh를 따라 자동으로 함께 좌우로 물러납니다.

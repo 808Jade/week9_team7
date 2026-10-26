@@ -4,172 +4,6 @@
         "PersistentLevel": {
             "Actors": [
                 {
-                    "Class": "ADirectionalLightActor",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UDirectionalLightComponent",
-                            "Name": "UDirectionalLightComponent",
-                            "Parent": "",
-                            "Properties": {
-                                "AngularRadiusDegrees": 0.5,
-                                "Intensity": 0.0,
-                                "LightColor": 4294967295,
-                                "ShadowBias": 0.009999999776482582,
-                                "ShadowResolutionScale": 1.0,
-                                "ShadowSharpen": 0.0,
-                                "ShadowSlopeBias": 0.009999999776482582,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 7.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 30.00000762939453,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadows": true,
-                                "bHiddenInGame": false,
-                                "bVisible": false
-                            }
-                        },
-                        {
-                            "Class": "UBillboardComponent",
-                            "Material": {
-                                "Base": "BillboardMaterial",
-                                "Instance": {
-                                    "BaseColor": {
-                                        "W": 1.0,
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "BlendState": "AlphaBlend",
-                                    "FlipNormalY": false,
-                                    "PSOType": 14,
-                                    "Properties": {},
-                                    "SamplerState": "LinearClamp",
-                                    "Shininess": 32.0,
-                                    "SpecularColor": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "Textures": [
-                                        "Assets/Icons/Directional.png"
-                                    ],
-                                    "UVScrollSpeed": [
-                                        0.0,
-                                        0.0
-                                    ]
-                                }
-                            },
-                            "Name": "UBillboardComponent",
-                            "Parent": "UDirectionalLightComponent",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": true,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "UArrowComponent",
-                            "OverrideMaterials": [
-                                {
-                                    "Asset": "EditorArrowMaterial"
-                                }
-                            ],
-                            "Parent": "UDirectionalLightComponent",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Arrow",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 90.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 0.30000001192092896,
-                                        "Y": 0.30000001192092896,
-                                        "Z": 0.5
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": true,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        }
-                    ],
-                    "Name": "ADirectionalLightActor_0",
-                    "Properties": {
-                        "bActorEnableCollision": true
-                    }
-                },
-                {
                     "Class": "ASkyLightActor",
                     "Components": [
                         {
@@ -545657,7 +545491,7 @@
                             "Properties": {
                                 "AttenuationRadius": 21.5,
                                 "InnerConeAngle": 19.0,
-                                "Intensity": 6.5,
+                                "Intensity": 17.399999618530273,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
                                 "OuterConeAngle": 72.4000015258789,
@@ -546131,7 +545965,7 @@
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -546161,14 +545995,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
                                 "AttenuationRadius": 27.200000762939453,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 1.0,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -546181,7 +546017,7 @@
                                         "Z": 10.0
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 89.98023223876953,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -546220,7 +546056,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -546229,7 +546065,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -546255,15 +546091,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_0",
+                    "Name": "ASpotLightActor_1",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -546293,14 +546165,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
                                 "AttenuationRadius": 41.20000076293945,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 7.900000095367432,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -546313,7 +546187,7 @@
                                         "Z": 19.0
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 59.980220794677734,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -546352,7 +546226,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -546361,7 +546235,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -546387,15 +546261,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_0_1",
+                    "Name": "ASpotLightActor_2",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -546425,14 +546335,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
                                 "AttenuationRadius": 41.20000076293945,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 7.900000095367432,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -546440,12 +546352,12 @@
                                 "SourceRadius": 0.019999999552965164,
                                 "Transform": {
                                     "Location": {
-                                        "X": 45.0,
+                                        "X": 44.996891021728516,
                                         "Y": 2.0,
-                                        "Z": 19.0
+                                        "Z": 28.0
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 89.98023223876953,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -546484,7 +546396,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -546493,7 +546405,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -546519,15 +546431,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_0_1_2",
+                    "Name": "ASpotLightActor_3",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -546557,14 +546505,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
                                 "AttenuationRadius": 61.70000076293945,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 1.0,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -546572,12 +546522,12 @@
                                 "SourceRadius": 0.019999999552965164,
                                 "Transform": {
                                     "Location": {
-                                        "X": 50.0,
+                                        "X": 49.998619079589844,
                                         "Y": 0.0,
-                                        "Z": 3.0
+                                        "Z": 7.0
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 89.98023223876953,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -546616,7 +546566,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -546625,7 +546575,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -546651,15 +546601,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_3",
+                    "Name": "ASpotLightActor_4",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -546689,14 +546675,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
                                 "AttenuationRadius": 58.5,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 1.0,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -546704,276 +546692,12 @@
                                 "SourceRadius": 0.019999999552965164,
                                 "Transform": {
                                     "Location": {
-                                        "X": 57.0,
-                                        "Y": 2.0,
-                                        "Z": 17.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadows": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UBillboardComponent",
-                            "Material": {
-                                "Base": "BillboardMaterial",
-                                "Instance": {
-                                    "BaseColor": {
-                                        "W": 1.0,
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "BlendState": "AlphaBlend",
-                                    "FlipNormalY": false,
-                                    "PSOType": 14,
-                                    "Properties": {},
-                                    "SamplerState": "LinearClamp",
-                                    "Shininess": 32.0,
-                                    "SpecularColor": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "Textures": [
-                                        "Assets/Icons/Point.png"
-                                    ],
-                                    "UVScrollSpeed": [
-                                        0.0,
-                                        0.0
-                                    ]
-                                }
-                            },
-                            "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": true,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        }
-                    ],
-                    "Name": "APointLightActor_4",
-                    "Properties": {
-                        "bActorEnableCollision": true
-                    }
-                },
-                {
-                    "Class": "APointLightActor",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
-                            "Parent": "",
-                            "Properties": {
-                                "AttenuationRadius": 58.5,
-                                "Intensity": 1.0,
-                                "LightColor": 4294967295,
-                                "LightFalloffExponent": 1.0,
-                                "ShadowBias": 0.009999999776482582,
-                                "ShadowResolutionScale": 1.0,
-                                "ShadowSharpen": 0.0,
-                                "ShadowSlopeBias": 0.009999999776482582,
-                                "SourceRadius": 0.019999999552965164,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 66.0,
-                                        "Y": 3.0,
-                                        "Z": 17.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadows": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UBillboardComponent",
-                            "Material": {
-                                "Base": "BillboardMaterial",
-                                "Instance": {
-                                    "BaseColor": {
-                                        "W": 1.0,
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "BlendState": "AlphaBlend",
-                                    "FlipNormalY": false,
-                                    "PSOType": 14,
-                                    "Properties": {},
-                                    "SamplerState": "LinearClamp",
-                                    "Shininess": 32.0,
-                                    "SpecularColor": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    },
-                                    "Textures": [
-                                        "Assets/Icons/Point.png"
-                                    ],
-                                    "UVScrollSpeed": [
-                                        0.0,
-                                        0.0
-                                    ]
-                                }
-                            },
-                            "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": true,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        }
-                    ],
-                    "Name": "APointLightActor_4_5",
-                    "Properties": {
-                        "bActorEnableCollision": true
-                    }
-                },
-                {
-                    "Class": "APointLightActor",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
-                            "Parent": "",
-                            "Properties": {
-                                "AttenuationRadius": 89.19999694824219,
-                                "Intensity": 5.900000095367432,
-                                "LightColor": 4294967295,
-                                "LightFalloffExponent": 1.0,
-                                "ShadowBias": 0.009999999776482582,
-                                "ShadowResolutionScale": 1.0,
-                                "ShadowSharpen": 0.0,
-                                "ShadowSlopeBias": 0.009999999776482582,
-                                "SourceRadius": 0.019999999552965164,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 81.0,
+                                        "X": 56.997581481933594,
                                         "Y": 2.0,
                                         "Z": 24.0
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 89.98023223876953,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -547012,7 +546736,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -547021,7 +546745,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -547047,15 +546771,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_4_5_6",
+                    "Name": "ASpotLightActor_5",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -547085,14 +546845,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
-                                "AttenuationRadius": 47.79999923706055,
+                                "AttenuationRadius": 58.5,
+                                "InnerConeAngle": 25.0,
                                 "Intensity": 1.0,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -547100,12 +546862,12 @@
                                 "SourceRadius": 0.019999999552965164,
                                 "Transform": {
                                     "Location": {
-                                        "X": 76.0,
-                                        "Y": 0.0,
-                                        "Z": 3.0
+                                        "X": 63.87484359741211,
+                                        "Y": 3.0,
+                                        "Z": 28.120588302612305
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 44.980220794677734,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -547144,7 +546906,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -547153,7 +546915,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -547179,15 +546941,51 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_7",
+                    "Name": "ASpotLightActor_4_5",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
                 },
                 {
-                    "Class": "APointLightActor",
+                    "Class": "ASpotLightActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -547217,14 +547015,16 @@
                             }
                         },
                         {
-                            "Class": "UPointLightComponent",
-                            "Name": "UPointLightComponent",
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
                             "Parent": "",
                             "Properties": {
-                                "AttenuationRadius": 47.79999923706055,
-                                "Intensity": 1.0,
+                                "AttenuationRadius": 89.19999694824219,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 5.900000095367432,
                                 "LightColor": 4294967295,
                                 "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
@@ -547232,12 +547032,12 @@
                                 "SourceRadius": 0.019999999552965164,
                                 "Transform": {
                                     "Location": {
-                                        "X": 84.0,
+                                        "X": 74.99930572509766,
                                         "Y": 2.0,
-                                        "Z": 17.0
+                                        "Z": 25.997928619384766
                                     },
                                     "Rotation": {
-                                        "Pitch": 0.0,
+                                        "Pitch": 89.98023223876953,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -547276,7 +547076,7 @@
                                         "Z": 1.0
                                     },
                                     "Textures": [
-                                        "Assets/Icons/Point.png"
+                                        "Assets/Icons/Spot.png"
                                     ],
                                     "UVScrollSpeed": [
                                         0.0,
@@ -547285,7 +547085,7 @@
                                 }
                             },
                             "Name": "UBillboardComponent",
-                            "Parent": "UPointLightComponent",
+                            "Parent": "USpotLightComponent",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
                                 "Transform": {
@@ -547311,9 +547111,1065 @@
                                 "bReceiveShadow": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
                         }
                     ],
-                    "Name": "APointLightActor_7_8",
+                    "Name": "ASpotLightActor_4_5_6",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 47.79999923706055,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 1.0,
+                                "LightColor": 4294902015,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 73.87794494628906,
+                                        "Y": 0.0,
+                                        "Z": 5.120588302612305
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 44.98024368286133,
+                                        "Roll": -0.0,
+                                        "Yaw": -0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_7",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 47.79999923706055,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 18.299999237060547,
+                                "LightColor": 4294967295,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 86.12059020996094,
+                                        "Y": 2.0,
+                                        "Z": 19.122053146362305
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 45.01978302001953,
+                                        "Roll": 180.0000457763672,
+                                        "Yaw": 180.0000457763672
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_7_8",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 54.900001525878906,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 27.600000381469727,
+                                "LightColor": 4294967295,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 99.0,
+                                        "Y": 0.0,
+                                        "Z": 25.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 89.98023223876953,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_6",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 75.5999984741211,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 10.699999809265137,
+                                "LightColor": 4278255360,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 111.0,
+                                        "Y": 0.0,
+                                        "Z": 18.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 89.98023223876953,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_8",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 75.5999984741211,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 121.5,
+                                "LightColor": 4278255360,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 118.0,
+                                        "Y": -1.0,
+                                        "Z": 19.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 89.98023223876953,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_2_3",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "ASpotLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USpotLightComponent",
+                            "Name": "USpotLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "AttenuationRadius": 61.70000076293945,
+                                "InnerConeAngle": 25.0,
+                                "Intensity": 37.400001525878906,
+                                "LightColor": 4294967295,
+                                "LightFalloffExponent": 1.0,
+                                "OuterConeAngle": 55.0,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "SourceRadius": 0.019999999552965164,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 52.86619567871094,
+                                        "Y": 0.0,
+                                        "Z": 2.5006444454193115
+                                    },
+                                    "Rotation": {
+                                        "Pitch": -89.98023223876953,
+                                        "Roll": 180.0000457763672,
+                                        "Yaw": 180.0000457763672
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Spot.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UArrowComponent",
+                            "OverrideMaterials": [
+                                {
+                                    "Asset": "EditorArrowMaterial"
+                                }
+                            ],
+                            "Parent": "USpotLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Arrow",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 90.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.30000001192092896,
+                                        "Y": 0.30000001192092896,
+                                        "Z": 0.5
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASpotLightActor_4_9",
                     "Properties": {
                         "bActorEnableCollision": true
                     }

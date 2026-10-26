@@ -67,7 +67,7 @@ bool UGameEngine::Init()
     GameInstance->Init();
 
     // 3. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
-    FString DefaultScene = "Scenes/PortalComplex.scene";
+    FString DefaultScene = "Scenes/LightGameScene.scene";
     if (!std::filesystem::exists(DefaultScene))
     {
         if (std::filesystem::exists("../../../" + DefaultScene))
@@ -182,10 +182,10 @@ void UGameEngine::RenderFrame()
 
     // 2. 렌더 옵션 설정 (그림자 퀄리티 향상)
     FSceneRenderOptions Options;
-    Options.DirectionalShadowMapSize = 4096;
+    Options.DirectionalShadowMapSize = 2048;
     Options.PointShadowMapSize = 512;
     Options.SpotShadowMapSize = 512;
-    Options.PcfMode = EPcfMode::PCSS;
+    Options.PcfMode = EPcfMode::Sample8;
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),

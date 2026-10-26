@@ -33,7 +33,7 @@ OtherActor:PrintLocation();
 end
 
 function Tick(dt)
-obj.Location = obj.Location + obj.Velocity * dt
+    -- obj.Location = obj.Location + obj.Velocity * dt
 --obj:PrintLocation()
 end
 
