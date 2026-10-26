@@ -1,0 +1,15 @@
+# MTL file for portal_elevator
+newmtl elevator_main_a
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd elevator_main_a.jpeg
+
+newmtl elevator_main_b
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd elevator_main_b.jpeg
+
+newmtl elevator_main_c
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd elevator_main_c.jpeg

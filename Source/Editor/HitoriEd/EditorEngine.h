@@ -139,6 +139,9 @@ private:
 	bool IsPlayingView(int32 ViewIndex) const { return PlayWorld && ViewIndex == PIEViewIndex && !bIsPaused && !IsSimulatingInEditor(); }
 	bool IsSimulatingInEditor() const;
 
+	// UI 오버레이를 그리기 위해 ViewportPanel에 전달
+	void DrawViewportUIOverlay(ImDrawList* DrawList, int32 ViewIndex, const ImVec2& ViewMin, const FRect& Rect);
+
 	// FEngineLoop 소유. OnInit에서 받아 둔다.
 	FWindow* MainWindow = nullptr;
 	FSwapchain* MainWindowSC = nullptr;

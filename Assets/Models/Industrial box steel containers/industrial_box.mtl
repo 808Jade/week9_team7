@@ -1,0 +1,32 @@
+# Blender 5.2.1 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl box_steel_2
+Ns 67.499985
+Ka 1.000000 1.000000 1.000000
+Ks 0.501900 0.501900 0.501900
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd e1c3b2fcac49bb63bed05d6067be3dc8.jpg
+
+newmtl box_steel_3
+Ns 70.899986
+Ka 1.000000 1.000000 1.000000
+Ks 0.501900 0.501900 0.501900
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 87c54bdb19e9c7faba8a03400adc4062.jpg
+
+newmtl jonathan-provencal-sol
+Ns 69.799988
+Ka 1.000000 1.000000 1.000000
+Ks 0.678400 0.678400 0.678400
+Ke 0.164700 0.164700 0.164700
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd jonathan-provencal-sol.jpg
