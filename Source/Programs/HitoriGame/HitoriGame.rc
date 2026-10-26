@@ -1,0 +1,36 @@
+// HitoriGame (Portal 3) resource script - exe/window icon + version info
+#include "../../Runtime/resource.h"
+#include "winres.h"
+
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+
+// Window.cpp loads IDI_ICON2 from the exe for the window class icon.
+// Lowest icon ID comes first, so this is also the exe icon in Explorer.
+IDI_ICON2               ICON                    "..\\..\\..\\Resources\\Icons\\portal3.ico"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204b0"
+        BEGIN
+            VALUE "CompanyName", "Krafton Jungle TechLab Week09 Team7"
+            VALUE "FileDescription", "Portal 3"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Team7"
+            VALUE "ProductName", "Portal 3"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 1200
+    END
+END

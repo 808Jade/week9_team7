@@ -42,7 +42,7 @@ namespace
 FEngineConfig UGameEngine::GetConfig() const
 {
 	FEngineConfig Desc;
-	Desc.Title = L"Hitori Game";
+	Desc.Title = L"Portal 3";
 	Desc.Width = 1280;
 	Desc.Height = 720;
 	Desc.bBorderless = false;
