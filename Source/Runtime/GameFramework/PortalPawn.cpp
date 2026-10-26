@@ -28,7 +28,7 @@ APortalPawn::APortalPawn()
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponet");
 	SetRootComponent(BoxComponent);
-	BoxComponent->SetBoxExtent(FVector(0.4f, 0.4f, 0.9f));
+	BoxComponent->SetBoxExtent(FVector(0.25f, 0.25f, 0.9f));
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
@@ -352,12 +352,12 @@ void APortalPawn::Tick(float DeltaTime)
 		bool bInWallPortal = false;
 		bool bInFloorPortal = false;
 
-		if(TargetPortal)
+		if(TargetPortal && TargetPortal->IsPointWithinPortalBounds(PreMoveLocation, 0.2f))
 		{
 			const FVector Normal = TargetPortal->GetPortalNormal();
 			if(std::abs(Normal.Z) > 0.7f)
 			{
-				bInFloorPortal = true; // 바닥 또는 천장 포탈
+				bInFloorPortal = true; // 바닥 또는 천장 포탈			
 			}
 			else
 			{

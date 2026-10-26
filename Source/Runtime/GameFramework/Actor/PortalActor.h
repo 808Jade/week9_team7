@@ -93,7 +93,7 @@ private:
 public:
 	FMatrix GetTeleportMatrix() const;
 
-	bool IsPointWithinPortalBounds(const FVector& Point) const;
+	bool IsPointWithinPortalBounds(const FVector& Point, const float Margin) const;
 
 	bool Checkcrossing(const FVector& PrevPos, const FVector& CurPos) const;
 

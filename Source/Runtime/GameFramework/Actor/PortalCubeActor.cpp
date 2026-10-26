@@ -82,7 +82,7 @@ void APortalCubeActor::Tick(float DeltaTime)
 		// 3) 포탈 개구부(가로/세로 범위) 내부인지 검사
 		const bool bHeadingIntoPortal = (VelocityIntoPortal > -0.1f) || bIsHeld;
 		const bool bTouchingPortalPlane = (DistToPlane <= 0.55f && DistToPlane >= -0.55f);
-		if(bHeadingIntoPortal && bTouchingPortalPlane && TargetPortal->IsPointWithinPortalBounds(CurrentLocation))
+		if(bHeadingIntoPortal && bTouchingPortalPlane && TargetPortal->IsPointWithinPortalBounds(CurrentLocation, 0.2f))
 		{
 			APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 			if(ExitPortal)
