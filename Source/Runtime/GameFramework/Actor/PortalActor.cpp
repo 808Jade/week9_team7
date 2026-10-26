@@ -62,6 +62,7 @@ APortalActor::APortalActor()
 	PortalMesh->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f)); // 법선 +Z → +X
 	PortalMesh->SetRelativeScale3D(FVector(PortalHeight, PortalWidth, 1.0f));
 	PortalMesh->SetHiddenInGame(true); // 처음엔 숨김
+	PortalMesh->SetCastShadow(false); // 포탈 면은 그림자를 만들지 않는다
 }
 
 void APortalActor::SpawnPair(UWorld* World, APortalActor*& OutBlue, APortalActor*& OutOrange)
@@ -174,6 +175,12 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 	const uint32 Width = static_cast<uint32>(MainView.ViewRect.Width);
 	const uint32 Height = static_cast<uint32>(MainView.ViewRect.Height);
 
+	// 포탈 뷰에서는 포탈 면을 모두 제외
+	TArray<const UPrimitiveComponent*> HiddenPortalMeshes;
+	for (AActor* Actor : World->GetPersistentLevel()->GetActors())
+		if (APortalActor* Portal = Cast<APortalActor>(Actor))
+			HiddenPortalMeshes.Add(Portal->GetPortalMesh());
+
 	for (AActor* Actor : World->GetPersistentLevel()->GetActors())
 	{
 		APortalActor* Portal = Cast<APortalActor>(Actor);
@@ -182,6 +189,7 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 
 		FSceneView PortalView;
 		if (!Portal->CalcPortalSceneView(MainView, PortalView)) continue;
+		PortalView.HiddenComponents = &HiddenPortalMeshes;
 
 		FSceneRenderer SceneRenderer(World, PortalView, Portal->GetRenderData());
 		SceneRenderer.InitViews(Renderer, Options);
