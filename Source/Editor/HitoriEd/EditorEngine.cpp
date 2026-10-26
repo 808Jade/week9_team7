@@ -854,7 +854,7 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 		return;
 	}
 	constexpr EKeyCode Keys[] = { EKeyCode::W, EKeyCode::A, EKeyCode::S, EKeyCode::D,
-		EKeyCode::Space, EKeyCode::Shift };
+		EKeyCode::Space, EKeyCode::Shift, EKeyCode::E, EKeyCode::Control, EKeyCode::Z, EKeyCode::Tab };
 	for (EKeyCode Key : Keys)
 	{
 		if (FInputSystem::IsKeyPressed(Key))
@@ -868,10 +868,10 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 			else GameViewport.InputKey(nullptr, static_cast<int32>(Key), false);
 		}
 	}
-	constexpr EMouseButton MouseButtons[] = { EMouseButton::Left, EMouseButton::Right };
+	constexpr EMouseButton MouseButtons[] = { EMouseButton::Left, EMouseButton::Right, EMouseButton::Middle };
 	for (EMouseButton Button : MouseButtons)
 	{
-		const int32 Key = Button == EMouseButton::Left ? static_cast<int32>(EKeyCode::LButton) : static_cast<int32>(EKeyCode::RButton);
+		const int32 Key = Button == EMouseButton::Left ? static_cast<int32>(EKeyCode::LButton) : (Button == EMouseButton::Right ? static_cast<int32>(EKeyCode::RButton) : static_cast<int32>(EKeyCode::MButton));
 		if (FInputSystem::IsMousePressed(Button))
 		{
 			if (GameViewport.IsSIEMode()) GameViewport.GetKeyInputBySIEMode(Key, true);
@@ -1513,6 +1513,13 @@ void UEditorEngine::StartPlayInEditorSession()
 	const bool bNewWindow = (PlayMode == EPlayModeType::InEditorFloating);
 
 	PIEStartEditorViewIndex = ViewportsPanel ? ViewportsPanel->GetActiveViewIndex() : 0;
+
+	if (FEditorViewportClient* Client = ViewportsPanel ? ViewportsPanel->GetViewportClient(PIEStartEditorViewIndex) : nullptr)
+	{
+		SavedEditorCameraLocation = Client->GetViewLocation();
+		SavedEditorCameraRotation = Client->GetViewRotation();
+	}
+
 	if (bNewWindow && CreatePIEWindow())
 		PIEViewIndex = -2;
 	else
@@ -1577,6 +1584,15 @@ void UEditorEngine::EndPlayMap()
 		return;
 	bIsPaused = false;
 	bStepRequested = false;
+
+	if (PIEStartEditorViewIndex >= 0 && ViewportsPanel)
+	{
+		if (FEditorViewportClient* Client = ViewportsPanel->GetViewportClient(PIEStartEditorViewIndex))
+		{
+			Client->SetViewLocation(SavedEditorCameraLocation);
+			Client->SetViewRotation(SavedEditorCameraRotation);
+		}
+	}
 
 	ResetSceneSelection();
 	if (ViewportsPanel)

@@ -1,7 +1,11 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "GameFramework/Actor.h"
+#include "GameFramework/Actor/DoorActor.h"
+#include "GameFramework/Actor/ButtonActorBase.h"
+#include "GameFramework/Actor/WeightedButtonActor.h"
+#include "GameFramework/Actor/StandButtonActor.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Camera/CameraComponent.h"
@@ -432,6 +436,147 @@ namespace LuaBindings
 				return SpawnActorHelper(nullptr, ClassName, FVector::ZeroVector, FRotator());
 			}
 		);
+
+		// ==========================================
+		// [도어 액터 (DoorActor) 제어 바인딩]
+		// ==========================================
+		ActorType["OpenDoor"] = [](AActor* Actor) {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				Door->OpenDoor();
+			}
+		};
+
+		ActorType["CloseDoor"] = [](AActor* Actor) {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				Door->CloseDoor();
+			}
+		};
+
+		ActorType["ToggleDoor"] = [](AActor* Actor) {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				Door->ToggleDoor();
+			}
+		};
+
+		ActorType["SetDoorOpen"] = [](AActor* Actor, bool bOpen) {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				Door->SetOpen(bOpen);
+			}
+		};
+
+		ActorType["IsDoorOpen"] = [](AActor* Actor) -> bool {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				return Door->IsOpen();
+			}
+			return false;
+		};
+
+		ActorType["SetDoorAutoOpen"] = [](AActor* Actor, bool bAuto) {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				Door->SetAutoOpenOnOverlap(bAuto);
+			}
+		};
+
+		ActorType["IsDoorAutoOpen"] = [](AActor* Actor) -> bool {
+			if (ADoorActor* Door = Cast<ADoorActor>(Actor))
+			{
+				return Door->IsAutoOpenOnOverlap();
+			}
+			return false;
+		};
+
+		// ==========================================
+		// [버튼 액터 (ButtonActorBase) 제어 및 콜백 바인딩]
+		// ==========================================
+		auto BindOnPressedFunc = [](AActor* Actor, sol::function Callback) {
+			if (AButtonActorBase* Button = Cast<AButtonActorBase>(Actor))
+			{
+				Button->OnButtonPressed.Add([Callback](bool bPressed) {
+					if (Callback.valid())
+					{
+						auto Result = Callback(bPressed);
+						if (!Result.valid())
+						{
+							sol::error Err = Result;
+							HTR_LOG(Error, "[Lua BindOnPressed Callback Error]: {}", Err.what());
+						}
+					}
+				});
+			}
+		};
+
+		ActorType["BindOnPressed"] = BindOnPressedFunc;
+		ActorType["OnPressed"] = BindOnPressedFunc;
+
+		ActorType["ClearButtonPressedCallbacks"] = [](AActor* Actor) {
+			if (AButtonActorBase* Button = Cast<AButtonActorBase>(Actor))
+			{
+				Button->OnButtonPressed.Clear();
+			}
+		};
+
+		ActorType["IsButtonPressed"] = [](AActor* Actor) -> bool {
+			if (AButtonActorBase* Button = Cast<AButtonActorBase>(Actor))
+			{
+				return Button->IsPressed();
+			}
+			return false;
+		};
+
+		ActorType["PressButton"] = [](AActor* Actor) {
+			if (AButtonActorBase* Button = Cast<AButtonActorBase>(Actor))
+			{
+				Button->PressButton();
+			}
+		};
+
+		ActorType["ReleaseButton"] = [](AActor* Actor) {
+			if (AButtonActorBase* Button = Cast<AButtonActorBase>(Actor))
+			{
+				Button->ReleaseButton();
+			}
+		};
+
+		ActorType["InteractButton"] = [](AActor* Actor, AActor* Interactor) {
+			if (AStandButtonActor* StandBtn = Cast<AStandButtonActor>(Actor))
+			{
+				StandBtn->Interact(Interactor);
+			}
+		};
+
+		// ==========================================
+		// [개별 유저타입 (Usertype) 등록]
+		// ==========================================
+		sol::usertype<ADoorActor> DoorType = Lua.new_usertype<ADoorActor>("DoorActor",
+			sol::base_classes, sol::bases<AActor>());
+		DoorType["OpenDoor"] = &ADoorActor::OpenDoor;
+		DoorType["CloseDoor"] = &ADoorActor::CloseDoor;
+		DoorType["ToggleDoor"] = &ADoorActor::ToggleDoor;
+		DoorType["IsOpen"] = &ADoorActor::IsOpen;
+		DoorType["SetOpen"] = &ADoorActor::SetOpen;
+		DoorType["SetAutoOpen"] = &ADoorActor::SetAutoOpenOnOverlap;
+		DoorType["IsAutoOpen"] = &ADoorActor::IsAutoOpenOnOverlap;
+
+		sol::usertype<AButtonActorBase> ButtonBaseType = Lua.new_usertype<AButtonActorBase>("ButtonActorBase",
+			sol::base_classes, sol::bases<AActor>());
+		ButtonBaseType["IsPressed"] = &AButtonActorBase::IsPressed;
+		ButtonBaseType["PressButton"] = &AButtonActorBase::PressButton;
+		ButtonBaseType["ReleaseButton"] = &AButtonActorBase::ReleaseButton;
+		ButtonBaseType["BindOnPressed"] = BindOnPressedFunc;
+		ButtonBaseType["OnPressed"] = BindOnPressedFunc;
+
+		sol::usertype<AWeightedButtonActor> WeightedButtonType = Lua.new_usertype<AWeightedButtonActor>("WeightedButtonActor",
+			sol::base_classes, sol::bases<AButtonActorBase, AActor>());
+
+		sol::usertype<AStandButtonActor> StandButtonType = Lua.new_usertype<AStandButtonActor>("StandButtonActor",
+			sol::base_classes, sol::bases<AButtonActorBase, AActor>());
+		StandButtonType["Interact"] = &AStandButtonActor::Interact;
 
 		// 6. Scene 모듈 (씬 로드 및 리로드)
 		auto SceneTable = Lua.create_named_table("Scene");

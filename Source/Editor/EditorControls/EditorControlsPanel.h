@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Editor/EditorUI/EditorPanel.h"
 
 #include "Editor/Gizmo/Gizmo.h"
@@ -15,7 +15,14 @@
 #include "GameFramework/Actor/FireBallActor.h"
 #include "GameFramework/Actor/ProjectileActor.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/PortalPawn.h"
+#include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/Actor/PortalActor.h"
+#include "GameFramework/Actor/MapCubeActor.h"
+#include "GameFramework/Actor/StandButtonActor.h"
+#include "GameFramework/Actor/WeightedButtonActor.h"
+#include "GameFramework/Actor/DoorActor.h"
 
 class FViewportsPanel;
 
@@ -40,7 +47,7 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[8] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart",  "Portal" };
+	const char* Items[16] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun", "Portal", "MapCube", "StandButton", "WeightedButton", "Door" };
 
 	FGizmo* Gizmo = nullptr;
 	int32 GizmoSelectedIndex = 0;
@@ -61,7 +68,14 @@ public:
 		AFireBallActor::StaticClass(),
 		AProjectileActor::StaticClass(),
 		APlayerStart::StaticClass(),
+		APortalPawn::StaticClass(),
+		APortalCubeActor::StaticClass(),
+		APortalGunActor::StaticClass(),
 		APortalActor::StaticClass(),
+		AMapCubeActor::StaticClass(),
+		AStandButtonActor::StaticClass(),
+		AWeightedButtonActor::StaticClass(),
+		ADoorActor::StaticClass(),
 	};
 
 private:
@@ -71,4 +85,3 @@ private:
     void DrawCameraProperties();
 	std::function<bool()> IsPlayingQuery;
 };
-

@@ -13,15 +13,15 @@ class APlayerController : public AActor
 public:
 	APlayerController();
 	void Tick(float DeltaTime) override;
-	void ProcessPlayerInput(float DeltaTime);
+	virtual void ProcessPlayerInput(float DeltaTime);
 	void GetPlayerViewCamera(FVector& OutLocation, FRotator& OutRotation) const;
-	void Possess(APawn* InPawn);
+	virtual void Possess(APawn* InPawn);
 	void UnPossess();
 	APawn* GetPawn() const { return PossessedPawn; }
-	void InputKey(int32 Key, bool bDown);
-	void InputAxis(EGameInputAxis Axis, float Delta);
-	void ClearInputState();
-private:
+	virtual void InputKey(int32 Key, bool bDown);
+	virtual void InputAxis(EGameInputAxis Axis, float Delta);
+	virtual void ClearInputState();
+protected:
 	APawn* PossessedPawn = nullptr;
 	bool bKeyDown[256]{};
 	float MouseAxisX = 0.0f;

@@ -205,6 +205,9 @@ private:
 	FEditorCommand StepFrame;
 	FEditorCommand Stop;
 
+	FVector SavedEditorCameraLocation{};
+	FRotator SavedEditorCameraRotation{};
+
 	bool bIsStep = false;
 
 	bool bPlaySessionRequested = false;
