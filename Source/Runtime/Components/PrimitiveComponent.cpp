@@ -138,14 +138,14 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 		FVector NewLocation = TraceStart;
 
 		UWorld* const MyWorld = GetWorld();
-		if(MyWorld && Actor && Actor->GetActorEnableCollision() && DeltaSizeSq > 0.0f)
+		if(MyWorld && Actor && Actor->GetActorEnableCollision() && DeltaSizeSq > 0.0f && CurrentCollisionResponse == ECollisionResponse::Block)
 		{
 			MyWorld->SweepMulti(Hits, TraceStart, TraceEnd, InitialRotationQuat, GetCollisionShape(), Actor);
 
 			float BlockingHitNormalDotDelta = 0.0f;
 			for(const FHitResult& TestHit : Hits)
 			{
-				if(TestHit.HitComponent == this)
+				if(TestHit.HitComponent == this || !TestHit.bBlockingHit)
 				{
 					continue;
 				}
@@ -186,7 +186,10 @@ bool UPrimitiveComponent::MoveComponent(const FVector& Delta, const FQuat& NewRo
 		SetWorldLocationAndRotation(NewLocation, NewRotation.ToFRotator(), false);
 	}
 
-	UpdateOverlaps();
+	if(CurrentCollisionResponse != ECollisionResponse::NoCollision)
+	{
+		UpdateOverlaps();
+	}
 
 	if(BlockingHit.bBlockingHit && BlockingHit.HitComponent)
 	{

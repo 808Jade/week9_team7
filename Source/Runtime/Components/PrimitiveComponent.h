@@ -23,6 +23,13 @@ enum class EPrimitiveType
 	ParticleQuad
 };
 
+enum class ECollisionResponse
+{
+	NoCollision,
+	Overlap,
+	Block
+};
+
 DECLARE_DELEGATE(FComponentHitSignature /*OnComponentHit*/, UPrimitiveComponent* /*HitComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, FVector /*NormalImpulse*/, const FHitResult& /*SweepResult*/);
 DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/);
 DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/);
@@ -109,10 +116,15 @@ public:
 	
 	const TArray<UPrimitiveComponent*>& GetOverlappingComponents() const;
 
+	const ECollisionResponse GetCurrentCollisionResponse() { return CurrentCollisionResponse; }
+	void SetCurrentCollisionResponse(const ECollisionResponse InCollisionResponse) { CurrentCollisionResponse = InCollisionResponse; }
+
 	FComponentHitSignature OnComponentHit;
 	FComponentBeginOverlapSignature OnComponentBeginOverlap;
 	FComponentEndOverlapSignature OnComponentEndOverlap;
 
 private:
 	TArray<UPrimitiveComponent*> OverlappingComponents;
+	
+	ECollisionResponse CurrentCollisionResponse = ECollisionResponse::Block;
 };

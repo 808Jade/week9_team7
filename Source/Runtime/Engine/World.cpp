@@ -711,7 +711,8 @@ bool UWorld::SweepMulti(TArray<FHitResult>& OutHit, const FVector& Start, const 
 			VIsitedComponents.Add(Component);
 			if(!Component->IsShown(true) || !Component->GetOwner() ||
 				!Component->GetOwner()->GetActorEnableCollision() ||
-				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this)
+				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this ||
+				Component->GetCurrentCollisionResponse() == ECollisionResponse::NoCollision )
 			{
 				return;
 			}
@@ -724,8 +725,8 @@ bool UWorld::SweepMulti(TArray<FHitResult>& OutHit, const FVector& Start, const 
 			if(FCollisionDetector::Sweep(CollisionShape, QueryTransform, ComponentShape, ComponentTransform, Direction, DeltaSize, TempHit))
 			{
 				TempHit.HitComponent = Component;
-				TempHit.HitActor = Component->GetOwner();;
-				TempHit.bBlockingHit = true;
+				TempHit.HitActor = Component->GetOwner();
+				TempHit.bBlockingHit = Component->GetCurrentCollisionResponse() == ECollisionResponse::Block ? true : false;
 				OutHit.Add(TempHit);
 			}
 		}
@@ -893,7 +894,8 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 			VIsitedComponents.Add(Component);
 			if(!Component->IsShown(true) || !Component->GetOwner() ||
 				!Component->GetOwner()->GetActorEnableCollision() ||
-				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this)
+				Component->GetOwner() == IgnoreActor || Component->GetOwner()->GetWorld() != this ||
+				Component->GetCurrentCollisionResponse() == ECollisionResponse::NoCollision )
 			{
 				return;
 			}
