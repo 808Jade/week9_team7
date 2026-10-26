@@ -570,8 +570,8 @@
                                 "ShapeColor": 4288517599,
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.0,
-                                        "Y": -8.0,
+                                        "X": 6.0,
+                                        "Y": 9.0,
                                         "Z": 6.0
                                     },
                                     "Rotation": {
@@ -1028,21 +1028,21 @@
                         },
                         {
                             "Class": "UBoxComponent",
-                            "Name": "TriggerBox",
-                            "Parent": "DefaultSceneRoot",
+                            "Name": "LeftDoorCollision",
+                            "Parent": "LeftDoorMesh",
                             "Properties": {
                                 "CurrentCollisionResponse": 2,
                                 "Extent": {
-                                    "X": 1.0,
-                                    "Y": 1.0,
-                                    "Z": 0.800000011920929
+                                    "X": 0.15000000596046448,
+                                    "Y": 0.35592299699783325,
+                                    "Z": 0.5074430108070374
                                 },
                                 "ShapeColor": 4288517599,
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.6000000238418579
+                                        "Y": -0.21829301118850708,
+                                        "Z": 0.5287730097770691
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -1050,8 +1050,44 @@
                                         "Yaw": 0.0
                                     },
                                     "Scale": {
-                                        "X": 0.1316511631011963,
-                                        "Y": 0.7266921997070313,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "RightDoorCollision",
+                            "Parent": "RightDoorMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.15000000596046448,
+                                    "Y": 0.35592299699783325,
+                                    "Z": 0.5074430108070374
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.21829301118850708,
+                                        "Z": 0.5287730097770691
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
                                         "Z": 1.0
                                     }
                                 },

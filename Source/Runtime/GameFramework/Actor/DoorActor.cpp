@@ -11,14 +11,25 @@ ADoorActor::ADoorActor()
     BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
     LeftDoorMesh = CreateDefaultSubobject<UStaticMeshComponent>("LeftDoorMesh");
     RightDoorMesh = CreateDefaultSubobject<UStaticMeshComponent>("RightDoorMesh");
-    TriggerBox = CreateDefaultSubobject<UBoxComponent>("TriggerBox");
 
+    // 좌문/우문 물리 충돌 박스 생성
+    LeftDoorCollision = CreateDefaultSubobject<UBoxComponent>("LeftDoorCollision");
+    RightDoorCollision = CreateDefaultSubobject<UBoxComponent>("RightDoorCollision");
+
+    // 계층 구조 설정
     BaseMesh->SetupAttachment(GetRootComponent());
     LeftDoorMesh->SetupAttachment(GetRootComponent());
     RightDoorMesh->SetupAttachment(GetRootComponent());
-    TriggerBox->SetupAttachment(GetRootComponent());
 
-    // 기본 메쉬 로드 및 할당
+    // 충돌 박스는 각 문짝 메시에 직접 부착하여, 문이 열리고 닫힐 때 함께 이동하도록 설정
+    LeftDoorCollision->SetupAttachment(LeftDoorMesh);
+    RightDoorCollision->SetupAttachment(RightDoorMesh);
+
+    // 충돌 응답 설정
+    LeftDoorCollision->SetCurrentCollisionResponse(ECollisionResponse::Block);
+    RightDoorCollision->SetCurrentCollisionResponse(ECollisionResponse::Block);
+
+    // 기본 메시 로드 및 할당
     if (UStaticMesh* Base = UAssetManager::LoadObjStaticMesh("Assets/Models/PortalDoor/portal_door_base.obj"))
     {
         BaseMesh->SetStaticMesh(Base);
@@ -32,16 +43,19 @@ ADoorActor::ADoorActor()
         RightDoorMesh->SetStaticMesh(Right);
     }
 
-    // 트리거 박스 기본 크기 및 위치 (문 전체를 넉넉하게 감싸도록)
-    TriggerBox->SetBoxExtent(FVector(1.0f, 1.0f, 0.8f));
-    TriggerBox->SetRelativeLocation(FVector(0.0f, 0.0f, 0.6f));
+    // 좌/우 문짝 메시의 AABB(최소외접육면체)를 계산하여 충돌 박스에 각각 할당
+    UpdateCollisionBoxes();
 }
 
 void ADoorActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 초기 상대 위치 저장 (닫힌 상태)
+    // 씬 로드 후 메시가 비어있다면 다시 할당
+    if (BaseMesh && !BaseMesh->GetStaticMesh())
+    {
+        BaseMesh->SetStaticMesh(UAssetManager::LoadObjStaticMesh("Assets/Models/PortalDoor/portal_door_base.obj"));
+    }
     if (LeftDoorMesh)
     {
         if (!LeftDoorMesh->GetStaticMesh())
@@ -58,15 +72,38 @@ void ADoorActor::BeginPlay()
         }
         InitialRightDoorLoc = RightDoorMesh->GetRelativeLocation();
     }
-    if (BaseMesh && !BaseMesh->GetStaticMesh())
+
+    // 씬 로드 후에도 정확한 메시 AABB 기반으로 충돌 박스 갱신
+    UpdateCollisionBoxes();
+}
+
+void ADoorActor::UpdateCollisionBoxes()
+{
+    // 왼쪽 문짝의 최소외접육면체(AABB) 계산 및 좌문 충돌 박스에 할당
+    if (LeftDoorMesh && LeftDoorCollision)
     {
-        BaseMesh->SetStaticMesh(UAssetManager::LoadObjStaticMesh("Assets/Models/PortalDoor/portal_door_base.obj"));
+        FBox LeftBounds = LeftDoorMesh->CalcLocalBounds();
+        FVector Extent = LeftBounds.GetExtent();
+        if (Extent.X > 0.001f && Extent.Y > 0.001f && Extent.Z > 0.001f)
+        {
+            // 두께(X)는 얇은 문짝 통과(터널링) 방지를 위해 최소 0.15f 보장
+            Extent.X = std::max(Extent.X, 0.15f);
+            LeftDoorCollision->SetBoxExtent(Extent);
+            LeftDoorCollision->SetRelativeLocation(LeftBounds.GetCenter());
+        }
     }
 
-    if (TriggerBox)
+    // 오른쪽 문짝의 최소외접육면체(AABB) 계산 및 우문 충돌 박스에 할당
+    if (RightDoorMesh && RightDoorCollision)
     {
-        TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ADoorActor::OnTriggerBeginOverlap);
-        TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ADoorActor::OnTriggerEndOverlap);
+        FBox RightBounds = RightDoorMesh->CalcLocalBounds();
+        FVector Extent = RightBounds.GetExtent();
+        if (Extent.X > 0.001f && Extent.Y > 0.001f && Extent.Z > 0.001f)
+        {
+            Extent.X = std::max(Extent.X, 0.15f);
+            RightDoorCollision->SetBoxExtent(Extent);
+            RightDoorCollision->SetRelativeLocation(RightBounds.GetCenter());
+        }
     }
 }
 
@@ -104,6 +141,9 @@ void ADoorActor::Tick(float DeltaTime)
         CurrentRight.Y = TargetRightLoc.Y;
     }
     RightDoorMesh->SetRelativeLocation(CurrentRight);
+
+    // 자식 컴포넌트인 LeftDoorCollision과 RightDoorCollision은
+    // 부모인 LeftDoorMesh / RightDoorMesh를 따라 자동으로 함께 좌우로 물러납니다.
 }
 
 void ADoorActor::OpenDoor()

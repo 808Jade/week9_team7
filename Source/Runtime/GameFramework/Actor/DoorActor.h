@@ -33,7 +33,11 @@ public:
     UStaticMeshComponent* GetBaseMesh() const { return BaseMesh; }
     UStaticMeshComponent* GetLeftDoorMesh() const { return LeftDoorMesh; }
     UStaticMeshComponent* GetRightDoorMesh() const { return RightDoorMesh; }
-    UBoxComponent* GetTriggerBox() const { return TriggerBox; }
+    UBoxComponent* GetLeftDoorCollision() const { return LeftDoorCollision; }
+    UBoxComponent* GetRightDoorCollision() const { return RightDoorCollision; }
+
+    // 좌/우 문짝 메시의 AABB(최소외접육면체)를 계산하여 충돌 박스에 할당
+    void UpdateCollisionBoxes();
 
 protected:
     void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -42,10 +46,11 @@ protected:
         UPrimitiveComponent* OtherComp);
 
 protected:
-    UStaticMeshComponent* BaseMesh = nullptr;       // 문틀 프레임
-    UStaticMeshComponent* LeftDoorMesh = nullptr;   // 좌문
-    UStaticMeshComponent* RightDoorMesh = nullptr;  // 우문
-    UBoxComponent* TriggerBox = nullptr;            // 접근 감지 트리거
+    UStaticMeshComponent* BaseMesh = nullptr;           // 문틀 프레임
+    UStaticMeshComponent* LeftDoorMesh = nullptr;       // 좌문
+    UStaticMeshComponent* RightDoorMesh = nullptr;      // 우문
+    UBoxComponent* LeftDoorCollision = nullptr;         // 좌문 물리 충돌 박스 (LeftDoorMesh에 부착)
+    UBoxComponent* RightDoorCollision = nullptr;        // 우문 물리 충돌 박스 (RightDoorMesh에 부착)
 
     bool bIsOpen = false;
     float OpenSpeed = 5.0f;            // 문 개폐 보간 속도
