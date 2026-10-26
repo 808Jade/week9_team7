@@ -30,3 +30,16 @@ void ACanvasActor::Tick(float DeltaTime)
         SetActorRotation(NewRotation);
     }
 }
+
+void ACanvasActor::SetCanvasVisibility(bool bVisible)
+{
+    bCanvasVisible = bVisible;
+    // 캔버스 액터가 소유한 모든 컴포넌트들의 표시/숨김을 일괄 설정합니다.
+    for (UActorComponent* Comp : Components)
+    {
+        if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+        {
+            SceneComp->SetVisibility(bVisible);
+        }
+    }
+}

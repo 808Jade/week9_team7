@@ -8,6 +8,7 @@ class ACanvasActor : public AActor
 {
 	DECLARE_CLASS(ACanvasActor, AActor)
 	REFLECT_START(ClassName)
+		PROPERTY(bCanvasVisible)
 		PROPERTY(bFollowCamera)
 		PROPERTY(CameraDistance)
 		REFLECT_END()
@@ -19,7 +20,10 @@ public:
 
 	bool IsFollowCamera() const { return bFollowCamera; }
 	float GetCameraDistance() const { return CameraDistance; }
+	bool IsCanvasVisible() const { return bCanvasVisible; }
+	virtual void SetCanvasVisibility(bool bVisible);
 private:
-	bool bFollowCamera = true;
+	bool bCanvasVisible = true;
+	bool bFollowCamera = false;
 	float CameraDistance = 2.0f;
 };
