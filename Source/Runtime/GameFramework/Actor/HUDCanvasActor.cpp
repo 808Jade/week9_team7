@@ -86,7 +86,7 @@ void AHUDCanvasActor::BeginPlay()
 
 	if (CrosshairImage)
 	{
-		CrosshairImage->SetSize(100.0f, 200.0f);
+		CrosshairImage->SetSize(120.0f, 220.0f);
 		CrosshairImage->SetCenterOnViewport(true);
 	}
 

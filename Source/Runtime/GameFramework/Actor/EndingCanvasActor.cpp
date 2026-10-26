@@ -109,7 +109,13 @@ void AEndingCanvasActor::SetEndingType(EEndingType InType)
 		// 3. 서브타이틀은 실패 화면에서 숨김 (실패, 걸린 시간, 엔터 안내만 표시)
 		if (SubtitleText)
 		{
-			SubtitleText->SetVisibility(false);
+			SubtitleText->SetText("테스트 챔버를 탈출에 실패했습니다.");
+			SubtitleText->SetFontSize(22.0f);
+			SubtitleText->SetCenterHorizontally(true);
+			SubtitleText->SetRelativeX(0.25f);
+			SubtitleText->SetRelativeY(0.38f);
+			SubtitleText->SetColor(FColor(200, 200, 200, 255));
+			SubtitleText->SetLayer(20);
 		}
 
 		// 4. 시간: "걸린 시간: 00:00.00"
