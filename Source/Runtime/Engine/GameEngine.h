@@ -6,6 +6,8 @@
 #include "Text/TextRenderer.h"
 #include "Render/FXAARenderer.h"
 
+class UGameInstance;
+
 class UGameEngine : public UEngine
 {
 	DECLARE_CLASS(UGameEngine, UEngine)
@@ -21,6 +23,7 @@ public:
 	void RenderFrame();
 
 private:
+	UGameInstance* GameInstance = nullptr;
 	UWorld* GameWorld = nullptr;
 	TSharedPtr<FGameViewportClient> GameViewport;
 

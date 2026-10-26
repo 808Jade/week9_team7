@@ -3,6 +3,7 @@
 
 #include "Launch/LaunchEngineLoop.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
 #include "Serialization/JsonArchive.h"
 #include "Render/SceneRenderer.h"
@@ -19,6 +20,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/PortalPlayerController.h"
+#include "Components/LuaScriptComponent.h"
 
 FEngineConfig UGameEngine::GetConfig() const
 {
@@ -43,6 +45,13 @@ bool UGameEngine::Init()
     FWorldContext& Context = CreateNewWorldContext(EWorldType::Game);
     GameWorld = UWorld::CreateWorld(EWorldType::Game, true);
     Context.SetCurrentWorld(GameWorld);
+
+    // GameInstance 생성 및 초기화 (LuaManager 활성화 포함)
+    ULuaScriptComponent::StaticClass();
+    GameInstance = NewObject<UGameInstance>();
+    GameInstance->SetWorldContext(&Context);
+    GameWorld->SetGameInstance(GameInstance);
+    GameInstance->Init();
 
     // 2. 게임 뷰포트 클라이언트 생성 및 초기화
     GameViewport = MakeShared<FGameViewportClient>();
@@ -234,6 +243,11 @@ void UGameEngine::RenderFrame()
 // 로드된 월드 및 UObject 자원 정리
 void UGameEngine::PreExit()
 {
+    if (GameInstance)
+    {
+        GameInstance->Shutdown();
+        GameInstance = nullptr;
+    }
     if (GameWorld)
     {
         GameWorld->ClearWorld();

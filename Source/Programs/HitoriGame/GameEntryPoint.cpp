@@ -10,6 +10,15 @@
 #include "GameFramework/Actor/StaticMeshActor.h"
 #include "GameFramework/Actor/ParticleActor.h"
 #include "GameFramework/Actor/TextRenderActor.h"
+#include "GameFramework/Actor/DoorActor.h"
+#include "GameFramework/Actor/ButtonActorBase.h"
+#include "GameFramework/Actor/WeightedButtonActor.h"
+#include "GameFramework/Actor/StandButtonActor.h"
+#include "GameFramework/Actor/CubeDropActor.h"
+#include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/PortalGunActor.h"
+#include "GameFramework/PortalPawn.h"
+#include "GameFramework/PortalPlayerController.h"
 
 UClass* GetEngineClass()
 {
@@ -26,6 +35,15 @@ UClass* GetEngineClass()
     ASpotLightActor::StaticClass();
     ARectLightActor::StaticClass();
     AStaticMeshActor::StaticClass();
+    ADoorActor::StaticClass();
+    AButtonActorBase::StaticClass();
+    AWeightedButtonActor::StaticClass();
+    AStandButtonActor::StaticClass();
+    ACubeDropActor::StaticClass();
+    APortalCubeActor::StaticClass();
+    APortalGunActor::StaticClass();
+    APortalPawn::StaticClass();
+    APortalPlayerController::StaticClass();
 
     return UGameEngine::StaticClass();
 }

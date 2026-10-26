@@ -262,6 +262,13 @@ project "HitoriGame"
 		"%{IncludeDir.stb}",
 		"%{IncludeDir.json}",
 		"%{IncludeDir.DDSLoader}",
+		"%{IncludeDir.LuaJIT}",
+		"%{IncludeDir.sol2}",
+	}
+
+	libdirs
+	{
+		"Source/ThirdParty/LuaJIT/lib",
 	}
 
 	links
@@ -270,6 +277,12 @@ project "HitoriGame"
 		"dxgi.lib",
 		"dxguid.lib",
 		"d3dcompiler.lib",
+		"lua51.lib",
+	}
+
+	postbuildcommands
+	{
+		'{COPY} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"',
 	}
 
 
