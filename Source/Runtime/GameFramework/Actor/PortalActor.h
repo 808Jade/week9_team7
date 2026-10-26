@@ -6,6 +6,15 @@
 
 class UStaticMeshComponent;
 
+// FSceneView를 채울 때 사용
+struct FPortalCameraPose
+{
+	FVector  Location;
+	FRotator Rotation;
+	FVector  Forward;
+	FMatrix  ViewMatrix;
+};
+
 class APortalActor : public AActor
 {
 	DECLARE_CLASS(APortalActor, AActor)
@@ -33,6 +42,12 @@ public:
 
 	// 포탈 면 셰이더가 읽을 텍스처
 	FTexture2D* GetPortalTexture() const { return ViewTargets.SceneColor.get(); }
+
+	// 플레이어 카메라 → 이 포탈을 통해 본 가상 카메라
+	bool CalcVirtualCamera(const FVector& CamLocation, const FRotator& CamRotation, FPortalCameraPose& Out) const;
+
+	// 스케일 없는 포탈 월드 행렬 (회전 + 위치)
+	FMatrix GetPortalMatrix() const;
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;

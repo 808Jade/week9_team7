@@ -35,3 +35,36 @@ void APortalActor::PlaceAt(const FVector& Location, const FVector& Normal)
 	PortalMesh->SetHiddenInGame(false);
 	bPlaced = true;
 }
+
+FMatrix APortalActor::GetPortalMatrix() const
+{
+	FMatrix M = GetActorQuat().ToFMatrix();
+	M.SetOrigin(GetActorLocation());
+	return M;
+}
+
+bool APortalActor::CalcVirtualCamera(const FVector& CamLocation, const FRotator& CamRotation,
+	FPortalCameraPose& Out) const
+{
+	if (!LinkedPortal) return false;
+
+	FMatrix CameraWorld = CamRotation.Quaternion().ToFMatrix();
+	CameraWorld.SetOrigin(CamLocation);
+
+	// Z축 180° 회전: 포탈 앞 ↔ 뒤, 들어가는 방향 ↔ 나오는 방향
+	static const FMatrix Flip(
+		-1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
+
+	// 행 벡터: 왼쪽부터 적용 (카메라 → A 로컬 → 뒤집기 → B 월드)
+	const FMatrix VirtualWorld =
+		CameraWorld * GetPortalMatrix().Inverse() * Flip * LinkedPortal->GetPortalMatrix();
+
+	Out.Location = FVector(VirtualWorld.M[3][0], VirtualWorld.M[3][1], VirtualWorld.M[3][2]);
+	Out.Forward = FVector(VirtualWorld.M[0][0], VirtualWorld.M[0][1], VirtualWorld.M[0][2]);
+	Out.Rotation = MatrixToRotator(VirtualWorld);
+	Out.ViewMatrix = VirtualWorld.Inverse();
+	return true;
+}
