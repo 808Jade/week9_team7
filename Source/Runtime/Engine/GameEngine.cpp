@@ -32,6 +32,8 @@ FEngineConfig UGameEngine::GetConfig() const
 	Desc.SyncInterval = 0;
 	Desc.bCreateDepthBuffer = true;   
 	Desc.bExitOnEscape = true;        
+	Desc.SplashImage = "Resources/JalveSplash.png";   // Valve 패러디 로고
+	Desc.SplashMinSeconds = 3.0f;
 	return Desc;
 }
 
