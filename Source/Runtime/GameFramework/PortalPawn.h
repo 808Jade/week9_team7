@@ -1,10 +1,12 @@
 #pragma once
 
 #include "GameFramework/Pawn.h"
+#include "Math/Vector.h"
 
 class USphereComponent;
 class UCameraComponent;
 class APortalGunActor;
+class APlayerStart;
 
 class APortalPawn : public APawn
 {
@@ -12,12 +14,24 @@ class APortalPawn : public APawn
 
 	REFLECT_START(ClassName)
 		PROPERTY(MoveSpeed)
+		PROPERTY(SprintSpeed)
+		PROPERTY(CrouchSpeed)
 		PROPERTY(LookSensitivity)
 		PROPERTY(CollisionRadius)
+		PROPERTY(CrouchRadius)
 		PROPERTY(EyeHeight)
+		PROPERTY(CrouchEyeHeight)
 		PROPERTY(bEnableGravity)
 		PROPERTY(Gravity)
 		PROPERTY(JumpVelocity)
+		PROPERTY(AirAcceleration)
+		PROPERTY(GroundFriction)
+		PROPERTY(BrakingDeceleration)
+		PROPERTY(WallFriction)
+		PROPERTY(MaxStepHeight)
+		PROPERTY(KillZ)
+		PROPERTY(bEnableHeadBob)
+		PROPERTY(Velocity)
 		REFLECT_END()
 
 public:
@@ -37,6 +51,36 @@ public:
 	void Jump();
 	bool IsGrounded() const { return bIsGrounded; }
 
+	// 속도 및 물리
+	FVector GetVelocity() const { return Velocity; }
+	void SetVelocity(const FVector& InVelocity) { Velocity = InVelocity; }
+
+	// 달리기 (Sprint)
+	void SetSprinting(bool bSprint) { bIsSprinting = bSprint; }
+	bool IsSprinting() const { return bIsSprinting; }
+
+	// 웅크리기 (Crouch)
+	void SetCrouching(bool bCrouch) { bIsCrouched = bCrouch; }
+	void ToggleCrouch() { bIsCrouched = !bIsCrouched; }
+	bool IsCrouched() const { return bIsCrouched; }
+
+	// 줌 (Zoom)
+	void SetZooming(bool bZoom) { bIsZooming = bZoom; }
+	void ToggleZoom() { bIsZooming = !bIsZooming; }
+	bool IsZooming() const { return bIsZooming; }
+
+	// 사망 및 리스폰
+	void Respawn();
+	void KillPlayer() { Respawn(); }
+	float GetKillZ() const { return KillZ; }
+	void SetKillZ(float InKillZ) { KillZ = InKillZ; }
+
+	// 포탈 순간이동 수신 인터페이스 & 쿨다운
+	void TeleportThroughPortal(const FVector& NewLocation, const FRotator& NewRotation, const FVector& NewVelocity);
+	bool CanTeleport() const { return TeleportCooldownTimer <= 0.0f; }
+	float GetTeleportCooldownTimer() const { return TeleportCooldownTimer; }
+	void SetTeleportCooldown(float Duration = 0.2f) { TeleportCooldownTimer = Duration; }
+
 	// 포탈건 액터로 명령 위임
 	virtual void PrimaryAction();
 	virtual void TogglePortalType();
@@ -51,18 +95,62 @@ private:
 	USphereComponent* SphereComponent = nullptr; // 루트 물리 콜라이더
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
 
-	// 이동 & 시선 파라미터
+	// 이동 파라미터
 	float MoveSpeed = 6.0f;
+	float SprintSpeed = 9.0f;
+	float CrouchSpeed = 3.0f;
 	float LookSensitivity = 1.0f;
-	float CollisionRadius = 0.5f;
-	float EyeHeight = 1.1f;
 
-	// 중력, 점프
+	// 물리 마찰력, 제동 및 계단 파라미터
+	float AirAcceleration = 2.0f;          // 공중 조향 가속도 (공중에서 최고 속도 제한 적용)
+	float GroundFriction = 12.0f;          // 지상 마찰력 계수
+	float BrakingDeceleration = 35.0f;     // 키를 뗐을 때 즉시 멈추는 제동력 (얼음판 슬라이딩 완전 제거)
+	float WallFriction = 0.25f;            // 벽면 미끄러짐 시 마찰력 (0.0: 얼음벽, 1.0: 즉시 멈춤)
+	float MaxStepHeight = 0.3f;            // 계단 및 문턱 최대 넘기 높이 (0.3m = 30cm)
+	float MaxPreservedFlingSpeed = 9.0f;    // 포탈 플링 시 보존되는 수평 최대 속도 한도
+
+	// 포탈 재진입 핑퐁 방지 쿨다운
+	float TeleportCooldownTimer = 0.0f;    // 0보다 크면 포탈 순간이동 재진입 불가
+	float TeleportCooldownDuration = 0.2f; // 포탈 통과 직후 쿨다운 시간(0.2초)
+
+	// 사망 및 리스폰
+	float KillZ = -40.0f;                  // 이 높이 이하로 추락하면 사망 및 리스폰
+	FVector InitialSpawnLocation = FVector::ZeroVector;
+	FRotator InitialSpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+	// 시각적 연출: 착지 반동 & 헤드 밥빙
+	float CurrentLandingDip = 0.0f;        // 착지 시 카메라가 아래로 내려앉는 오프셋
+	bool bEnableHeadBob = true;            // 헤드 밥빙 활성화 여부
+	float BobTimer = 0.0f;                 // 밥빙 타이머
+	float BobAmountVertical = 0.03f;       // 밥빙 상하 흔들림 폭 (3cm)
+	float BobAmountHorizontal = 0.015f;    // 밥빙 좌우 흔들림 폭 (1.5cm)
+	float CurrentBobZ = 0.0f;
+	float CurrentBobX = 0.0f;
+
+	// 콜라이더 및 눈높이
+	float CollisionRadius = 0.5f;
+	float CrouchRadius = 0.35f;
+	float EyeHeight = 1.1f;
+	float CrouchEyeHeight = 0.55f;
+	float CurrentEyeHeight = 1.1f;
+
+	// 중력, 점프, 3D 속도
 	bool bEnableGravity = true;
 	float Gravity = 9.8f;
 	float JumpVelocity = 5.5f;
-	float VerticalVelocity = 0.0f;
+	FVector Velocity = FVector::ZeroVector;
+	FVector PendingInputVector = FVector::ZeroVector;
 	bool bIsGrounded = false;
+
+	// 상태 플래그
+	bool bIsSprinting = false;
+	bool bIsCrouched = false;
+	bool bIsZooming = false;
+
+	// 줌 FOV
+	float DefaultFOV = 60.0f;
+	float ZoomedFOV = 30.0f;
+	float CurrentFOV = 60.0f;
 
 	// 보유 중인 포탈건 액터
 	APortalGunActor* PortalGun = nullptr;
