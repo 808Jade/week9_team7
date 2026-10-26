@@ -12,6 +12,7 @@
 #include "Render/RenderGraph/RenderGraph.h"
 #include "Render/SkyboxRenderer.h"
 #include "UObject/UObjectIterator.h"
+#include "GameFramework/Actor/PortalActor.h"
 
 FEngineConfig UGameEngine::GetConfig() const
 {
@@ -106,6 +107,10 @@ void UGameEngine::RenderFrame()
     Options.PointShadowMapSize = 512;
     Options.SpotShadowMapSize = 512;
     Options.PcfMode = EPcfMode::PCSS;
+
+    // 2.5 포탈 뷰 먼저 렌더링
+    APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),
+        SkyboxRenderer.get(), SceneView, Options);
 
     // 3. 씬 렌더링
     FSceneRenderer SceneRenderer(GameWorld, SceneView, GameViewport->GetRenderData());

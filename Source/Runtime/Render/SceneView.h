@@ -30,6 +30,7 @@ struct FSceneView
 	bool bIsPerspective = true;
 	bool bIsWireframe = false;
 	bool bGameView = false;
+	const TArray<const UPrimitiveComponent*>* HiddenComponents = nullptr;
 
 	FViewContext ToViewContext() const
 	{
@@ -43,6 +44,7 @@ struct FSceneView
 		Context.NearZ = NearClip;
 		Context.bOrthographic = !bIsPerspective;
 		Context.bGameView = bGameView;
+		Context.HiddenComponents = HiddenComponents;
 		const float ScaleX = ProjectionMatrix.M[1][0];
 		const float ScaleY = ProjectionMatrix.M[2][1];
 		Context.ProjectionScaleSquared = std::max(ScaleX * ScaleX, ScaleY * ScaleY);
