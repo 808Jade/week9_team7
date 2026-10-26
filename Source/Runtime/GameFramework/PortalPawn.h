@@ -5,6 +5,12 @@
 class USphereComponent;
 class UCameraComponent;
 
+enum class PortalType : int32
+{
+	Blue = 0,
+	Orange = 1
+};
+
 class APortalPawn : public APawn
 {
 	DECLARE_CLASS(APortalPawn, APawn)
@@ -35,6 +41,10 @@ public:
 	void Jump();
 	bool IsGrounded() const { return bIsGrounded; }
 
+	virtual void FirePortal();
+	virtual void PortalTypeChanged() { CurrentPortalType = CurrentPortalType == PortalType::Blue ? PortalType::Orange : PortalType::Blue; }
+	virtual void Interact();
+
 	USphereComponent* GetSphereComponent() const { return SphereComponent; }
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 
@@ -55,4 +65,6 @@ private:
 	float JumpVelocity = 10.0f;
 	float VerticalVelocity = 0.0f;
 	bool bIsGrounded = false;
+
+	PortalType CurrentPortalType = PortalType::Blue;
 };

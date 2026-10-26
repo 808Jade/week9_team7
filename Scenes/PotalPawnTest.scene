@@ -198,10 +198,10 @@
                     "Properties": {
                         "CollisionRadius": 1.0,
                         "EyeHeight": 1.600000023841858,
-                        "Gravity": 25.0,
-                        "JumpVelocity": 10.0,
+                        "Gravity": 9.800000190734863,
+                        "JumpVelocity": 5.5,
                         "LookSensitivity": 1.0,
-                        "MoveSpeed": 15.0,
+                        "MoveSpeed": 6.0,
                         "bActorEnableCollision": true,
                         "bEnableGravity": true
                     }

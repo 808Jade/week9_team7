@@ -113,3 +113,15 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
 	}
 }
+
+void APortalPawn::FirePortal()
+{
+	HTR_LOG(Info, "FirePortal: Type {} ", CurrentPortalType == PortalType::Blue ? "Blue (Primary)" : "Orange (Secondary)");
+	// TODO: 나중에 포탈 발사/생성 로직 연결
+}
+
+void APortalPawn::Interact()
+{
+	HTR_LOG(Info, "Interact: E key pressed");
+	// TODO: 나중에 큐브 들기/버튼 누르기 로직 연결
+}
