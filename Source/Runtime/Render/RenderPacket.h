@@ -9,6 +9,8 @@
 #include <bit>
 
 class FPrimitiveSceneProxy;
+class UPrimitiveComponent;
+
 inline constexpr uint32 InvalidObjectSlot = ~0u;
 
 struct FRenderPacket
