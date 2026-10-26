@@ -84,6 +84,11 @@ public:
 	void SetTeleportCooldown(float Duration = 0.2f) { TeleportCooldownTimer = Duration; }
 
 	// 포탈건 액터로 명령 위임
+	// 포탈 상태 및 리셋
+	bool IsBluePortalPlaced() const;
+	bool IsOrangePortalPlaced() const;
+	void ResetPortals();
+
 	virtual void PrimaryAction();     // 좌클릭: 파란 포탈
 	virtual void SecondaryAction();   // 우클릭: 주황 포탈
 	virtual void TogglePortalType();

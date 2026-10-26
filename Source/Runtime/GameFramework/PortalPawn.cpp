@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/PlayerStart.h"
@@ -8,6 +8,9 @@
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/PortalActor.h"
+#include "GameFramework/Actor/UIManagerActor.h"
+#include "Components/LuaScriptComponent.h"
 #include "Collision/Ray.h"
 #include "Collision/HitResult.h"
 #include "UObject/Casts.h"
@@ -94,6 +97,24 @@ void APortalPawn::BeginPlay()
 		if (PortalGun)
 		{
 			PortalGun->AttachToPawn(this);
+		}
+	}
+
+	// 크로스헤어 상태 관리 루아 스크립트가 아직 부착되어 있지 않다면 자동 부착
+	bool bHasScript = false;
+	for (UActorComponent* Comp : GetComponents())
+	{
+		if (Comp && Comp->IsA<ULuaScriptComponent>())
+		{
+			bHasScript = true;
+			break;
+		}
+	}
+	if (!bHasScript)
+	{
+		if (ULuaScriptComponent* LuaComp = Cast<ULuaScriptComponent>(AddComponent(ULuaScriptComponent::StaticClass(), "PortalCrosshairScript")))
+		{
+			LuaComp->SetScriptPath("Scripts/PortalCrosshairController.lua");
 		}
 	}
 }
@@ -441,6 +462,13 @@ void APortalPawn::Respawn()
 		CameraComponent->SetRelativeRotation(FRotator(TargetRotation.Pitch, 0.0f, 0.0f));
 	}
 
+	// 리스폰 시 포탈 설치 상태 초기화 및 크로스헤어 리셋
+	ResetPortals();
+	if (AUIManagerActor::Get())
+	{
+		AUIManagerActor::Get()->SetCrosshairState("unfilled");
+	}
+
 	// 물리 및 연출 상태 초기화
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
@@ -650,5 +678,32 @@ void APortalPawn::Interact()
 	else
 	{
 		HTR_LOG(Warning, "Interact Hit nothing");
+	}
+}
+
+
+bool APortalPawn::IsBluePortalPlaced() const
+{
+	if (PortalGun && PortalGun->GetPortal(EPortalType::Blue))
+	{
+		return PortalGun->GetPortal(EPortalType::Blue)->IsPlaced();
+	}
+	return false;
+}
+
+bool APortalPawn::IsOrangePortalPlaced() const
+{
+	if (PortalGun && PortalGun->GetPortal(EPortalType::Orange))
+	{
+		return PortalGun->GetPortal(EPortalType::Orange)->IsPlaced();
+	}
+	return false;
+}
+
+void APortalPawn::ResetPortals()
+{
+	if (PortalGun)
+	{
+		PortalGun->ResetPortals();
 	}
 }

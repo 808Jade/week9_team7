@@ -4,54 +4,85 @@
 #include "Components/UITextComponent.h"
 #include "Input/InputSystem.h"
 #include "GameFramework/Actor/UIManagerActor.h"
+#include "Asset/AssetManager.h"
 
 ATitleCanvasActor::ATitleCanvasActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 1. 어두운 배경 오버레이 (Layer 5)
+	// 1. 순수 검은 배경 오버레이 (뷰포트 전체 자동 일치, Layer 5)
 	BackgroundImage = CreateDefaultSubobject<UUIImageComponent>("TitleBackground");
 	BackgroundImage->SetupAttachment(GetRootComponent());
-	BackgroundImage->SetPosition(0.0f, 0.0f);
-	BackgroundImage->SetSize(1920.0f, 1080.0f);
-	BackgroundImage->SetColor(FColor(12, 16, 22, 220)); // 어두운 블루그레이 톤
+	BackgroundImage->SetMatchViewportSize(true);
+	BackgroundImage->SetTexture(UAssetManager::Get().LoadTexture("Assets/Models/Background/TitleBackground.png"));
+	BackgroundImage->SetColor(FColor(255, 255, 255, 255));
 	BackgroundImage->SetLayer(5);
 
-	// 2. 메인 타이틀 텍스트 (포탈 블루 색상, Layer 20)
+	// 2. 메인 타이틀 텍스트 (화면 상단 30% 위치, 중앙에서 0.25 왼쪽 가로 정렬, Layer 20)
 	TitleText = CreateDefaultSubobject<UUITextComponent>("TitleLogoText");
 	TitleText->SetupAttachment(GetRootComponent());
 	TitleText->SetText("PORTAL");
-	TitleText->SetFontSize(64.0f);
-	TitleText->SetPosition(780.0f, 320.0f);
-	TitleText->SetColor(FColor(0, 180, 255, 255)); // Aperture Blue
+	TitleText->SetFontSize(72.0f);
+	TitleText->SetCenterHorizontally(true);
+	TitleText->SetRelativeX(0.25f);
+	TitleText->SetRelativeY(0.30f);
+	TitleText->SetColor(FColor(255, 255, 255, 255)); // 하얀색
 	TitleText->SetLayer(20);
 
-	// 3. 서브타이틀 텍스트 (Layer 20)
+	// 3. 서브타이틀 텍스트 (화면 상단 42% 위치, 중앙에서 0.25 왼쪽 가로 정렬, Layer 20)
 	SubtitleText = CreateDefaultSubobject<UUITextComponent>("TitleSubtitleText");
 	SubtitleText->SetupAttachment(GetRootComponent());
 	SubtitleText->SetText("Aperture Science Enrichment Center");
-	SubtitleText->SetFontSize(20.0f);
-	SubtitleText->SetPosition(680.0f, 410.0f);
-	SubtitleText->SetColor(FColor(180, 180, 180, 255));
+	SubtitleText->SetFontSize(22.0f);
+	SubtitleText->SetCenterHorizontally(true);
+	SubtitleText->SetRelativeX(0.25f);
+	SubtitleText->SetRelativeY(0.42f);
+	SubtitleText->SetColor(FColor(200, 200, 200, 255));
 	SubtitleText->SetLayer(20);
 
-	// 4. [ Enter ] 게임 시작 안내 (Layer 20)
+	// 4. [ Enter ] 시작 안내 (화면 상단 60% 위치, 중앙에서 0.25 왼쪽 가로 정렬, Layer 20)
 	StartPromptText = CreateDefaultSubobject<UUITextComponent>("TitleStartPrompt");
 	StartPromptText->SetupAttachment(GetRootComponent());
-	StartPromptText->SetText("[ Enter ]  게임 시작");
-	StartPromptText->SetFontSize(26.0f);
-	StartPromptText->SetPosition(820.0f, 580.0f);
-	StartPromptText->SetColor(FColor(255, 255, 255, 255));
+	StartPromptText->SetText("[ Enter ]  시작");
+	StartPromptText->SetFontSize(28.0f);
+	StartPromptText->SetCenterHorizontally(true);
+	StartPromptText->SetRelativeX(0.25f);
+	StartPromptText->SetRelativeY(0.60f);
+	StartPromptText->SetColor(FColor(255, 255, 255, 255)); // 하얀색
 	StartPromptText->SetLayer(20);
 
-	// 5. [ ESC ] 종료 안내 (Layer 20)
+	// 5. [ ESC ] 종료 안내 (화면 상단 68% 위치, 중앙에서 0.25 왼쪽 가로 정렬, Layer 20)
 	QuitPromptText = CreateDefaultSubobject<UUITextComponent>("TitleQuitPrompt");
 	QuitPromptText->SetupAttachment(GetRootComponent());
 	QuitPromptText->SetText("[ ESC ]  종료");
-	QuitPromptText->SetFontSize(22.0f);
-	QuitPromptText->SetPosition(870.0f, 650.0f);
-	QuitPromptText->SetColor(FColor(150, 150, 150, 255));
+	QuitPromptText->SetFontSize(20.0f);
+	QuitPromptText->SetCenterHorizontally(true);
+	QuitPromptText->SetRelativeX(0.25f);
+	QuitPromptText->SetRelativeY(0.68f);
+	QuitPromptText->SetColor(FColor(160, 160, 160, 255));
 	QuitPromptText->SetLayer(20);
+}
+
+void ATitleCanvasActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 배경 텍스처 로드 및 색상(White: 255, 255, 255) 적용 (텍스처 본연의 색상 표시)
+	if (BackgroundImage)
+	{
+		UTexture2D* BgTex = UAssetManager::Get().LoadTexture("Assets/Models/Background/TitleBackground.png");
+		if (BgTex)
+		{
+			BackgroundImage->SetTexture(BgTex);
+		}
+		BackgroundImage->SetColor(FColor(255, 255, 255, 255));
+	}
+
+	// 씬 파일에서 로드된 이후에도 화면 중앙(0.5)에서 0.25 왼쪽(0.25 비율) 위치에 가로 중앙 정렬 적용
+	if (TitleText) TitleText->SetRelativeX(0.25f);
+	if (SubtitleText) SubtitleText->SetRelativeX(0.25f);
+	if (StartPromptText) StartPromptText->SetRelativeX(0.25f);
+	if (QuitPromptText) QuitPromptText->SetRelativeX(0.25f);
 }
 
 void ATitleCanvasActor::Tick(float DeltaTime)

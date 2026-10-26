@@ -20,6 +20,10 @@ class UUIImageComponent : public UPrimitiveComponent
 		PROPERTY(Material)
 		PROPERTY(Color)
 		PROPERTY(Opacity)
+		PROPERTY(bMatchViewportSize)
+		PROPERTY(bCenterOnViewport)
+		PROPERTY(OffsetX)
+		PROPERTY(OffsetY)
 		REFLECT_END()
 
 public:
@@ -47,6 +51,19 @@ public:
 	int32 GetLayer() const { return Layer; }
 	void SetLayer(int32 InLayer) { Layer = InLayer; }
 
+	// 뷰포트 크기에 자동 맞춤 (전체 화면 배경용)
+	void SetMatchViewportSize(bool bEnable) { bMatchViewportSize = bEnable; }
+	bool IsMatchViewportSize() const { return bMatchViewportSize; }
+
+	// 뷰포트 화면 중앙 배치 (크로스헤어 등)
+	void SetCenterOnViewport(bool bEnable, float InOffsetX = 0.0f, float InOffsetY = 0.0f)
+	{
+		bCenterOnViewport = bEnable;
+		OffsetX = InOffsetX;
+		OffsetY = InOffsetY;
+	}
+	bool IsCenterOnViewport() const { return bCenterOnViewport; }
+
 private:
 	float PosX = 100.0f;   // 화면 좌상단 X (픽셀)
 	float PosY = 100.0f;   // 화면 좌상단 Y (픽셀)
@@ -55,6 +72,11 @@ private:
 	int32 Layer = 0;      // UI 레이어
 	FColor Color = FColor(255, 255, 255, 255);
 	float Opacity = 1.0f;
+
+	bool bMatchViewportSize = false;
+	bool bCenterOnViewport = false;
+	float OffsetX = 0.0f;
+	float OffsetY = 0.0f;
 
 	UStaticMesh* Mesh = nullptr;
 	UMaterial* Material = nullptr;

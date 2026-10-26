@@ -1,7 +1,9 @@
 #include "EnginePCH.h"
 #include "GameFramework/PortalPlayerController.h"
 #include "GameFramework/PortalPawn.h"
+#include "GameFramework/Actor/UIManagerActor.h"
 #include "Input/InputSystem.h"
+#include "Engine/World.h"
 
 APortalPlayerController::APortalPlayerController()
 {
@@ -18,8 +20,22 @@ APortalPlayerController::~APortalPlayerController()
 void APortalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// 게임 시작 시 마우스 잠금 & 커서 숨김
-	SetMouseCapture(true);
+
+	// UIManagerActor가 없다면 자동 생성 보장
+	if (!AUIManagerActor::Get() && GetWorld())
+	{
+		GetWorld()->SpawnActor<AUIManagerActor>();
+	}
+
+	// UI 모드가 InGame일 때만 마우스 잠금, Title/Pause/Ending에서는 마우스 해제
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		SetMouseCapture(false);
+	}
+	else
+	{
+		SetMouseCapture(true);
+	}
 }
 
 void APortalPlayerController::EndPlay()
@@ -53,6 +69,17 @@ void APortalPlayerController::SetMouseCapture(bool bEnable)
 
 void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 {
+	// 0. UI 모드 (Title, Pause, Ending 등)일 때는 플레이어 시선 회전 및 이동 전면 차단
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		if (bMouseCaptured)
+		{
+			SetMouseCapture(false);
+		}
+		MouseAxisX = MouseAxisY = 0.0f;
+		return;
+	}
+
 	// 1. 윈도우 키(LWin, RWin)를 눌렀거나, 다른 창/시작메뉴로 포커스가 빠져나가면 즉시 마우스 잠금 해제 & 커서 표시
 	const bool bWinKeyPressed = ((::GetAsyncKeyState(VK_LWIN) & 0x8000) != 0) ||
 		((::GetAsyncKeyState(VK_RWIN) & 0x8000) != 0) ||
@@ -143,10 +170,23 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 
 	if (!bPressed) return;
 
-	// 1. ESC 키: 일시정지 / 마우스 커서 잠금 토글
+	// UI 모드 (Title, Pause, Ending)일 때는 플레이어 액션 차단
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		return;
+	}
+
+	// 1. ESC 키: 일시정지 (UI Manager가 있으면 Pause 모드로 전환)
 	if (Key == static_cast<int32>(EKeyCode::Escape))
 	{
-		SetMouseCapture(!bMouseCaptured);
+		if (AUIManagerActor::Get())
+		{
+			AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
+		}
+		else
+		{
+			SetMouseCapture(!bMouseCaptured);
+		}
 		return;
 	}
 

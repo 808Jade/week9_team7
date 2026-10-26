@@ -65,6 +65,11 @@ public:
 	static void DrawPortalSurfaces(UWorld* World, const FSceneView& MainView); 
 
 	bool IsPlaced() const { return bPlaced; }
+	void ResetPortal()
+	{
+		bPlaced = false;
+		SetActorLocation(FVector(0.0f, 0.0f, -9999.0f));
+	}
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;

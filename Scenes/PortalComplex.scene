@@ -523,6 +523,18 @@
                                 "bHiddenInGame": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_PortalCrosshair",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/PortalCrosshairController.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/PortalCrosshairController.lua"
                         }
                     ],
                     "Name": "APortalPawn_0",
@@ -3509,9 +3521,9 @@
                             "Properties": {
                                 "Transform": {
                                     "Location": {
-                                        "X": 119.8744888305664,
-                                        "Y": -1.7480000257492065,
-                                        "Z": 12.372634887695313
+                                        "X": -16.125511169433594,
+                                        "Y": -1.7479838132858276,
+                                        "Z": -1.6273651123046875
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -543739,6 +543751,1213 @@
                         }
                     ],
                     "Name": "Tile_W_106_-6_9_12",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AUIManagerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "AUIManagerActor_0",
+                    "Properties": {
+                        "bActorEnableCollision": false
+                    }
+                },
+                {
+                    "Class": "AHUDCanvasActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "CrosshairImage",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 3707764735,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 12.0,
+                                "Layer": 10,
+                                "Material": null,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 150.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": true,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "HUDTimerText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 32.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.03999999910593033,
+                                "Text": "00:00.00",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "InteractPromptText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 22.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.5600000023841858,
+                                "Text": "Text",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "SubtitleText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4284802815,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 24.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.8799999952316284,
+                                "Text": "Text",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "FadeImage",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4278190080,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 99,
+                                "Material": null,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 0.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        }
+                    ],
+                    "Name": "AHUDCanvasActor_0",
+                    "Properties": {
+                        "CameraDistance": 2.0,
+                        "bActorEnableCollision": false,
+                        "bCanvasVisible": false,
+                        "bFollowCamera": false
+                    }
+                },
+                {
+                    "Class": "ATitleCanvasActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleBackground",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 5,
+                                "Material": null,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": true,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleLogoText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 72.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.25,
+                                "RelativeY": 0.30000001192092896,
+                                "Text": "PORTAL",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleSubtitleText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 22.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.25,
+                                "RelativeY": 0.41999998688697815,
+                                "Text": "Aperture Science Enrichment Center",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleStartPrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 28.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.25,
+                                "RelativeY": 0.6000000238418579,
+                                "Text": "[ Enter ]  시작",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleQuitPrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4288716960,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 20.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.25,
+                                "RelativeY": 0.6800000071525574,
+                                "Text": "[ ESC ]  종료",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ATitleCanvasActor_0",
+                    "Properties": {
+                        "CameraDistance": 2.0,
+                        "bActorEnableCollision": false,
+                        "bCanvasVisible": true,
+                        "bFollowCamera": false
+                    }
+                },
+                {
+                    "Class": "APauseCanvasActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "PauseDimOverlay",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 3019898880,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 40,
+                                "Material": null,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "PauseTitleText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 48.0,
+                                "Layer": 50,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.30000001192092896,
+                                "Text": "PAUSED",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "PauseResumePrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294952960,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 24.0,
+                                "Layer": 50,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.47999998927116394,
+                                "Text": "[ ESC ]  계속하기",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "PauseRestartPrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 22.0,
+                                "Layer": 50,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.550000011920929,
+                                "Text": "[ R ]  챔버 재시작",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "PauseMenuPrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 22.0,
+                                "Layer": 50,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.6200000047683716,
+                                "Text": "[ M ]  메인 메뉴로",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        }
+                    ],
+                    "Name": "APauseCanvasActor_0",
+                    "Properties": {
+                        "CameraDistance": 2.0,
+                        "bActorEnableCollision": false,
+                        "bCanvasVisible": false,
+                        "bFollowCamera": false
+                    }
+                },
+                {
+                    "Class": "AEndingCanvasActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "EndingBackground",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4278190080,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 5,
+                                "Material": null,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": true,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "EndingTitleText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 64.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.30000001192092896,
+                                "Text": "TEST COMPLETE",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "EndingSubtitleText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4292664540,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 22.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.41999998688697815,
+                                "Text": "모든 테스트 챔버를 탈출하였습니다.",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "EndingClearTimeText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 38.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.5,
+                                "Text": "탈출 시간: 00:00.00",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "EndingReturnPrompt",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294967295,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/CookieRun.json",
+                                "FontSize": 28.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": -1.0,
+                                "RelativeY": 0.6000000238418579,
+                                "Text": "[ Enter ]  시작 화면으로",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": false
+                            }
+                        }
+                    ],
+                    "Name": "AEndingCanvasActor_0",
+                    "Properties": {
+                        "CameraDistance": 2.0,
+                        "bActorEnableCollision": false,
+                        "bCanvasVisible": false,
+                        "bFollowCamera": false
+                    }
+                },
+                {
+                    "Class": "AElevatorTriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 118.5,
+                                        "Y": -1.7480000257492065,
+                                        "Z": 14.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "ElevatorTriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.5,
+                                    "Y": 2.5,
+                                    "Z": 3.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "AElevatorTriggerActor_0",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.5,
+                            "Y": 2.5,
+                            "Z": 3.0
+                        },
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "AStaticMeshActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 120.8744888305664,
+                                        "Y": -0.7480000257492065,
+                                        "Z": 12.372634887695313
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": -90.00003051757813
+                                    },
+                                    "Scale": {
+                                        "X": 0.019999999552965164,
+                                        "Y": 0.019999999552965164,
+                                        "Z": 0.019999999552965164
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "UStaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalElevator/portal_elevator.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ExitElevator_Final_0",
                     "Properties": {
                         "bActorEnableCollision": true
                     }

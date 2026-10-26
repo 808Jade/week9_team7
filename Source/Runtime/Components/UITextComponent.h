@@ -1,5 +1,6 @@
 #pragma once
 #include "Components/PrimitiveComponent.h"
+#include "Components/UIImageComponent.h" // FUIConstants
 #include "Text/Font.h"
 
 class UUITextComponent : public UPrimitiveComponent
@@ -14,6 +15,12 @@ class UUITextComponent : public UPrimitiveComponent
 		PROPERTY(Color)
 		PROPERTY(Opacity)
 		PROPERTY(Font)
+		PROPERTY(bCenterHorizontally)
+		PROPERTY(bCenterVertically)
+		PROPERTY(RelativeX)
+		PROPERTY(RelativeY)
+		PROPERTY(OffsetX)
+		PROPERTY(OffsetY)
 		REFLECT_END()
 
 public:
@@ -47,6 +54,38 @@ public:
 	UFont* GetFont() const { return Font; }
 	void SetFont(UFont* InFont);
 
+	// 가로 중앙 정렬
+	void SetCenterHorizontally(bool bCenter, float InOffset = 0.0f)
+	{
+		bCenterHorizontally = bCenter;
+		OffsetX = InOffset;
+	}
+	bool IsCenterHorizontally() const { return bCenterHorizontally; }
+
+	// 세로 중앙 정렬
+	void SetCenterVertically(bool bCenter, float InOffset = 0.0f)
+	{
+		bCenterVertically = bCenter;
+		OffsetY = InOffset;
+	}
+	bool IsCenterVertically() const { return bCenterVertically; }
+
+	// 뷰포트 상대 세로 위치 (0.0f ~ 1.0f, 음수면 무효)
+	void SetRelativeY(float InRelY, float InOffset = 0.0f)
+	{
+		RelativeY = InRelY;
+		OffsetY = InOffset;
+	}
+	float GetRelativeY() const { return RelativeY; }
+
+	// 뷰포트 상대 가로 위치 (0.0f ~ 1.0f, 음수면 무효)
+	void SetRelativeX(float InRelX, float InOffset = 0.0f)
+	{
+		RelativeX = InRelX;
+		OffsetX = InOffset;
+	}
+	float GetRelativeX() const { return RelativeX; }
+
 private:
 	void RebuildTextMesh();
 
@@ -58,6 +97,13 @@ private:
 	FColor Color = FColor(255, 255, 255, 255);
 	float Opacity = 1.0f;
 
+	bool bCenterHorizontally = false;
+	bool bCenterVertically = false;
+	float RelativeX = -1.0f;
+	float RelativeY = -1.0f;
+	float OffsetX = 0.0f;
+	float OffsetY = 0.0f;
+
 	FVector2 Size = FVector2(100.0f, 32.0f); // 텍스트 전체 가로, 세로 크기 (자동 계산)
 
 	UFont* Font = nullptr;
@@ -67,4 +113,6 @@ private:
 	FString CachedText;
 	float CachedFontSize = -1.0f;
 	UFont* CachedFont = nullptr;
+
+	FUIConstants UIConstants; // 각 인스턴스 전용 FUIConstants
 };
