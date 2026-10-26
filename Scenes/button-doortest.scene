@@ -102,7 +102,7 @@
                             "Name": "TriggerBox",
                             "Parent": "DefaultSceneRoot",
                             "Properties": {
-                                "CurrentCollisionResponse": 2,
+                                "CurrentCollisionResponse": 1,
                                 "Extent": {
                                     "X": 0.31794148683547974,
                                     "Y": 0.3180314898490906,
@@ -402,7 +402,7 @@
                             "Name": "TriggerBox",
                             "Parent": "DefaultSceneRoot",
                             "Properties": {
-                                "CurrentCollisionResponse": 2,
+                                "CurrentCollisionResponse": 1,
                                 "Extent": {
                                     "X": 1.0,
                                     "Y": 1.0,

@@ -6,13 +6,17 @@ AButtonActorBase::AButtonActorBase()
     BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
     ButtonMesh = CreateDefaultSubobject<UStaticMeshComponent>("ButtonMesh");
     TriggerBox = CreateDefaultSubobject<UBoxComponent>("TriggerBox");
+    BaseCollisionBox = CreateDefaultSubobject<UBoxComponent>("BaseCollisionBox");
 
     BaseMesh->SetupAttachment(GetRootComponent());
     ButtonMesh->SetupAttachment(GetRootComponent());
     TriggerBox->SetupAttachment(GetRootComponent());
+    BaseCollisionBox->SetupAttachment(GetRootComponent());  
 
-    TriggerBox->SetBoxExtent(FVector(50.0f, 50.0f, 20.0f));
-    TriggerBox->SetRelativeLocation(FVector(0.0f, 0.0f, 10.0f));
+
+    TriggerBox->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
+
+    BaseCollisionBox->SetCurrentCollisionResponse(ECollisionResponse::Block);
 
     PrimaryActorTick.bCanEverTick = true;
 }
@@ -20,6 +24,15 @@ AButtonActorBase::AButtonActorBase()
 void AButtonActorBase::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (TriggerBox)
+    {
+        TriggerBox->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
+    }
+    if (BaseCollisionBox)
+    {
+        BaseCollisionBox->SetCurrentCollisionResponse(ECollisionResponse::Block);
+    }
 
     // 시작 시점의 버튼 메쉬 원래 로컬 위치 저장
     if (ButtonMesh)

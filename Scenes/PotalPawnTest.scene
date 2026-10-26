@@ -768,7 +768,7 @@
                             "Name": "TriggerBox",
                             "Parent": "DefaultSceneRoot",
                             "Properties": {
-                                "CurrentCollisionResponse": 2,
+                                "CurrentCollisionResponse": 1,
                                 "Extent": {
                                     "X": 0.31794148683547974,
                                     "Y": 0.3180314898490906,
@@ -1065,9 +1065,9 @@
                             "Properties": {
                                 "CurrentCollisionResponse": 2,
                                 "Extent": {
-                                    "X": 0.5,
-                                    "Y": 0.5,
-                                    "Z": 1.5
+                                    "X": 0.4,
+                                    "Y": 0.4,
+                                    "Z": 0.9
                                 },
                                 "ShapeColor": 4288517599,
                                 "Transform": {
@@ -1103,7 +1103,7 @@
                                     "Location": {
                                         "X": 0.0,
                                         "Y": 0.0,
-                                        "Z": 1.100000023841858
+                                        "Z": 0.75
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -1127,16 +1127,16 @@
                         "AirAcceleration": 2.0,
                         "BrakingDeceleration": 35.0,
                         "CollisionRadius": 0.5,
-                        "CrouchEyeHeight": 0.550000011920929,
+                        "CrouchEyeHeight": 0.25,
                         "CrouchRadius": 0.3499999940395355,
                         "CrouchSpeed": 3.0,
-                        "EyeHeight": 1.100000023841858,
+                        "EyeHeight": 0.75,
                         "Gravity": 9.800000190734863,
                         "GroundFriction": 12.0,
                         "JumpVelocity": 5.5,
                         "KillZ": -40.0,
                         "LookSensitivity": 1.0,
-                        "MaxStepHeight": 0.30000001192092896,
+                        "MaxStepHeight": 0.5,
                         "MoveSpeed": 6.0,
                         "SprintSpeed": 9.0,
                         "Velocity": {

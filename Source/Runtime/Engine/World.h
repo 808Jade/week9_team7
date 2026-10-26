@@ -85,7 +85,9 @@ public:
 	void EndPlay();
 	bool HasBegunPlay() const { return bBegunPlay; }
 	APawn* GetPlayerPawn() const { return PlayerPawn; }
+	void SetPlayerPawn(APawn* InPawn) { PlayerPawn = InPawn; }
 	APlayerController* GetPlayerController() const { return PlayerController; }
+	void SetPlayerController(APlayerController* InController) { PlayerController = InController; }
 	bool IsPaused() const { return bIsPaused; }
 	void SetPaused(bool bPaused) { bIsPaused = bPaused; }
 

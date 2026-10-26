@@ -26,6 +26,13 @@ void FLog::RemoveSink(ILogSink* Sink)
 
 void FLog::Emit(ELogVerbosity Verbosity, const FString& Message)
 {
+    FString DebugMessage = Message;
+    if (DebugMessage.empty() || DebugMessage.back() != '\n')
+    {
+        DebugMessage += "\n";
+    }
+    OutputDebugStringA(DebugMessage.c_str());
+
     for (ILogSink* Sink : GetSinks())
         Sink->OnLog(Verbosity, Message);
 }

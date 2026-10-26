@@ -6,6 +6,8 @@
 #include "GameFramework/Actor/ButtonActorBase.h"
 #include "GameFramework/Actor/WeightedButtonActor.h"
 #include "GameFramework/Actor/StandButtonActor.h"
+#include "GameFramework/Actor/CubeDropActor.h"
+#include "GameFramework/Actor/PortalCubeActor.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Camera/CameraComponent.h"
@@ -504,7 +506,7 @@ namespace LuaBindings
 						if (!Result.valid())
 						{
 							sol::error Err = Result;
-							HTR_LOG(Error, "[Lua BindOnPressed Callback Error]: {}", Err.what());
+							HTR_LOG(Error, "[Lua] BindOnPressed Callback Runtime error: {}", Err.what());
 						}
 					}
 				});
@@ -577,6 +579,47 @@ namespace LuaBindings
 		sol::usertype<AStandButtonActor> StandButtonType = Lua.new_usertype<AStandButtonActor>("StandButtonActor",
 			sol::base_classes, sol::bases<AButtonActorBase, AActor>());
 		StandButtonType["Interact"] = &AStandButtonActor::Interact;
+
+		// ==========================================
+		// [큐브 드로퍼 액터 (CubeDropActor) 제어 바인딩]
+		// ==========================================
+		ActorType["DropCube"] = [](AActor* Actor) -> AActor* {
+			if (ACubeDropActor* Dropper = Cast<ACubeDropActor>(Actor))
+			{
+				return Dropper->DropCube();
+			}
+			return nullptr;
+		};
+
+		ActorType["ResetCube"] = [](AActor* Actor) {
+			if (ACubeDropActor* Dropper = Cast<ACubeDropActor>(Actor))
+			{
+				Dropper->ResetCube();
+			}
+		};
+
+		ActorType["GetCurrentCube"] = [](AActor* Actor) -> AActor* {
+			if (ACubeDropActor* Dropper = Cast<ACubeDropActor>(Actor))
+			{
+				return Dropper->GetCurrentCube();
+			}
+			return nullptr;
+		};
+
+		ActorType["HasActiveCube"] = [](AActor* Actor) -> bool {
+			if (ACubeDropActor* Dropper = Cast<ACubeDropActor>(Actor))
+			{
+				return Dropper->HasActiveCube();
+			}
+			return false;
+		};
+
+		sol::usertype<ACubeDropActor> CubeDropType = Lua.new_usertype<ACubeDropActor>("CubeDropActor",
+			sol::base_classes, sol::bases<AActor>());
+		CubeDropType["DropCube"] = &ACubeDropActor::DropCube;
+		CubeDropType["ResetCube"] = &ACubeDropActor::ResetCube;
+		CubeDropType["GetCurrentCube"] = &ACubeDropActor::GetCurrentCube;
+		CubeDropType["HasActiveCube"] = &ACubeDropActor::HasActiveCube;
 
 		// 6. Scene 모듈 (씬 로드 및 리로드)
 		auto SceneTable = Lua.create_named_table("Scene");

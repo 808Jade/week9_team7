@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/PlayerStart.h"
@@ -24,7 +24,7 @@ APortalPawn::APortalPawn()
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponet");
 	SetRootComponent(BoxComponent);
-	BoxComponent->SetBoxExtent(FVector(0.5f, 0.5f, 1.5f));
+	BoxComponent->SetBoxExtent(FVector(0.4f, 0.4f, 0.9f));
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");

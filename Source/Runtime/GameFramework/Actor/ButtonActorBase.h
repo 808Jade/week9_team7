@@ -37,6 +37,7 @@ protected:
 	FVector InitialButtonLocation = FVector::ZeroVector; // 초기 버튼 높이
 
 	UStaticMeshComponent* BaseMesh = nullptr;
+	UBoxComponent* BaseCollisionBox = nullptr;
 	UStaticMeshComponent* ButtonMesh = nullptr;
 	UBoxComponent* TriggerBox = nullptr;
 };

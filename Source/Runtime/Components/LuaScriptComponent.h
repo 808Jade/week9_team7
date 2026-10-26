@@ -79,7 +79,7 @@ private:
 		if (!Result.valid())
 		{
 			sol::error Error = Result;
-			HTR_LOG(Error, "[LuaScriptComponent] Error occurred while calling {}: {}", FunctionName, Error.what());
+			HTR_LOG(Error, "[Lua] {} Runtime error in {}: {}", GetScriptFileName(), FunctionName, Error.what());
 			return false;
 		}
 		return true;
