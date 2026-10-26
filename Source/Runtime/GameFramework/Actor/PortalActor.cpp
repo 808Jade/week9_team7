@@ -3,7 +3,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
+#include "Math/Frustum.h"
 #include <cmath>
+
+namespace 
+{ 
+	constexpr int32 PortalViewIndex = 100; // 에디터 뷰포트 슬롯(0~3)과 겹치지 않게
+}   
 
 APortalActor::APortalActor()
 {
@@ -66,5 +72,28 @@ bool APortalActor::CalcVirtualCamera(const FVector& CamLocation, const FRotator&
 	Out.Forward = FVector(VirtualWorld.M[0][0], VirtualWorld.M[0][1], VirtualWorld.M[0][2]);
 	Out.Rotation = MatrixToRotator(VirtualWorld);
 	Out.ViewMatrix = VirtualWorld.Inverse();
+	return true;
+}
+
+bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& OutView) const
+{
+	FPortalCameraPose Pose;
+	if (!CalcVirtualCamera(MainView.ViewLocation, MainView.ViewRotation, Pose))
+		return false;
+
+	// 투영(FOV/Aspect/Near/Far/ProjectionMatrix), ViewRect, bGameView는 메인 뷰와 동일
+	OutView = MainView;
+	OutView.ViewIndex = PortalViewIndex;
+
+	// 카메라 자세만 가상 카메라로 교체
+	OutView.ViewLocation = Pose.Location;
+	OutView.ViewRotation = Pose.Rotation;
+	OutView.ViewForward = Pose.Forward;
+	OutView.ViewMatrix = Pose.ViewMatrix;
+
+	// 파생 값 재계산
+	OutView.ViewProjectionMatrix = OutView.ViewMatrix * OutView.ProjectionMatrix;
+	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
+	OutView.FrustumCorners = GenerateFrustumCorners(OutView.ViewProjectionMatrix.Inverse());
 	return true;
 }

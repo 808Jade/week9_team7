@@ -3,6 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "Render/SceneViewTargets.h"
 #include "Render/SceneRenderData.h"
+#include "Render/SceneView.h"
 
 class UStaticMeshComponent;
 
@@ -48,6 +49,9 @@ public:
 
 	// 스케일 없는 포탈 월드 행렬 (회전 + 위치)
 	FMatrix GetPortalMatrix() const;
+
+	// 메인 뷰 → 이 포탈을 통해 본 뷰 (FSceneRenderer에 넘김)
+	bool CalcPortalSceneView(const FSceneView& MainView, FSceneView& OutView) const;
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
