@@ -31,4 +31,7 @@ private:
 	TUniquePtr<FSkyboxRenderer> SkyboxRenderer;
 	TUniquePtr<FTextRenderer> TextRenderer;
 	TUniquePtr<FFXAARenderer> FXAARenderer;
+
+	// ImGui 프레임워크 상태
+	bool bImGuiInitialized = false;
 };

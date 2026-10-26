@@ -98,6 +98,8 @@ public:
 	APortalGunActor* GetPortalGun() const { return PortalGun; }
 	USphereComponent* GetSphereComponent() const { return SphereComponent; }
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+	float GetLookSensitivity() const { return LookSensitivity; }
+	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
@@ -149,7 +151,7 @@ private:
 
 	// 중력, 점프, 3D 속도
 	bool bEnableGravity = true;
-	float Gravity = 9.8f;
+	float Gravity = 9.8f * 1.5f;
 	float JumpVelocity = 5.5f;
 	FVector Velocity = FVector::ZeroVector;
 	FVector PendingInputVector = FVector::ZeroVector;

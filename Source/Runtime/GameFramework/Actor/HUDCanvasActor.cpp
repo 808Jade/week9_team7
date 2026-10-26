@@ -1,11 +1,21 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "HUDCanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
 #include "Input/InputSystem.h"
 #include "GameFramework/Actor/UIManagerActor.h"
+#include "GameFramework/Actor/EndingCanvasActor.h"
 #include "Asset/AssetManager.h"
 #include <cstdio>
+#include <imgui.h>
+#include "Engine/Engine.h"
+#include "Launch/LaunchEngineLoop.h"
+#include "GameFramework/PortalPlayerController.h"
+#include "GameFramework/PortalPawn.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+
+#define U8(str) reinterpret_cast<const char*>(u8##str)
 
 AHUDCanvasActor::AHUDCanvasActor()
 {
@@ -14,7 +24,7 @@ AHUDCanvasActor::AHUDCanvasActor()
 	// 1. 포탈 크로스헤어 (뷰포트 정중앙 자동 배치, Layer 10)
 	CrosshairImage = CreateDefaultSubobject<UUIImageComponent>("CrosshairImage");
 	CrosshairImage->SetupAttachment(GetRootComponent());
-	CrosshairImage->SetSize(150.0f, 250.0f);
+	CrosshairImage->SetSize(100.0f, 200.0f);
 	CrosshairImage->SetCenterOnViewport(true); // 항상 화면 정중앙
 	CrosshairImage->SetColor(FColor(255, 255, 255, 255));
 	CrosshairImage->SetLayer(10);
@@ -74,7 +84,14 @@ void AHUDCanvasActor::BeginPlay()
 	CrosshairTexOrange = UAssetManager::Get().LoadTexture("Assets/Models/Crosshair/crosshair_orange.png");
 	CrosshairTexBoth = UAssetManager::Get().LoadTexture("Assets/Models/Crosshair/crosshair_both.png");
 
+	if (CrosshairImage)
+	{
+		CrosshairImage->SetSize(120.0f, 220.0f);
+		CrosshairImage->SetCenterOnViewport(true);
+	}
+
 	SetCrosshairState(ECrosshairState::Unfilled);
+	ApplyMouseSensitivity();
 }
 
 void AHUDCanvasActor::SetCrosshairState(ECrosshairState InState)
@@ -157,18 +174,145 @@ void AHUDCanvasActor::SetCrosshairVisibility(bool bVisible)
 	}
 }
 
+void AHUDCanvasActor::SetSettingsWindowVisible(bool bVisible)
+{
+	bShowSettingsWindow = bVisible;
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.MouseDrawCursor = bShowSettingsWindow;
+
+	if (bShowSettingsWindow)
+	{
+		// 설정창 열림: 마우스 커서 표시 및 잠금 해제
+		if (GetWorld())
+		{
+			if (APortalPlayerController* PPC = Cast<APortalPlayerController>(GetWorld()->GetPlayerController()))
+			{
+				PPC->SetMouseCapture(false);
+			}
+		}
+		while (::ShowCursor(TRUE) < 1);
+		::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
+	}
+	else
+	{
+		// 설정창 닫힘 (게임 복귀): 마우스 잠금 및 커서 숨김
+		if (GetWorld())
+		{
+			if (APortalPlayerController* PPC = Cast<APortalPlayerController>(GetWorld()->GetPlayerController()))
+			{
+				PPC->SetMouseCapture(true);
+			}
+		}
+		while (::ShowCursor(FALSE) >= 0);
+	}
+}
+
+void AHUDCanvasActor::ApplyMouseSensitivity()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	if (APlayerController* PC = World->GetPlayerController())
+	{
+		PC->SetLookSensitivity(MouseSensitivity);
+	}
+	if (APortalPawn* Pawn = Cast<APortalPawn>(World->GetPlayerPawn()))
+	{
+		Pawn->SetLookSensitivity(MouseSensitivity * 10.0f);
+	}
+	if (ACameraActor* Cam = World->GetMainCamera())
+	{
+		if (UCameraComponent* CamCom = Cam->GetCameraComponent())
+		{
+			CamCom->SetMouseSensitivity(MouseSensitivity);
+		}
+	}
+}
+
+void AHUDCanvasActor::DrawSettingsWindow()
+{
+	float ViewportW = 1280.0f;
+	float ViewportH = 720.0f;
+	if (GEngine)
+	{
+		ViewportW = static_cast<float>(GEngine->GetEngineLoop().GetViewportWidth());
+		ViewportH = static_cast<float>(GEngine->GetEngineLoop().GetViewportHeight());
+	}
+
+	ImVec2 Center(ViewportW * 0.5f, ViewportH * 0.5f);
+	ImGui::SetNextWindowPos(Center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+	ImGui::SetNextWindowSize(ImVec2(440.0f, 240.0f), ImGuiCond_Always);
+
+	ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	if (ImGui::Begin(U8("설정 (Settings)"), nullptr, WindowFlags))
+	{
+		ImGui::Dummy(ImVec2(0.0f, 5.0f));
+		ImGui::Text(U8("마우스 조작 설정"));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0.0f, 5.0f));
+
+		// 마우스 감도 슬라이더
+		ImGui::Text(U8("마우스 감도:"));
+		ImGui::SameLine();
+		if (ImGui::SliderFloat("##MouseSensitivity", &MouseSensitivity, 0.01f, 1.0f, "%.2f"))
+		{
+			ApplyMouseSensitivity();
+		}
+
+		ImGui::Dummy(ImVec2(0.0f, 15.0f));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+		// 버튼 배치
+		float ButtonWidth = 185.0f;
+		float ButtonHeight = 38.0f;
+
+		if (ImGui::Button(U8("닫기 (계속하기)"), ImVec2(ButtonWidth, ButtonHeight)))
+		{
+			SetSettingsWindowVisible(false);
+		}
+
+		ImGui::SameLine(0.0f, 20.0f);
+
+		// 그만두기 버튼은 붉은색 계열로 강조 (엔딩 실패 화면으로 전환)
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.20f, 0.20f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.25f, 0.25f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.55f, 0.15f, 0.15f, 1.00f));
+		if (ImGui::Button(U8("그만두기"), ImVec2(ButtonWidth, ButtonHeight)))
+		{
+			SetSettingsWindowVisible(false);
+			if (AUIManagerActor::Get())
+			{
+				if (AEndingCanvasActor* EndingCanvas = AUIManagerActor::Get()->GetEndingCanvas())
+				{
+					EndingCanvas->SetEndingType(EEndingType::Fail);
+				}
+				AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
+			}
+		}
+		ImGui::PopStyleColor(3);
+	}
+	ImGui::End();
+}
+
 void AHUDCanvasActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 인게임 중 ESC 누르면 -> 일시정지 모드로 전환
-	if (IsCanvasVisible() && FInputSystem::IsKeyPressed(EKeyCode::Escape))
+	// ESC 키 입력 시 설정창 토글
+	if ((IsCanvasVisible() || bShowSettingsWindow) && FInputSystem::IsKeyPressed(EKeyCode::Escape))
 	{
-		if (AUIManagerActor::Get())
-		{
-			AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
-			return;
-		}
+		SetSettingsWindowVisible(!bShowSettingsWindow);
+	}
+
+	// 설정창이 열려있을 때: ImGui 렌더링 및 커서 보장
+	if (bShowSettingsWindow)
+	{
+		ImGui::GetIO().MouseDrawCursor = true;
+		::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
+		DrawSettingsWindow();
+		return;
 	}
 
 	// 게임 진행 시간 실시간 누적 및 상단 타이머 갱신

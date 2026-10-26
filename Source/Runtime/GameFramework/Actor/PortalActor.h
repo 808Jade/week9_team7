@@ -74,6 +74,8 @@ public:
 	}
 
 	UBoxComponent* GetPortalTrigger() const { return PortalTrigger; }
+	float GetPortalWidth() const { return PortalWidth; }
+	float GetPortalHeight() const { return PortalHeight; }
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
@@ -93,9 +95,9 @@ private:
 public:
 	FMatrix GetTeleportMatrix() const;
 
-	bool IsPointWithinPortalBounds(const FVector& Point) const;
+	bool IsPointWithinPortalBounds(const FVector& Point, float Margin = 0.0f) const;
 
-	bool Checkcrossing(const FVector& PrevPos, const FVector& CurPos) const;
+	bool Checkcrossing(const FVector& PrevPos, const FVector& CurPos, float Margin = 0.0f) const;
 
 	float GetDistanceToPlane(const FVector& Point) const;
 

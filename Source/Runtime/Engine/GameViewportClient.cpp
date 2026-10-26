@@ -1,6 +1,7 @@
 #include "EnginePCH.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
+#include "Engine/GameEngine.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/Pawn.h"
@@ -40,8 +41,11 @@ bool FGameViewportClient::InputKey(FViewport* Viewport, int32 Key, bool bDown)
 		return true;
 	if (bDown && Key == static_cast<int32>(EKeyCode::Escape))
 	{
-		bExitRequested = true;
-		return true;
+		if (Engine && !Engine->IsA(UGameEngine::StaticClass()))
+		{
+			bExitRequested = true;
+			return true;
+		}
 	}
 
 	if (bDown && Key == static_cast<int32>(EKeyCode::F8))

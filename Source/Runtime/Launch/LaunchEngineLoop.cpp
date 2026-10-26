@@ -58,6 +58,8 @@ bool FEngineLoop::PreInit(HINSTANCE hInstance, UClass* EngineClass)
 	GEngine->EngineLoop = this;
 	Config = GEngine->GetConfig();
 
+	// 스플래시 최소 표시 시간을 재기 위한 시작 시각
+	const uint64 SplashStartCycles = FPlatformTime::GetCycles64();
 	if (Config.SplashImage)
 	{
 		FSplashScreen::Show(hInstance, Config.SplashImage);
@@ -109,6 +111,19 @@ bool FEngineLoop::PreInit(HINSTANCE hInstance, UClass* EngineClass)
 	}
 
 	FSplashScreen::SetProgress(1.0f);
+
+	// 로딩이 빨리 끝나도 로고를 최소 SplashMinSeconds 동안 보여 준다.
+	// 스플래시 창은 별도 스레드가 메시지를 처리하므로 여기서 Sleep해도 멈추지 않는다.
+	if (Config.SplashImage && Config.SplashMinSeconds > 0.0f)
+	{
+		FSplashScreen::SetText(L"");
+		const double Elapsed = FPlatformTime::ToSeconds64(FPlatformTime::GetCycles64() - SplashStartCycles);
+		const double Remaining = Config.SplashMinSeconds - Elapsed;
+		if (Remaining > 0.0)
+		{
+			Sleep(static_cast<DWORD>(Remaining * 1000.0));
+		}
+	}
 	FSplashScreen::Hide();
 
 	// 초기화 동안 숨겨 두었던 메인 창을 스플래시가 닫힌 뒤에 띄운다.

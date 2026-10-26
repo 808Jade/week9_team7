@@ -543828,7 +543828,7 @@
                             "Properties": {
                                 "Color": 3707764735,
                                 "CurrentCollisionResponse": 0,
-                                "Height": 12.0,
+                                "Height": 64.0,
                                 "Layer": 10,
                                 "Material": null,
                                 "OffsetX": 0.0,
@@ -543853,7 +543853,7 @@
                                         "Z": 1.0
                                     }
                                 },
-                                "Width": 150.0,
+                                "Width": 64.0,
                                 "bAutoActivate": true,
                                 "bCastShadow": true,
                                 "bCenterOnViewport": true,
@@ -544135,7 +544135,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": 0.25,
                                 "RelativeY": 0.30000001192092896,
-                                "Text": "PORTAL",
+                                "Text": "PORTAL3",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,

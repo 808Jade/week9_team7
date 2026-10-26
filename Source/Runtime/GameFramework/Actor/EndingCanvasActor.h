@@ -4,6 +4,12 @@
 class UUIImageComponent;
 class UUITextComponent;
 
+enum class EEndingType
+{
+	Success,
+	Fail
+};
+
 class AEndingCanvasActor : public ACanvasActor
 {
 	DECLARE_CLASS(AEndingCanvasActor, ACanvasActor)
@@ -16,10 +22,16 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	// 최종 탈출 시간(스코어) 설정
+	// 엔딩 종류 (성공 / 실패) 설정
+	void SetEndingType(EEndingType InType);
+	EEndingType GetEndingType() const { return CurrentEndingType; }
+	void SetEndingFail(bool bFail) { SetEndingType(bFail ? EEndingType::Fail : EEndingType::Success); }
+
+	// 최종 탈출 시간(스코어) 설정 및 표시 갱신
 	void SetClearTime(float InTime);
 	void SetClearTimeText(const FString& InText);
 	float GetClearTime() const { return ClearTime; }
+	void UpdateClearTimeDisplay();
 
 	virtual void BeginPlay() override;
 
@@ -37,6 +49,7 @@ private:
 	UUITextComponent* ClearTimeText = nullptr;
 	UUITextComponent* ReturnPromptText = nullptr;
 
+	EEndingType CurrentEndingType = EEndingType::Success;
 	float ClearTime = 0.0f;
 
 	// 복귀 문구 깜빡임(Blink) 애니메이션 타이머

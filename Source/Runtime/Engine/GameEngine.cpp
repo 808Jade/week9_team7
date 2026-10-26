@@ -21,6 +21,23 @@
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/PortalPlayerController.h"
 #include "Components/LuaScriptComponent.h"
+#include "Core/Window.h"
+
+#include <imgui.h>
+#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_dx11.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
+
+namespace
+{
+    bool GameImGuiWndProcHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+        return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam) != 0;
+    }
+}
+
+#define U8(str) reinterpret_cast<const char*>(u8##str)
 
 FEngineConfig UGameEngine::GetConfig() const
 {
@@ -32,6 +49,9 @@ FEngineConfig UGameEngine::GetConfig() const
 	Desc.SyncInterval = 0;
 	Desc.bCreateDepthBuffer = true;   
 	Desc.bExitOnEscape = true;        
+	Desc.SplashImage = "Resources/JalveSplash.png";   // Valve 패러디 로고
+	Desc.SplashMinSeconds = 3.0f;
+	Desc.bExitOnEscape = false; // ESC 누를 때 게임이 즉시 종료되지 않고 설정창을 열도록 false 설정
 	return Desc;
 }
 
@@ -46,27 +66,21 @@ bool UGameEngine::Init()
     GameWorld = UWorld::CreateWorld(EWorldType::Game, true);
     Context.SetCurrentWorld(GameWorld);
 
-    // GameInstance 생성 및 초기화 (LuaManager 활성화 포함)
+    // 2. 게임 인스턴스(UGameInstance) 생성 및 초기화 (FLuaManager 인스턴스화 포함)
     ULuaScriptComponent::StaticClass();
     GameInstance = NewObject<UGameInstance>();
     GameInstance->SetWorldContext(&Context);
-    GameWorld->SetGameInstance(GameInstance);
-    GameInstance->Init();
-
-    // 2. 게임 뷰포트 클라이언트 생성 및 초기화
-    GameViewport = MakeShared<FGameViewportClient>();
-    GameViewport->Init(Context, this);
-    Context.GameViewport = GameViewport;
-
-    // 2-1. 게임 인스턴스(UGameInstance) 생성 및 LuaManager 초기화
-    UGameInstance* GameInstance = NewObject<UGameInstance>();
-    GameInstance->SetWorldContext(&Context);
     Context.OwningGameInstance = GameInstance;
     GameWorld->SetGameInstance(GameInstance);
-    GameViewport->SetGameInstance(GameInstance);
     GameInstance->Init();
 
-    // 3. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
+    // 3. 게임 뷰포트 클라이언트 생성 및 초기화
+    GameViewport = MakeShared<FGameViewportClient>();
+    GameViewport->Init(Context, this);
+    GameViewport->SetGameInstance(GameInstance);
+    Context.GameViewport = GameViewport;
+
+    // 4. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
     FString DefaultScene = "Scenes/LightGameScene.scene";
     if (!std::filesystem::exists(DefaultScene))
     {
@@ -119,7 +133,85 @@ bool UGameEngine::Init()
     FXAARenderer = MakeUnique<FFXAARenderer>();
     FXAARenderer->Init(Renderer);
 
-    // 5. Start gameplay
+    APawn* PlayerPawn = GameWorld->GetPlayerPawn();
+    if (!PlayerPawn)
+    {
+        if (ULevel* PersistentLevel = GameWorld->GetPersistentLevel())
+        {
+            for (AActor* Actor : PersistentLevel->GetActors())
+            {
+                if (APawn* Pawn = Cast<APawn>(Actor))
+                {
+                    PlayerPawn = Pawn;
+                    break;
+                }
+            }
+        }
+    }
+    if (!PlayerPawn)
+    {
+        ACameraActor* MainCamera = GameWorld->GetMainCamera();
+        FTransform Transform = MainCamera ? MainCamera->GetActorTransform() : FTransform::Identity;
+        PlayerPawn = GameWorld->SpawnActor<ADefaultPawn>(NAME_None, &Transform);
+    }
+    GameWorld->SetPlayerPawn(PlayerPawn);
+
+    APlayerController* PlayerController = GameWorld->GetPlayerController();
+    if (!PlayerController)
+    {
+        if (Cast<APortalPawn>(PlayerPawn))
+            PlayerController = GameWorld->SpawnActor<APortalPlayerController>();
+        else
+            PlayerController = GameWorld->SpawnActor<APlayerController>();
+    }
+    GameWorld->SetPlayerController(PlayerController);
+
+    if (PlayerController && PlayerPawn)
+    {
+        PlayerController->Possess(PlayerPawn);
+    }
+
+    // 5. ImGui 초기화 (ESC 설정창 및 인게임 디버그 오버레이용)
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    // 한글 폰트 로드 시도
+    const ImWchar* KoreanRanges = io.Fonts->GetGlyphRangesKorean();
+    if (std::filesystem::exists("HMKMRHD.ttf"))
+    {
+        io.Fonts->AddFontFromFileTTF("HMKMRHD.ttf", 18.0f, nullptr, KoreanRanges);
+    }
+    else if (std::filesystem::exists("../../../HMKMRHD.ttf"))
+    {
+        io.Fonts->AddFontFromFileTTF("../../../HMKMRHD.ttf", 18.0f, nullptr, KoreanRanges);
+    }
+    else if (std::filesystem::exists("C:/Windows/Fonts/malgun.ttf"))
+    {
+        io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/malgun.ttf", 18.0f, nullptr, KoreanRanges);
+    }
+    else
+    {
+        io.Fonts->AddFontDefault();
+    }
+
+    ImGui_ImplWin32_Init(GetEngineLoop().GetMainWindow()->GetHandle());
+    ImGui_ImplDX11_Init(GetEngineLoop().GetRenderDevice()->GetDevice(), GetEngineLoop().GetRenderDevice()->GetContext());
+    FWindow::SetWndProcHook(&GameImGuiWndProcHook);
+
+    ImGui::StyleColorsDark();
+    ImGuiStyle& Style = ImGui::GetStyle();
+    Style.WindowRounding = 8.0f;
+    Style.FrameRounding = 5.0f;
+    Style.PopupRounding = 6.0f;
+    Style.GrabRounding = 5.0f;
+    Style.WindowPadding = ImVec2(24.0f, 20.0f);
+    Style.ItemSpacing = ImVec2(12.0f, 14.0f);
+
+    bImGuiInitialized = true;
+
+    // 6. Start gameplay
     GameWorld->BeginPlay();
     return true;
 }
@@ -127,6 +219,12 @@ bool UGameEngine::Init()
 void UGameEngine::TickInput(float DeltaTime)
 {
     if (!GameViewport) return;
+
+    // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단
+    if (bImGuiInitialized && (ImGui::GetIO().MouseDrawCursor || ImGui::GetIO().WantCaptureMouse))
+    {
+        return;
+    }
 
     // 키보드 입력
     for (int32 Key = 0; Key < 256; ++Key)
@@ -156,10 +254,18 @@ void UGameEngine::TickInput(float DeltaTime)
 }
 
 // 입력 업데이트 및 액터/컴포넌트 틱 (World->Tick(DeltaTime))
-// ImGui 오버레이 없이 스왑체인 백버퍼에 게임 씬 직접 렌더링(SceneRenderer)
+// 백버퍼에 게임 씬 렌더링 후 ImGui 오버레이 렌더링
 void UGameEngine::Tick(float DeltaTime)
 {
     if (!GameWorld || !GameViewport) return;
+
+    // ImGui 프레임 시작 (Tick 내의 액터들, 예: AHUDCanvasActor가 ImGui 윈도우를 작성할 수 있도록 보장)
+    if (bImGuiInitialized)
+    {
+        ImGui_ImplDX11_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
+    }
 
     TickInput(DeltaTime);
     GameWorld->Tick(DeltaTime);
@@ -229,21 +335,47 @@ void UGameEngine::RenderFrame()
         {
             RenderCommand::GetContext()->CopyResource(Backbuffer->GetRawPtr(), ColorTarget->GetRawPtr());
         }
+
+        // ImGui 렌더링 (HUDCanvasActor 등 액터가 NewFrame ~ Render 사이에 제출한 ImGui 창 및 커서)
+        if (bImGuiInitialized)
+        {
+            ImGui::Render();
+            ImDrawData* DrawData = ImGui::GetDrawData();
+            if (DrawData && (DrawData->CmdListsCount > 0 || DrawData->TotalVtxCount > 0))
+            {
+                RenderCommand::BindRenderPassNoClear(Backbuffer, nullptr, Width, Height);
+                ImGui_ImplDX11_RenderDrawData(DrawData);
+                RenderCommand::EndRenderPass();
+            }
+        }
     }
 }
 
 // 로드된 월드 및 UObject 자원 정리
 void UGameEngine::PreExit()
 {
-    if (GameInstance)
+    if (bImGuiInitialized)
     {
-        GameInstance->Shutdown();
-        GameInstance = nullptr;
+        FWindow::SetWndProcHook(nullptr);
+        ImGui_ImplDX11_Shutdown();
+        ImGui_ImplWin32_Shutdown();
+        ImGui::DestroyContext();
+        bImGuiInitialized = false;
     }
+
+    // 1. GameWorld를 먼저 정리하여 모든 액터와 컴포넌트(LuaScriptComponent 등)의 EndPlay 및 OnUnregister가
+    //    GameInstance(FLuaManager)가 살아있을 때 정상적으로 호출되도록 합니다.
     if (GameWorld)
     {
         GameWorld->ClearWorld();
         GameWorld = nullptr;
+    }
+
+    // 2. 월드 정리가 완료된 후 GameInstance(FLuaManager)를 안전하게 셧다운합니다.
+    if (GameInstance)
+    {
+        GameInstance->Shutdown();
+        GameInstance = nullptr;
     }
     if (GameViewport)
     {

@@ -53,6 +53,7 @@ struct FEngineConfig
 	bool bCreateDepthBuffer = true;   // 백버퍼에 3D를 직접 그리지 않는 엔진(에디터)은 끈다.
 	bool bExitOnEscape = true;        // 테두리 없는 창에는 닫기 버튼이 없다.
 	const char* SplashImage = nullptr;
+	float SplashMinSeconds = 0.0f;    // 로딩이 빨리 끝나도 스플래시를 최소 이 시간만큼 보여 준다.
 };
 
 // 모든 엔진 모드의 베이스. 플랫폼·루프·Present는 FEngineLoop가 맡고,
@@ -84,10 +85,10 @@ public:
 	// PIE 컨텍스트는 게임 인스턴스와 복제 월드까지 함께 정리한다.
 	void DestroyWorldContext(UWorld* InWorld);
 
+	FEngineLoop& GetEngineLoop() const { return *EngineLoop; }
+
 protected:
 	UAssetManager* AssetManager;
-
-	FEngineLoop& GetEngineLoop() const { return *EngineLoop; }
 
 	TIndirectArray<FWorldContext> WorldContextlist;
 	//UWorld* World = nullptr;

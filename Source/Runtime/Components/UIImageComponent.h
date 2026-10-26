@@ -17,7 +17,7 @@ class UUIImageComponent : public UPrimitiveComponent
 		PROPERTY(Width)
 		PROPERTY(Height)
 		PROPERTY(Layer)
-		PROPERTY(Material)
+
 		PROPERTY(Color)
 		PROPERTY(Opacity)
 		PROPERTY(bMatchViewportSize)
@@ -29,6 +29,8 @@ class UUIImageComponent : public UPrimitiveComponent
 public:
 	UUIImageComponent();
 	virtual ~UUIImageComponent() = default;
+
+	void EnsureMaterial();
 
 	virtual void SubmitToRenderQueue(FRenderQueue& RenderQueue, const FViewContext& ViewContext) override;
 	virtual FBox CalcLocalBounds() const override { return FBox(FVector(-100000.0f), FVector(100000.0f)); }

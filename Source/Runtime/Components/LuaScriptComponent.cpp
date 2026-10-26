@@ -299,7 +299,10 @@ void ULuaScriptComponent::OnUnregister()
 	// Destroy / DestroyComponent / PIE 종료 모두 여기를 거친다.
 	if (bIsLoaded && bLuaBegunPlay)
 	{
-		EndPlay();
+		if (ScriptEnv.valid() && ScriptEnv.lua_state() && FLuaManager::GetActive() && FLuaManager::GetActive()->GetState().lua_state())
+		{
+			EndPlay();
+		}
 	}
 
 	FCoroutineScheduler::Get().StopAllForOwner(this);
