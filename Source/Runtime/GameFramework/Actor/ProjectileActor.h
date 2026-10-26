@@ -6,6 +6,7 @@ class UStaticMeshComponent;
 class UFireBallComponent;
 class UProjectileMovementComponent;
 class USphereComponent;
+class UBoxComponent;
 
 // Reusable PIE projectile launched by the default pawn.
 class AProjectileActor : public AActor
@@ -29,6 +30,7 @@ private:
     UFireBallComponent* FireBallComponent = nullptr;
     UProjectileMovementComponent* ProjectileMovementComponent = nullptr;
     USphereComponent* SphereComponent = nullptr;
+    UBoxComponent* BoxComponent = nullptr;
     bool bInFlight = false;
     float RemainingLife = 0.0f;
     float LifeTime = 100.0f;
