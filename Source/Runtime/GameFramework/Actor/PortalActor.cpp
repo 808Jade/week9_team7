@@ -6,10 +6,48 @@
 #include "Math/Frustum.h"
 #include <cmath>
 
-namespace 
-{ 
-	constexpr int32 PortalViewIndex = 100; // 에디터 뷰포트 슬롯(0~3)과 겹치지 않게
-}   
+namespace
+{
+	constexpr int32 PortalViewIndex = 100;// 에디터 뷰포트 슬롯(0~3)과 겹치지 않게
+
+	// 행 벡터 곱: V * M
+	FVector4 MulRow(const FVector4& V, const FMatrix& M)
+	{
+		return FVector4(
+			V.X * M.M[0][0] + V.Y * M.M[1][0] + V.Z * M.M[2][0] + V.W * M.M[3][0],
+			V.X * M.M[0][1] + V.Y * M.M[1][1] + V.Z * M.M[2][1] + V.W * M.M[3][1],
+			V.X * M.M[0][2] + V.Y * M.M[1][2] + V.Z * M.M[2][2] + V.W * M.M[3][2],
+			V.X * M.M[0][3] + V.Y * M.M[1][3] + V.Z * M.M[2][3] + V.W * M.M[3][3]);
+	}
+
+	float Dot4(const FVector4& A, const FVector4& B)
+	{
+		return A.X * B.X + A.Y * B.Y + A.Z * B.Z + A.W * B.W;
+	}
+
+	// 뷰 공간 평면 C(보이는 쪽 >= 0)를 근평면으로 하는 투영 행렬 (D3D, z ∈ [0, w])
+	FMatrix MakeObliqueProjection(const FMatrix& Proj, const FVector4& C)
+	{
+		const FMatrix InvProj = Proj.Inverse();
+
+		// 클립 공간 평면 = InvProj * C (열 벡터 곱) → x, y 부호만 필요
+		const float ClipX = InvProj.M[0][0] * C.X + InvProj.M[0][1] * C.Y + InvProj.M[0][2] * C.Z + InvProj.M[0][3] * C.W;
+		const float ClipY = InvProj.M[1][0] * C.X + InvProj.M[1][1] * C.Y + InvProj.M[1][2] * C.Z + InvProj.M[1][3] * C.W;
+
+		// 평면 반대편 먼 모서리를 뷰 공간으로
+		const FVector4 Q = MulRow(FVector4(ClipX >= 0.0f ? 1.0f : -1.0f,
+			ClipY >= 0.0f ? 1.0f : -1.0f, 1.0f, 1.0f), InvProj);
+
+		const float Scale = 1.0f / Dot4(C, Q);
+
+		FMatrix Out = Proj;
+		Out.M[0][2] = C.X * Scale;
+		Out.M[1][2] = C.Y * Scale;
+		Out.M[2][2] = C.Z * Scale;
+		Out.M[3][2] = C.W * Scale;
+		return Out;
+	}
+}
 
 APortalActor::APortalActor()
 {
@@ -95,5 +133,20 @@ bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& O
 	OutView.ViewProjectionMatrix = OutView.ViewMatrix * OutView.ProjectionMatrix;
 	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
 	OutView.FrustumCorners = GenerateFrustumCorners(OutView.ViewProjectionMatrix.Inverse());
+
+	// 짝 포탈 B가 있는 벽면 평면을 근평면으로
+	const FVector N = LinkedPortal->GetPortalNormal();
+	const FVector P = LinkedPortal->GetActorLocation();
+	const FVector4 Nv = MulRow(FVector4(N.X, N.Y, N.Z, 0.0f), OutView.ViewMatrix);
+	const FVector4 Pv = MulRow(FVector4(P.X, P.Y, P.Z, 1.0f), OutView.ViewMatrix);
+	const FVector4 ClipPlane(Nv.X, Nv.Y, Nv.Z, -(Nv.X * Pv.X + Nv.Y * Pv.Y + Nv.Z * Pv.Z));
+
+	// 카메라(뷰 원점)가 평면 뒤에 있을 때만 적용. 원점의 평면 값 = ClipPlane.W
+	if (ClipPlane.W < -0.001f)
+	{
+		OutView.ProjectionMatrix = MakeObliqueProjection(OutView.ProjectionMatrix, ClipPlane);
+		OutView.ViewProjectionMatrix = OutView.ViewMatrix * OutView.ProjectionMatrix;
+	}
+
 	return true;
 }
