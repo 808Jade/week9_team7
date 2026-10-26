@@ -2,6 +2,7 @@
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/PortalActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Asset/AssetManager.h"
@@ -11,7 +12,7 @@
 
 APortalGunActor::APortalGunActor()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;	
 	SetActorEnableCollision(false);
 
 	// 1. 루트 메시 컴포넌트
@@ -29,14 +30,20 @@ APortalGunActor::APortalGunActor()
 void APortalGunActor::BeginPlay()
 {
 	Super::BeginPlay();
-	HeldCube = nullptr;	
+	HeldCube = nullptr;
+
+	// 포탈 2개를 미리 만들어 두고(숨김), 쏠 때마다 이동만 시킨다
+	if (!BluePortal && GetWorld())
+	{
+		APortalActor::SpawnPair(GetWorld(), BluePortal, OrangePortal);
+	}
 }
 
 void APortalGunActor::EndPlay()
 {
 	Super::EndPlay();
 	if (HeldCube)
-	{		
+	{
 		HeldCube = nullptr;
 	}
 }
@@ -59,7 +66,13 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 
 void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult)
 {
-	const int32 PortalTypeIndex = static_cast<int32>(PortalToFire);
+	APortalActor* Portal = GetPortal(PortalToFire);
+	if (!Portal || !HitResult.bBlockingHit)
+	{
+		return;
+	}
+
+	Portal->PlaceAt(HitResult.ImpactPoint, HitResult.ImpactNormal);
 }
 
 void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
@@ -86,6 +99,18 @@ void APortalGunActor::Unhold()
 	}
 }
 
+void APortalGunActor::ResetPortals()
+{
+	if (BluePortal)
+	{
+		BluePortal->ResetPortal();
+	}
+	if (OrangePortal)
+	{
+		OrangePortal->ResetPortal();
+	}
+}
+
 void APortalGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -97,7 +122,7 @@ void APortalGunActor::Tick(float DeltaTime)
 		{
 			return;
 		}
-		
+
 		FVector CamLoc = Cam->GetWorldLocation();
 		FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
 		FVector TargetLocation = CamLoc + (CamForward * HoldDistance);

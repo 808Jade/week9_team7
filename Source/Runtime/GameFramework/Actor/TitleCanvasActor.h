@@ -14,6 +14,7 @@ public:
 	ATitleCanvasActor();
 	virtual ~ATitleCanvasActor() = default;
 
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
 	// 컴포넌트 접근자

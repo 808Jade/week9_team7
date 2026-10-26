@@ -1,7 +1,9 @@
 #include "EnginePCH.h"
 #include "GameFramework/PortalPlayerController.h"
 #include "GameFramework/PortalPawn.h"
+#include "GameFramework/Actor/UIManagerActor.h"
 #include "Input/InputSystem.h"
+#include "Engine/World.h"
 
 APortalPlayerController::APortalPlayerController()
 {
@@ -18,8 +20,22 @@ APortalPlayerController::~APortalPlayerController()
 void APortalPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// 게임 시작 시 마우스 잠금 & 커서 숨김
-	SetMouseCapture(true);
+
+	// UIManagerActor가 없다면 자동 생성 보장
+	if (!AUIManagerActor::Get() && GetWorld())
+	{
+		GetWorld()->SpawnActor<AUIManagerActor>();
+	}
+
+	// UI 모드가 InGame일 때만 마우스 잠금, Title/Pause/Ending에서는 마우스 해제
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		SetMouseCapture(false);
+	}
+	else
+	{
+		SetMouseCapture(true);
+	}
 }
 
 void APortalPlayerController::EndPlay()
@@ -53,6 +69,17 @@ void APortalPlayerController::SetMouseCapture(bool bEnable)
 
 void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 {
+	// 0. UI 모드 (Title, Pause, Ending 등)일 때는 플레이어 시선 회전 및 이동 전면 차단
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		if (bMouseCaptured)
+		{
+			SetMouseCapture(false);
+		}
+		MouseAxisX = MouseAxisY = 0.0f;
+		return;
+	}
+
 	// 1. 윈도우 키(LWin, RWin)를 눌렀거나, 다른 창/시작메뉴로 포커스가 빠져나가면 즉시 마우스 잠금 해제 & 커서 표시
 	const bool bWinKeyPressed = ((::GetAsyncKeyState(VK_LWIN) & 0x8000) != 0) ||
 		((::GetAsyncKeyState(VK_RWIN) & 0x8000) != 0) ||
@@ -82,10 +109,13 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 	PortalPawn->SetCrouching(bCrouch);
 
 	// 3. WASD 수평 이동 (카메라 Pitch 무관하게 수평 평면 기준 방향 벡터)
-	const float Forward = static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::W)]) -
-		static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::S)]);
-	const float Right = static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::D)]) -
-		static_cast<float>(bKeyDown[static_cast<int32>(EKeyCode::A)]);
+	// WASD 또는 방향키
+	const auto Down = [this](EKeyCode A, EKeyCode B)
+	{
+		return static_cast<float>(bKeyDown[static_cast<int32>(A)] || bKeyDown[static_cast<int32>(B)]);
+	};
+	const float Forward = Down(EKeyCode::W, EKeyCode::Up)    - Down(EKeyCode::S, EKeyCode::Down);
+	const float Right   = Down(EKeyCode::D, EKeyCode::Right) - Down(EKeyCode::A, EKeyCode::Left);
 
 	const FRotator ActorRot = PortalPawn->GetActorRotation();
 	const FQuat YawQuat = FRotator(0.0f, ActorRot.Yaw, 0.0f).Quaternion();
@@ -98,14 +128,32 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 		PortalPawn->AddControllerYawInput(MouseAxisX * LookSensitivity);
 		PortalPawn->AddControllerPitchInput(MouseAxisY * LookSensitivity);
 
-		// 마우스를 창 중앙으로 재고정하여 화면 밖 탈출 방지
-		RECT rc;
-		if (::GetClientRect(hWnd, &rc))
+		// 마우스를 게임 화면 중앙으로 재고정하여 화면 밖 탈출 방지
+		// 에디터 PIE는 창 중앙이 PIE 뷰포트 밖(디테일 패널 등)일 수 있으므로
+		// 에디터가 지정한 PIE 뷰 중앙(스크린 좌표)을 우선 사용한다.
+		POINT ScreenCenter{};
+		int32 LockX = 0, LockY = 0;
+		bool bHasCenter = false;
+		if (FInputSystem::GetMouseLockCenter(LockX, LockY))
 		{
-			const POINT ClientCenter = { (rc.right - rc.left) / 2, (rc.bottom - rc.top) / 2 };
-			POINT ScreenCenter = ClientCenter;
-			::ClientToScreen(hWnd, &ScreenCenter);
+			ScreenCenter = { LockX, LockY };
+			bHasCenter = true;
+		}
+		else
+		{
+			RECT rc;
+			if (::GetClientRect(hWnd, &rc))
+			{
+				ScreenCenter = { (rc.right - rc.left) / 2, (rc.bottom - rc.top) / 2 };
+				::ClientToScreen(hWnd, &ScreenCenter);
+				bHasCenter = true;
+			}
+		}
+		if (bHasCenter)
+		{
 			::SetCursorPos(ScreenCenter.x, ScreenCenter.y);
+			POINT ClientCenter = ScreenCenter;
+			::ScreenToClient(hWnd, &ClientCenter);
 			FInputSystem::SyncMousePosition(ClientCenter.x, ClientCenter.y);
 		}
 	}
@@ -122,10 +170,23 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 
 	if (!bPressed) return;
 
-	// 1. ESC 키: 일시정지 / 마우스 커서 잠금 토글
+	// UI 모드 (Title, Pause, Ending)일 때는 플레이어 액션 차단
+	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
+	{
+		return;
+	}
+
+	// 1. ESC 키: 일시정지 (UI Manager가 있으면 Pause 모드로 전환)
 	if (Key == static_cast<int32>(EKeyCode::Escape))
 	{
-		SetMouseCapture(!bMouseCaptured);
+		if (AUIManagerActor::Get())
+		{
+			AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
+		}
+		else
+		{
+			SetMouseCapture(!bMouseCaptured);
+		}
 		return;
 	}
 
@@ -156,10 +217,10 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	{
 		PortalPawn->PrimaryAction();
 	}
-	// 6. 마우스 우클릭: 포탈 타입 변경 (Blue <-> Orange 모드 토글)
+	// 6. 마우스 우클릭: 주황 포탈 발사
 	else if (Key == static_cast<int32>(EKeyCode::RButton) && bMouseCaptured)
 	{
-		
+		PortalPawn->SecondaryAction();
 	}
 	// 7. E 키: 상호작용 (큐브 잡기/놓기)
 	else if (Key == static_cast<int32>(EKeyCode::E))

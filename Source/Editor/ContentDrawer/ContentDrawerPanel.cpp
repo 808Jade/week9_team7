@@ -4,6 +4,7 @@
 #include "Text/Font.h"
 #include "Editor/HitoriEd/EditorDragDrop.h"
 #include "Editor/HitoriEd/EditorFileUtils.h"
+#include "Editor/HitoriEd/EditorEngine.h"
 #include "Editor/HitoriEd/LuaScriptUtils.h"
 #include "Input/InputSystem.h"
 #include "Engine/World.h"
@@ -298,7 +299,13 @@ void FContentDrawerPanel::OnRender()
 					{
 						if (World)
 						{
-							FEditorFileUtils::LoadSceneFromPath(World, PathString);
+							if (FEditorFileUtils::LoadSceneFromPath(World, PathString))
+							{
+								if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+								{
+									EditorEngine->ResetSceneSelection();
+								}
+							}
 						}
 					}
 					else if (ExtString == ".lua")

@@ -70,6 +70,7 @@ public:
 	void DeleteActor(AActor* Actor);
 	void DeleteActorsWithUndo(const TArray<AActor*>& InActors);
 	void DeleteComponent(UActorComponent* Component);
+	void ResetSceneSelection();
 
 	//Play 버튼을 눌렀을때 Play Session 실행을 요청한다.
 	inline void RequestPlaySession() { bPlaySessionRequested = true; }
@@ -214,8 +215,6 @@ private:
 	bool bRequestEndPlayMapQueued = false;
 	bool bStepRequested = false;
 	bool bIsPaused = false;
-
-	void ResetSceneSelection();
 
 	void CreateNewScene();
 	void OpenScene();

@@ -1,4 +1,4 @@
-workspace "Hitori"
+﻿workspace "Hitori"
 	architecture "x64"
 	startproject "HitoriEditor"
 
@@ -282,7 +282,7 @@ project "HitoriGame"
 
 	postbuildcommands
 	{
-		'{COPY} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"'
 	}
 
 

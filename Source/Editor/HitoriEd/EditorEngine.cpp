@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 
 #include "Editor/HitoriEd/EditorEngine.h"
 #include "Editor/HitoriEd/EditorUndoManager.h"
@@ -818,6 +818,20 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 		? AllViewportClients[InputViewIndex]->GetRect() : FRect{};
 	const bool bMouseOverPIE = Mouse.X >= PIEViewRect.X && Mouse.Y >= PIEViewRect.Y &&
 		Mouse.X < PIEViewRect.X + PIEViewRect.Width && Mouse.Y < PIEViewRect.Y + PIEViewRect.Height;
+
+	// 마우스를 잠그는 컨트롤러가 커서를 "PIE 뷰 중앙"으로 되돌리게 한다.
+	// (창 중앙으로 되돌리면 PIE 뷰 밖으로 나가 포커스를 잃고 모든 입력이 매 프레임 초기화된다)
+	if (!IsPIEInWindow() && ViewportsPanel && PIEViewRect.Width > 0.0f && PIEViewRect.Height > 0.0f)
+	{
+		const FVector2 Origin = ViewportsPanel->GetContentOrigin();
+		FInputSystem::SetMouseLockCenter(
+			static_cast<int32>(Origin.X + PIEViewRect.X + PIEViewRect.Width * 0.5f),
+			static_cast<int32>(Origin.Y + PIEViewRect.Y + PIEViewRect.Height * 0.5f));
+	}
+	else
+	{
+		FInputSystem::ClearMouseLockCenter();
+	}
 	const int32 ActiveViewIdx = ViewportsPanel ? ViewportsPanel->GetActiveViewIndex() : -1;
 	const bool bEditorSIEFocus = IsPIEInWindow() && GameViewport.IsSIEMode() &&
 		::GetForegroundWindow() == MainWindow->GetHandle() &&
@@ -854,6 +868,7 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 		return;
 	}
 	constexpr EKeyCode Keys[] = { EKeyCode::W, EKeyCode::A, EKeyCode::S, EKeyCode::D,
+		EKeyCode::Up, EKeyCode::Down, EKeyCode::Left, EKeyCode::Right,
 		EKeyCode::Space, EKeyCode::Shift, EKeyCode::E, EKeyCode::Control, EKeyCode::Z, EKeyCode::Tab };
 	for (EKeyCode Key : Keys)
 	{
@@ -1272,7 +1287,7 @@ void UEditorEngine::RenderFrame(FEditorViewportClient* ViewClient,
 		if (bIsPIE) return;
 		const FViewportSettings ViewportSetting{ 0, 0, Targets.SceneColor->GetWidth(),Targets.SceneColor->GetHeight(), 0.0f, 1.0f };
 		const bool bIsActiveViewport = ViewportsPanel && SceneView.ViewIndex == ViewportsPanel->GetActiveViewIndex();
-		
+
 		const bool bDrawSelectedLight = bIsActiveViewport && Gizmo->GetTarget() &&
 			(Cast<ASpotLightActor>(Gizmo->GetTarget()->GetOwner()) ||
 			 Cast<APointLightActor>(Gizmo->GetTarget()->GetOwner()) ||
@@ -1419,6 +1434,7 @@ void UEditorEngine::DrawPIEWindows()
 // ImGui를 정리한다. UObject 일괄 삭제와 공용 자원·Device 정리는 FEngineLoop가 이어서 한다.
 void UEditorEngine::PreExit()
 {
+	FEditorUndoManager::Get().Clear();
 	EndPlayMap();
 	EditorWorld->ClearWorld();
 	// PIE 창이 열린 채 종료하면 Device가 살아 있을 때 Swapchain과 타깃을 먼저 정리한다.

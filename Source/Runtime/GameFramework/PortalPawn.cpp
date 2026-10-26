@@ -1,6 +1,7 @@
 #include "EnginePCH.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/PortalGunActor.h"
+#include "GameFramework/Actor/PortalActor.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
@@ -8,6 +9,9 @@
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/PortalActor.h"
+#include "GameFramework/Actor/UIManagerActor.h"
+#include "Components/LuaScriptComponent.h"
 #include "Collision/Ray.h"
 #include "Collision/HitResult.h"
 #include "UObject/Casts.h"
@@ -56,19 +60,19 @@ void APortalPawn::BeginPlay()
 	InitialSpawnRotation = GetActorRotation();
 
 	// 씬에 PlayerStart가 존재하면 시작 위치와 회전을 PlayerStart에 맞춤
-	if (GetWorld() && GetWorld()->GetPersistentLevel())
+	if(GetWorld() && GetWorld()->GetPersistentLevel())
 	{
-		for (AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
+		for(AActor* Actor : GetWorld()->GetPersistentLevel()->GetActors())
 		{
-			if (APlayerStart* Start = Cast<APlayerStart>(Actor))
+			if(APlayerStart* Start = Cast<APlayerStart>(Actor))
 			{
 				InitialSpawnLocation = Start->GetSpawnLocation();
 				InitialSpawnRotation = Start->GetSpawnRotation();
-				if (GetRootComponent())
+				if(GetRootComponent())
 				{
 					GetRootComponent()->SetWorldLocationAndRotation(InitialSpawnLocation, FRotator(0.0f, InitialSpawnRotation.Yaw, 0.0f), false);
 				}
-				if (CameraComponent)
+				if(CameraComponent)
 				{
 					CameraComponent->SetRelativeRotation(FRotator(InitialSpawnRotation.Pitch, 0.0f, 0.0f));
 				}
@@ -77,10 +81,10 @@ void APortalPawn::BeginPlay()
 		}
 	}
 
-	if (CameraComponent)
+	if(CameraComponent)
 	{
 		DefaultFOV = CameraComponent->GetFieldOfView();
-		if (DefaultFOV <= 0.0f)
+		if(DefaultFOV <= 0.0f)
 		{
 			DefaultFOV = 60.0f;
 		}
@@ -88,12 +92,37 @@ void APortalPawn::BeginPlay()
 	}
 
 	// 게임 시작 시 포탈건 액터 스폰 및 카메라에 장착
-	if (GetWorld() && !PortalGun)
+	if(GetWorld() && !PortalGun)
 	{
 		PortalGun = GetWorld()->SpawnActor<APortalGunActor>();
-		if (PortalGun)
+		if(PortalGun)
 		{
 			PortalGun->AttachToPawn(this);
+		}
+	}
+
+	if(BoxComponent)
+	{
+		BoxComponent->SetCurrentCollisionResponse(ECollisionResponse::Block);
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APortalPawn::OnBeginOverlap);
+		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &APortalPawn::OnEndOverlap);
+	}
+
+	// 크로스헤어 상태 관리 루아 스크립트가 아직 부착되어 있지 않다면 자동 부착
+	bool bHasScript = false;
+	for (UActorComponent* Comp : GetComponents())
+	{
+		if (Comp && Comp->IsA<ULuaScriptComponent>())
+		{
+			bHasScript = true;
+			break;
+		}
+	}
+	if (!bHasScript)
+	{
+		if (ULuaScriptComponent* LuaComp = Cast<ULuaScriptComponent>(AddComponent(ULuaScriptComponent::StaticClass(), "PortalCrosshairScript")))
+		{
+			LuaComp->SetScriptPath("Scripts/PortalCrosshairController.lua");
 		}
 	}
 }
@@ -315,13 +344,35 @@ void APortalPawn::Tick(float DeltaTime)
 	if (GetRootComponent())
 	{
 		// 7-A. 수평 이동, 계단 넘기(Step-Up), 벽면 미끄러짐(Wall Slide)
+		const FVector PreMoveLocation = GetActorLocation();
+		APortalActor* TargetPortal = (CurrentOverlappingPortal && CurrentOverlappingPortal->IsActive()) ? CurrentOverlappingPortal : nullptr;
+
+		const bool bInPortal = (TargetPortal != nullptr);
+
+		bool bInWallPortal = false;
+		bool bInFloorPortal = false;
+
+		if(TargetPortal)
+		{
+			const FVector Normal = TargetPortal->GetPortalNormal();
+			if(std::abs(Normal.Z) > 0.7f)
+			{
+				bInFloorPortal = true; // 바닥 또는 천장 포탈
+			}
+			else
+			{
+				bInWallPortal = true;  // 일반 벽 포탈
+			}
+		}
+
 		const FVector HorizontalDelta(Velocity.X * DeltaTime, Velocity.Y * DeltaTime, 0.0f);
 		if (HorizontalDelta.SizeSquared() > 1e-8f)
 		{
 			FHitResult Hit;
-			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), true, &Hit);
+			const bool bSweepHoriz = !bInWallPortal;
+			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), !bInPortal, &Hit);
 
-			if (Hit.bBlockingHit)
+			if (bSweepHoriz && Hit.bBlockingHit)
 			{
 				bool bSteppedUp = false;
 
@@ -379,9 +430,10 @@ void APortalPawn::Tick(float DeltaTime)
 		if (VerticalDelta.SizeSquared() > 1e-8f)
 		{
 			FHitResult Hit;
-			GetRootComponent()->MoveComponent(VerticalDelta, GetActorRotation(), true, &Hit);
+			const bool bSweepVert = !bInFloorPortal;
+			GetRootComponent()->MoveComponent(VerticalDelta, GetActorRotation(), bSweepVert, &Hit);
 
-			if (Hit.bBlockingHit)
+			if (bSweepVert && Hit.bBlockingHit)
 			{
 				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
 				{
@@ -403,10 +455,38 @@ void APortalPawn::Tick(float DeltaTime)
 					Velocity.Z = 0.0f;
 				}
 			}
+			else if(bInFloorPortal)
+			{
+				// 바닥 포탈 구멍에 들어섰으므로 착지 상태 해제 (낙하 가속)
+				bIsGrounded = false;
+			}
 			else
 			{
-				// 허공을 통과함 -> 낙하 중 (공중 상태)
 				bIsGrounded = false;
+			}
+		}
+
+		if(TargetPortal && TargetPortal->IsActive() && CanTeleport())
+		{
+			const FVector PostMoveLocation = GetActorLocation();
+
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation))
+			{
+				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
+				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
+
+				FVector NewLocation = TelportMatrix.TransformPosition(PostMoveLocation);
+				NewLocation += ExitPortal->GetPortalNormal() * 0.10f;
+
+				FVector NewVelocity = TelportMatrix.TransformVector(Velocity);
+				
+				FRotator CamWorldRot = GetActorRotation() + CameraComponent->GetRelativeRotation();
+				FMatrix NewCamWorldMat = CamWorldRot.Quaternion().ToFMatrix() * TelportMatrix;
+				FRotator NewCamRotation = MatrixToRotator(NewCamWorldMat);
+
+				TeleportThroughPortal(NewLocation, NewCamRotation, NewVelocity);
+				SetTeleportCooldown(0.15f);
+				CurrentOverlappingPortal = nullptr;
 			}
 		}
 	}
@@ -439,6 +519,13 @@ void APortalPawn::Respawn()
 	if (CameraComponent)
 	{
 		CameraComponent->SetRelativeRotation(FRotator(TargetRotation.Pitch, 0.0f, 0.0f));
+	}
+
+	// 리스폰 시 포탈 설치 상태 초기화 및 크로스헤어 리셋
+	ResetPortals();
+	if (AUIManagerActor::Get())
+	{
+		AUIManagerActor::Get()->SetCrosshairState("unfilled");
 	}
 
 	// 물리 및 연출 상태 초기화
@@ -538,7 +625,70 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 
 void APortalPawn::PrimaryAction()
 {
+	// 큐브를 들고 있으면 놓기 (던지기 구현 시 교체)
+	if (PortalGun && PortalGun->IsHoldingCube())
+	{
+		PortalGun->Unhold();
+		return;
+	}
+	FirePortal(EPortalType::Blue);
+}
 
+void APortalPawn::SecondaryAction()
+{
+	if (PortalGun && PortalGun->IsHoldingCube())
+	{
+		return;
+	}
+	FirePortal(EPortalType::Orange);
+}
+
+void APortalPawn::FirePortal(EPortalType Type)
+{
+	if (!PortalGun || !CameraComponent || !GetWorld())
+	{
+		return;
+	}
+
+	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	const FRay WorldRay{ CameraComponent->GetWorldLocation(), RayDir };
+
+	// LineTraceSingle은 ImpactNormal을 채우지 않으므로 반지름 0 SweepSingle 사용
+	FHitResult Hit;
+	if (!GetWorld()->SweepSingle(WorldRay, 1000.0f, 0.0f, Hit, this))
+	{
+		return;
+	}
+
+	// 움직이는 큐브에는 포탈을 붙이지 않는다
+	if (Hit.HitComponent)
+	{
+		if(Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()) || Cast<APortalActor>(Hit.HitComponent->GetOwner()))
+		{
+			return;
+		}
+	}
+
+	PortalGun->FirePortal(Type, Hit);
+}
+
+void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(APortalActor* Portal = Cast<APortalActor>(OtherActor))
+	{
+		if(Portal->IsActive())
+		{
+			CurrentOverlappingPortal = Portal;
+		}
+	}
+}
+
+void APortalPawn::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp)
+{
+	if(OtherActor == CurrentOverlappingPortal)
+	{
+		CurrentOverlappingPortal = nullptr;
+	}
 }
 
 void APortalPawn::TogglePortalType()
@@ -609,5 +759,32 @@ void APortalPawn::Interact()
 	else
 	{
 		HTR_LOG(Warning, "Interact Hit nothing");
+	}
+}
+
+
+bool APortalPawn::IsBluePortalPlaced() const
+{
+	if (PortalGun && PortalGun->GetPortal(EPortalType::Blue))
+	{
+		return PortalGun->GetPortal(EPortalType::Blue)->IsPlaced();
+	}
+	return false;
+}
+
+bool APortalPawn::IsOrangePortalPlaced() const
+{
+	if (PortalGun && PortalGun->GetPortal(EPortalType::Orange))
+	{
+		return PortalGun->GetPortal(EPortalType::Orange)->IsPlaced();
+	}
+	return false;
+}
+
+void APortalPawn::ResetPortals()
+{
+	if (PortalGun)
+	{
+		PortalGun->ResetPortals();
 	}
 }

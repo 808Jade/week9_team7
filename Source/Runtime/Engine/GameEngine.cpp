@@ -58,29 +58,58 @@ bool UGameEngine::Init()
     GameViewport->Init(Context, this);
     Context.GameViewport = GameViewport;
 
-    // 3. 기본 씬 로드 (예: Scenes/Room.scene 또는 Bocchi.scene)
-    if (!FJsonArchive::LoadWorld(GameWorld, "Scenes/PotalPawnTest.scene"))
+    // 2-1. 게임 인스턴스(UGameInstance) 생성 및 LuaManager 초기화
+    UGameInstance* GameInstance = NewObject<UGameInstance>();
+    GameInstance->SetWorldContext(&Context);
+    Context.OwningGameInstance = GameInstance;
+    GameWorld->SetGameInstance(GameInstance);
+    GameViewport->SetGameInstance(GameInstance);
+    GameInstance->Init();
+
+    // 3. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
+    FString DefaultScene = "Scenes/PortalComplex.scene";
+    if (!std::filesystem::exists(DefaultScene))
+    {
+        if (std::filesystem::exists("../../../" + DefaultScene))
+        {
+            DefaultScene = "../../../" + DefaultScene;
+        }
+        else if (std::filesystem::exists("Scenes/Bocchi.scene"))
+        {
+            DefaultScene = "Scenes/Bocchi.scene";
+        }
+        else if (std::filesystem::exists("../../../Scenes/Bocchi.scene"))
+        {
+            DefaultScene = "../../../Scenes/Bocchi.scene";
+        }
+    }
+
+    if (!FJsonArchive::LoadWorld(GameWorld, DefaultScene))
     {
         // 파일 로드 실패 시에도 빈 월드로 계속 진행
         OutputDebugStringA("Scene Load Failed!\n");
     }
 
-    if (ACameraActor* MainCam = GameWorld->GetMainCamera())
+    if (DefaultScene.find("Bocchi") != std::string::npos)
     {
-        if (UCameraComponent* CamCom = MainCam->GetCameraComponent())
+        if (ACameraActor* MainCam = GameWorld->GetMainCamera())
         {
-            CamCom->SetRelativeLocation(FVector(-6.7f, -11.2f, 11.3f));
-            CamCom->SetRelativeRotation(FRotator(30.0f, 45.0f, 0.0f));
-            CamCom->SetMoveSpeed(10.0f);
-            CamCom->SetMouseSensitivity(0.2f);
+            if (UCameraComponent* CamCom = MainCam->GetCameraComponent())
+            {
+                CamCom->SetRelativeLocation(FVector(-6.7f, -11.2f, 11.3f));
+                CamCom->SetRelativeRotation(FRotator(30.0f, 45.0f, 0.0f));
+                CamCom->SetMoveSpeed(10.0f);
+                CamCom->SetMouseSensitivity(0.2f);
+            }
         }
     }
 
     SkyboxRenderer = MakeUnique<FSkyboxRenderer>();
     FString SkyPath = "Assets/SkySphere/Sky.hdr";
-    if (!std::filesystem::exists(SkyPath) && std::filesystem::exists("../../" + SkyPath))
+    if (!std::filesystem::exists(SkyPath))
     {
-        SkyPath = "../../" + SkyPath;
+        if (std::filesystem::exists("../../../" + SkyPath)) SkyPath = "../../../" + SkyPath;
+        else if (std::filesystem::exists("../../" + SkyPath)) SkyPath = "../../" + SkyPath;
     }
     SkyboxRenderer->Init(SkyPath);
 
@@ -253,5 +282,8 @@ void UGameEngine::PreExit()
         GameWorld->ClearWorld();
         GameWorld = nullptr;
     }
-    GameViewport->Reset();
+    if (GameViewport)
+    {
+        GameViewport->Reset();
+    }
 }

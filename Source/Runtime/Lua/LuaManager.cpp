@@ -21,10 +21,17 @@ bool FLuaManager::Init()
 	// 루아 VM 초기화 및 표준 라이브러리 로드
 	Lua.open_libraries(
 		sol::lib::base,
+		sol::lib::package,
 		sol::lib::math,
 		sol::lib::string,
 		sol::lib::table,
 		sol::lib::coroutine);
+
+	// require() 및 스크립트 모듈 탐색용 package.path 설정
+	Lua.script(R"(
+		local cur_path = package.path or ""
+		package.path = "Scripts/?.lua;./Scripts/?.lua;../../../Scripts/?.lua;?.lua;./?.lua;" .. cur_path
+	)");
 
 	Lua.set_exception_handler([](lua_State* L, sol::optional<const std::exception&> MaybeException, sol::string_view Description) {
 		HTR_LOG(Error, "[Lua Exception] {}", Description);

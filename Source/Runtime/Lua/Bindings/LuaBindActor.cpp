@@ -8,6 +8,12 @@
 #include "GameFramework/Actor/StandButtonActor.h"
 #include "GameFramework/Actor/CubeDropActor.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
+#include "GameFramework/Actor/UIManagerActor.h"
+#include "GameFramework/Actor/HUDCanvasActor.h"
+#include "GameFramework/Actor/TitleCanvasActor.h"
+#include "GameFramework/Actor/PauseCanvasActor.h"
+#include "GameFramework/Actor/EndingCanvasActor.h"
+#include "GameFramework/PortalPawn.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Camera/CameraComponent.h"
@@ -552,6 +558,27 @@ namespace LuaBindings
 			}
 		};
 
+		ActorType["IsBluePortalPlaced"] = [](AActor* Actor) -> bool {
+			if (APortalPawn* Pawn = Cast<APortalPawn>(Actor))
+			{
+				return Pawn->IsBluePortalPlaced();
+			}
+			return false;
+		};
+		ActorType["IsOrangePortalPlaced"] = [](AActor* Actor) -> bool {
+			if (APortalPawn* Pawn = Cast<APortalPawn>(Actor))
+			{
+				return Pawn->IsOrangePortalPlaced();
+			}
+			return false;
+		};
+		ActorType["ResetPortals"] = [](AActor* Actor) {
+			if (APortalPawn* Pawn = Cast<APortalPawn>(Actor))
+			{
+				Pawn->ResetPortals();
+			}
+		};
+
 		// ==========================================
 		// [개별 유저타입 (Usertype) 등록]
 		// ==========================================
@@ -620,6 +647,125 @@ namespace LuaBindings
 		CubeDropType["ResetCube"] = &ACubeDropActor::ResetCube;
 		CubeDropType["GetCurrentCube"] = &ACubeDropActor::GetCurrentCube;
 		CubeDropType["HasActiveCube"] = &ACubeDropActor::HasActiveCube;
+
+		// ==========================================
+		// [UI ?≫꽣 諛?留ㅻ땲? 諛붿씤??
+		// ==========================================
+		sol::usertype<AHUDCanvasActor> HUDType = Lua.new_usertype<AHUDCanvasActor>("HUDCanvasActor",
+			sol::base_classes, sol::bases<AActor>());
+		HUDType["StartTimer"] = &AHUDCanvasActor::StartTimer;
+		HUDType["StopTimer"] = &AHUDCanvasActor::StopTimer;
+		HUDType["ResetTimer"] = &AHUDCanvasActor::ResetTimer;
+		HUDType["GetElapsedTime"] = &AHUDCanvasActor::GetElapsedTime;
+		HUDType["GetFormattedTime"] = &AHUDCanvasActor::GetFormattedTime;
+		HUDType["SetTimerText"] = &AHUDCanvasActor::SetTimerText;
+		HUDType["SetTimerVisibility"] = &AHUDCanvasActor::SetTimerVisibility;
+		HUDType["ShowSubtitle"] = &AHUDCanvasActor::ShowSubtitle;
+		HUDType["HideSubtitle"] = &AHUDCanvasActor::HideSubtitle;
+		HUDType["ShowInteractPrompt"] = &AHUDCanvasActor::ShowInteractPrompt;
+		HUDType["HideInteractPrompt"] = &AHUDCanvasActor::HideInteractPrompt;
+		HUDType["StartFade"] = &AHUDCanvasActor::StartFade;
+		HUDType["SetCrosshairState"] = [](AHUDCanvasActor* HUD, const FString& State) {
+			if (HUD) HUD->SetCrosshairStateByName(State);
+		};
+		HUDType["GetCrosshairState"] = [](AHUDCanvasActor* HUD) -> FString {
+			return HUD ? HUD->GetCrosshairStateName() : FString("unfilled");
+		};
+		HUDType["SetCrosshairSize"] = [](AHUDCanvasActor* HUD, float W, float H) {
+			if (HUD) HUD->SetCrosshairSize(W, H);
+		};
+		HUDType["SetCrosshairVisibility"] = [](AHUDCanvasActor* HUD, bool bVisible) {
+			if (HUD) HUD->SetCrosshairVisibility(bVisible);
+		};
+
+		sol::usertype<AEndingCanvasActor> EndingType = Lua.new_usertype<AEndingCanvasActor>("EndingCanvasActor",
+			sol::base_classes, sol::bases<AActor>());
+		EndingType["SetClearTime"] = &AEndingCanvasActor::SetClearTime;
+		EndingType["SetClearTimeText"] = &AEndingCanvasActor::SetClearTimeText;
+		EndingType["GetClearTime"] = &AEndingCanvasActor::GetClearTime;
+
+		sol::usertype<AUIManagerActor> UIManagerType = Lua.new_usertype<AUIManagerActor>("UIManagerActor",
+			sol::base_classes, sol::bases<AActor>());
+		UIManagerType["GetElapsedTime"] = &AUIManagerActor::GetElapsedTime;
+		UIManagerType["GetFormattedTime"] = &AUIManagerActor::GetFormattedTime;
+		UIManagerType["ResetTimer"] = &AUIManagerActor::ResetTimer;
+		UIManagerType["StartTimer"] = &AUIManagerActor::StartTimer;
+		UIManagerType["StopTimer"] = &AUIManagerActor::StopTimer;
+		UIManagerType["GetHUDCanvas"] = &AUIManagerActor::GetHUDCanvas;
+		UIManagerType["GetEndingCanvas"] = &AUIManagerActor::GetEndingCanvas;
+		UIManagerType["SetCrosshairState"] = &AUIManagerActor::SetCrosshairState;
+		UIManagerType["GetCrosshairState"] = &AUIManagerActor::GetCrosshairState;
+		UIManagerType["SetCrosshairSize"] = &AUIManagerActor::SetCrosshairSize;
+		UIManagerType["SetCrosshairVisibility"] = &AUIManagerActor::SetCrosshairVisibility;
+		UIManagerType["SetUIMode"] = [](AUIManagerActor* Mgr, const FString& ModeStr) {
+			if (!Mgr) return;
+			if (ModeStr == "InGame") Mgr->SetUIMode(EUIMode::InGame);
+			else if (ModeStr == "Title") Mgr->SetUIMode(EUIMode::Title);
+			else if (ModeStr == "Pause") Mgr->SetUIMode(EUIMode::Pause);
+			else if (ModeStr == "Ending") Mgr->SetUIMode(EUIMode::Ending);
+		};
+
+		// ?꾩뿭 UIManager ?몄쓽 ?뚯씠釉?(?ㅽ겕由쏀듃 ?대뵒?쒕뱺 UIManager.GetFormattedTime() ?깆쑝濡???以??몄텧 媛??
+		auto UIManagerTable = Lua.create_named_table("UIManager");
+		UIManagerTable["Get"] = &AUIManagerActor::Get;
+		UIManagerTable["GetElapsedTime"] = []() -> float {
+			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetElapsedTime() : 0.0f;
+		};
+		UIManagerTable["GetFormattedTime"] = []() -> FString {
+			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetFormattedTime() : FString("00:00.00");
+		};
+		UIManagerTable["StartTimer"] = []() {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->StartTimer();
+		};
+		UIManagerTable["StopTimer"] = []() {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->StopTimer();
+		};
+		UIManagerTable["ResetTimer"] = []() {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->ResetTimer();
+		};
+		UIManagerTable["SetUIMode"] = [](const FString& ModeStr) {
+			if (!AUIManagerActor::Get()) return;
+			if (ModeStr == "InGame") AUIManagerActor::Get()->SetUIMode(EUIMode::InGame);
+			else if (ModeStr == "Title") AUIManagerActor::Get()->SetUIMode(EUIMode::Title);
+			else if (ModeStr == "Pause") AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
+			else if (ModeStr == "Ending") AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
+		};
+		UIManagerTable["GetHUD"] = []() -> AHUDCanvasActor* {
+			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetHUDCanvas() : nullptr;
+		};
+		UIManagerTable["GetEnding"] = []() -> AEndingCanvasActor* {
+			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetEndingCanvas() : nullptr;
+		};
+		UIManagerTable["SetCrosshairState"] = [](const FString& State) {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->SetCrosshairState(State);
+		};
+		UIManagerTable["GetCrosshairState"] = []() -> FString {
+			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetCrosshairState() : FString("unfilled");
+		};
+		UIManagerTable["SetCrosshairSize"] = [](float W, float H) {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->SetCrosshairSize(W, H);
+		};
+		UIManagerTable["SetCrosshairVisibility"] = [](bool bVisible) {
+			if (AUIManagerActor::Get()) AUIManagerActor::Get()->SetCrosshairVisibility(bVisible);
+		};
+		UIManagerTable["GetUIMode"] = []() -> FString {
+			if (!AUIManagerActor::Get()) return FString("None");
+			switch (AUIManagerActor::Get()->GetCurrentUIMode())
+			{
+			case EUIMode::Title: return FString("Title");
+			case EUIMode::InGame: return FString("InGame");
+			case EUIMode::Pause: return FString("Pause");
+			case EUIMode::Ending: return FString("Ending");
+			default: return FString("None");
+			}
+		};
+
+		// PortalPawn 유저타입 등록
+		sol::usertype<APortalPawn> PortalPawnType = Lua.new_usertype<APortalPawn>("PortalPawn",
+			sol::base_classes, sol::bases<AActor>());
+		PortalPawnType["IsBluePortalPlaced"] = &APortalPawn::IsBluePortalPlaced;
+		PortalPawnType["IsOrangePortalPlaced"] = &APortalPawn::IsOrangePortalPlaced;
+		PortalPawnType["ResetPortals"] = &APortalPawn::ResetPortals;
 
 		// 6. Scene 모듈 (씬 로드 및 리로드)
 		auto SceneTable = Lua.create_named_table("Scene");

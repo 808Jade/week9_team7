@@ -1,5 +1,6 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "Editor/HitoriEd/EditorFileUtils.h"
+#include "Editor/HitoriEd/EditorUndoManager.h"
 
 #include "Core/EngineLog.h"
 #include <commdlg.h>
@@ -12,6 +13,7 @@ bool FEditorFileUtils::NewScene(UWorld* World)
 	if (!World)
 		return false;
 
+	FEditorUndoManager::Get().Clear();
 	World->ClearWorld();
 
 	if (World->GetMainCamera())
@@ -106,6 +108,8 @@ bool FEditorFileUtils::LoadSceneFromPath(UWorld* World, const FString& InFilePat
 {
 	if (!World || InFilePath.empty())
 		return false;
+
+	FEditorUndoManager::Get().Clear();
 
 	FString FilePath = std::filesystem::absolute(InFilePath).lexically_normal().string();
 

@@ -8,9 +8,8 @@
 class FRenderer;
 class FSkyboxRenderer;
 struct FSceneRenderOptions;
-
-
 class UStaticMeshComponent;
+class UBoxComponent;
 
 // FSceneView를 채울 때 사용
 struct FPortalCameraPose
@@ -65,6 +64,13 @@ public:
 	static void DrawPortalSurfaces(UWorld* World, const FSceneView& MainView); 
 
 	bool IsPlaced() const { return bPlaced; }
+	void ResetPortal()
+	{
+		bPlaced = false;
+		SetActorLocation(FVector(0.0f, 0.0f, -9999.0f));
+	}
+
+	UBoxComponent* GetPortalTrigger() const { return PortalTrigger; }
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
@@ -76,6 +82,18 @@ private:
 	FSceneViewTargets ViewTargets;   // 포탈 카메라가 그린 결과 (Color + Depth)
 	FSceneRenderData  RenderData;    // 포탈 뷰 전용 렌더 큐/그림자 캐시
 
-	float PortalWidth = 1.0f;
-	float PortalHeight = 2.0f;
+	UBoxComponent* PortalTrigger = nullptr;
+
+	float PortalWidth = 2.0f;
+	float PortalHeight = 4.0f;
+
+public:
+	FMatrix GetTeleportMatrix() const;
+
+	bool IsPointWithinPortalBounds(const FVector& Point) const;
+
+	bool Checkcrossing(const FVector& PrevPos, const FVector& CurPos) const;
+
+	float GetDistanceToPlane(const FVector& Point) const;
+
 };

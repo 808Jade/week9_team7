@@ -148,8 +148,51 @@ void UUITextComponent::SubmitToRenderQueue(FRenderQueue& RenderQueue, const FVie
 	const float ViewportWidth = static_cast<float>(ViewContext.Width);
 	const float ViewportHeight = static_cast<float>(ViewContext.Height);
 
-	static FUIConstants UIConstants;
-	UIConstants.Rect = FVector4(PosX, PosY, Size.X, Size.Y);
+	float ActualX = PosX;
+	float ActualY = PosY;
+
+	// 가로 위치 계산
+	if (RelativeX > -1.0f)
+	{
+		// 0.0 ~ 1.0 비율: 화면 비율 (예: 0.25 = 화면 25% 지점)
+		// -1.0 < RelativeX < 0.0 음수 비율: 중앙(0.5) 기준 오프셋 (예: -0.25 -> 0.5 - 0.25 = 0.25)
+		float TargetRatio = (RelativeX >= 0.0f) ? RelativeX : (0.5f + RelativeX);
+		if (bCenterHorizontally)
+		{
+			// TargetRatio 지점을 기준으로 텍스트 가로 중앙 정렬
+			ActualX = (ViewportWidth * TargetRatio) - (Size.X * 0.5f) + OffsetX;
+		}
+		else
+		{
+			// TargetRatio 지점을 텍스트의 왼쪽 시작 위치로 정렬
+			ActualX = (ViewportWidth * TargetRatio) + OffsetX;
+		}
+	}
+	else if (bCenterHorizontally)
+	{
+		// RelativeX가 지정되지 않은 기본 상태(-1.0f)에서는 화면 정중앙(0.5)에 가로 정렬
+		ActualX = (ViewportWidth - Size.X) * 0.5f + OffsetX;
+	}
+
+	// 세로 위치 계산
+	if (RelativeY > -1.0f)
+	{
+		float TargetRatio = (RelativeY >= 0.0f) ? RelativeY : (0.5f + RelativeY);
+		if (bCenterVertically)
+		{
+			ActualY = (ViewportHeight * TargetRatio) - (Size.Y * 0.5f) + OffsetY;
+		}
+		else
+		{
+			ActualY = (ViewportHeight * TargetRatio) + OffsetY;
+		}
+	}
+	else if (bCenterVertically)
+	{
+		ActualY = (ViewportHeight - Size.Y) * 0.5f + OffsetY;
+	}
+
+	UIConstants.Rect = FVector4(ActualX, ActualY, Size.X, Size.Y);
 	UIConstants.ViewportSize = FVector4(ViewportWidth, ViewportHeight, Font->DistanceRange, 0.0f);
 	UIConstants.Color = FLinearColor(
 		Color.R / 255.0f,
