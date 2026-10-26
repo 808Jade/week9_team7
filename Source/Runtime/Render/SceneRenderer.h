@@ -7,6 +7,8 @@
 #include "Render/SceneRenderData.h"
 #include "Render/SceneRenderOptions.h"
 #include "Render/RenderGraph/RenderGraph.h"
+#include "Components/UIImageComponent.h"
+#include "Components/UITextComponent.h"
 
 class UWorld;
 class FScene;

@@ -40,6 +40,8 @@ public:
 	void CreateDefaultMeshes();
 	void CreateDefaultMaterial();
 	void CreateBillboardMaterial();
+	void CreateUIImageMaterial();
+	void CreateUITextMaterial();
 	void CreateParticleMaterial();
 	void CreateEditorArrowMaterial();
 

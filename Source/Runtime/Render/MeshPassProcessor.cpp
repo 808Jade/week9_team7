@@ -104,6 +104,10 @@ namespace
 			{
 				std::memcpy(Batch.MaterialData.data(), OverrideParams, OverrideSize);
 				Batch.MaterialDataSize = OverrideSize;
+				if (Material->PSOType == EPSOType::UI_Image || Material->PSOType == EPSOType::UI_Text)
+				{
+					Batch.MaterialStages = EShaderBindFlagBits::Vertex | EShaderBindFlagBits::Pixel;
+				}
 			}
 		}
 		Batch.Sampler = Material->SamplerState;

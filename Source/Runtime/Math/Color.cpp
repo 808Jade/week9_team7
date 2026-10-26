@@ -1,9 +1,9 @@
 #include "EnginePCH.h"
 #include "Color.h"
 
-static const FColor White(255, 255, 255, 255);
-static const FColor Black(0, 0, 0, 255);
-static const FColor Transparent(0, 0, 0, 0);
+const FColor FColor::White(255, 255, 255, 255);
+const FColor FColor::Black(0, 0, 0, 255);
+const FColor FColor::Transparent(0, 0, 0, 0);
 static const FColor Red(255, 0, 0, 255);
 static const FColor Green(0, 255, 0, 255);
 static const FColor Blue(0, 0, 255, 255);

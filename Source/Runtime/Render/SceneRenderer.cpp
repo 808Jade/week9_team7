@@ -943,7 +943,7 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 		for (uint32 c = 0; c < ChunkCount; ++c)
 			if (GatherChunks[c].Packets.Num() > 0)
 				RenderQueue.Append(GatherChunks[c].Packets);  // 조각 순서대로 이어 붙이기
-
+		TArray<UPrimitiveComponent*> UIComponents;
 		for (uint32 c = 0; c < ChunkCount; ++c)
 		{
 			for (uint32 VisibleIndex : GatherChunks[c].SlowPathIndices)
@@ -952,6 +952,12 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 				UPrimitiveComponent* Primitive = Proxy->GetComponent();
 				if (!Primitive || !Primitive->IsVisible())
 					continue;
+
+				if (Cast<UUIImageComponent>(Primitive) || Cast<UUITextComponent>(Primitive))
+				{
+					UIComponents.Add(Primitive);
+					continue;
+				}
 
 				const uint32 FirstNew = RenderQueue.Num();
 
@@ -968,6 +974,33 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 				}
 
 				// continue 없이 항상 여기까지 와서 새 패킷에 여유 칸을 배정한다.
+				for (uint32 p = FirstNew; p < RenderQueue.Num(); ++p)
+				{
+					if (!bPrepareObjectSlots || NextExtraSlot >= MaxSlots) break;
+					FRenderPacket& Packet = RenderQueue[p];
+					const FMatrix& Model = Packet.Proxy ? Packet.Proxy->GetLocalToWorld() : Packet.Model ? *Packet.Model : FMatrix::Identity;
+					Data.ObjectConstants[NextExtraSlot] = MakePerObjectConstants(Model);
+					Packet.Slot = NextExtraSlot++;
+				}
+			}
+		}
+
+		if (!UIComponents.IsEmpty())
+		{
+			std::stable_sort(UIComponents.begin(), UIComponents.end(),
+				[](UPrimitiveComponent* A, UPrimitiveComponent* B)
+				{
+					auto GetLayer = [](UPrimitiveComponent* C) -> int32 {
+						if (auto* Img = Cast<UUIImageComponent>(C)) return Img->GetLayer();
+						if (auto* Txt = Cast<UUITextComponent>(C)) return Txt->GetLayer();
+						return 0;
+						};
+					return GetLayer(A) < GetLayer(B);
+				});
+			for (UPrimitiveComponent* UIComp : UIComponents)
+			{
+				const uint32 FirstNew = RenderQueue.Num();
+				UIComp->SubmitToRenderQueue(RenderQueue, View);
 				for (uint32 p = FirstNew; p < RenderQueue.Num(); ++p)
 				{
 					if (!bPrepareObjectSlots || NextExtraSlot >= MaxSlots) break;

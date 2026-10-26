@@ -23,6 +23,16 @@ struct FTransform
 	FVector Scale = FVector(1, 1, 1);
 	FRotator Rotation = FRotator(0, 0, 0);
 
+	FTransform GetRelativeTransformNoScale(const FTransform& Other) const;
+
+	FVector TransformPosition(const FVector& V) const;
+
+	FVector TransformVectorNoScale(const FVector& V) const;
+	
+	FVector InverseTransformVector(const FVector& V) const;
+
+	FVector InverseTransformPosition(const FVector& V) const;
+
 	bool operator==(const FTransform& Other) const
 	{
 		return Location == Other.Location && Scale == Other.Scale && Rotation == Other.Rotation;

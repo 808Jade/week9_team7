@@ -16,6 +16,7 @@
 #include "Asset/LOD/StaticMeshLODSelector.h"
 #include "Engine/EngineTypes.h"
 #include "Render/SceneRenderData.h"
+#include "Collision/CollisionShape.h"
 
 //class ACameraActor;
 class ULevel;
@@ -76,7 +77,10 @@ public:
 	bool LineTraceSingle(const FRay& WorldRay, FHitResult& OutHit,
 		FBillboardTraceTransform ResolveBillboard = nullptr, const void* ViewContext = nullptr, AActor* IgnoreActor = nullptr);
 	bool SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, FHitResult& OutHit, AActor* IgnoreActor = nullptr);
-
+	bool SweepSingle(FHitResult& OutHIt, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor = nullptr);
+	bool SweepMulti(TArray<FHitResult>& OutHit, const FVector& Start, const FVector& End, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor = nullptr);
+	bool OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVector& Pos, const FQuat& Rot, const FCollisionShape& CollisionShape, const AActor* IgnoreActor = nullptr);
+		
 	void BeginPlay();
 	void EndPlay();
 	bool HasBegunPlay() const { return bBegunPlay; }

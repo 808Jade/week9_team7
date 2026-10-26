@@ -3,6 +3,7 @@
 #include "Math/Vector.h"
 
 class UPrimitiveComponent;
+class AActor;
 
 struct FHitResult
 {
@@ -24,6 +25,7 @@ struct FHitResult
 	bool bBlockingHit = false;
 	bool bStartPentrating = false;
 
+	AActor* HitActor = nullptr;
 	UPrimitiveComponent* HitComponent = nullptr;
 
 	FHitResult()

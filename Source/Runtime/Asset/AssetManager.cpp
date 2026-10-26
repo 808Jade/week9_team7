@@ -136,6 +136,8 @@ void UAssetManager::Init(const FAssetLoadProgress& OnProgress)
 	Get().ScanAssets("Assets", OnProgress);
 	Get().CreateDefaultMeshes();
 	Get().CreateBillboardMaterial();
+	Get().CreateUIImageMaterial();
+	Get().CreateUITextMaterial();
 	Get().CreateParticleMaterial();
 	Get().CreateEditorArrowMaterial();
 }
@@ -320,6 +322,27 @@ void UAssetManager::CreateBillboardMaterial()
 	BillboardMat->SamplerState = ESamplerState::LinearClamp;
 	BillboardMat->ParamLayout = EMaterialParamLayout::ParticleSubUV;
 	RegisterAsset("BillboardMaterial", BillboardMat);
+}
+
+void UAssetManager::CreateUIImageMaterial()
+{
+	UMaterial* UIMat = NewObject<UMaterial>();
+	UIMat->PSOType = EPSOType::UI_Image;
+	UIMat->Textures.Add(GetAssetByPath<UTexture2D>("WhiteTexture"));
+	UIMat->BlendState = EBlendState::AlphaBlend;
+	UIMat->DepthStencilState = EDepthStencilState::Disabled;
+	UIMat->SamplerState = ESamplerState::LinearClamp;
+	RegisterAsset("UIMaterial", UIMat);
+}
+
+void UAssetManager::CreateUITextMaterial()
+{
+	UMaterial* TextMat = NewObject<UMaterial>();
+	TextMat->PSOType = EPSOType::UI_Text;
+	TextMat->BlendState = EBlendState::AlphaBlend;
+	TextMat->DepthStencilState = EDepthStencilState::Disabled;
+	TextMat->SamplerState = ESamplerState::LinearClamp;
+	RegisterAsset("UITextMaterial", TextMat);
 }
 
 void UAssetManager::CreateParticleMaterial()

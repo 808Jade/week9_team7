@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "Engine.h"
 #include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
@@ -83,10 +83,10 @@ void UEngine::DestroyWorldContext(UWorld* InWorld)
 			{
 				ACameraActor* Camera = InWorld->GetMainCamera();
 				const bool bOwnsCamera = Camera && !Camera->GetLevel();
-				InWorld->SetMainCamera(nullptr);
 				InWorld->ClearWorld();
+				InWorld->SetMainCamera(nullptr);
 				for (ULevel* Level : InWorld->GetLevels()) delete Level;
-				if (bOwnsCamera) delete Camera;
+				if (bOwnsCamera && Camera) { Camera->UnregisterAllComponents(); Camera->RegisterAllActorTickFunctions(false); delete Camera; }
 				delete InWorld;
 			}
 			if (WorldContextlist[idx].OwningGameInstance)

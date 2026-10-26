@@ -31,6 +31,12 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/FireBallComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
+#include "GameFramework/Actor/CanvasActor.h"
+#include "Components/UIImageComponent.h"
+#include "Components/UITextComponent.h"
 
 #include "Asset/AssetManager.h"
 #include "Render/RenderResourceManager.h"
@@ -315,7 +321,12 @@ bool UEditorEngine::Init()
 	SettingsPanel->SetWorld(EditorWorld);
 	SettingsPanel->SetViewportsPanel(ViewportsPanel);
 	ViewportsPanel->SetLayoutMode(ViewportLayoutMode, SingleViewportIndex);
-
+	// 2D UI 오버레이 및 상호작용 콜백 연결
+	ViewportsPanel->SetOverlayCallback(
+		[this](ImDrawList* DrawList, int32 ViewIndex, const ImVec2& ViewMin, const FRect& Rect)
+		{
+			DrawViewportUIOverlay(DrawList, ViewIndex, ViewMin, Rect);
+	});
 	for (int32 i = 0; i < 4; ++i)
 	{
 		if (FEditorViewportClient* Client = ViewportsPanel->GetViewportClient(i))
@@ -407,7 +418,7 @@ void UEditorEngine::BeginFrame(const float DeltaTime)
 
 	if (!ImGui::GetIO().WantTextInput)
 	{
-		// 1. Ctrl + Z (?ㅽ뻾 痍⑥냼 - Undo) / Ctrl + Y or Ctrl + Shift + Z (?ㅼ떆 ?ㅽ뻾 - Redo) / Ctrl + G (洹몃━???ㅻ깄 ?좉?)
+		// 1. Ctrl + Z (실행 취소 - Undo) / Ctrl + Y or Ctrl + Shift + Z (다시 실행 - Redo) / Ctrl + G (그리드 스냅 토글)
 		if (FInputSystem::IsKeyDown(EKeyCode::Control))
 		{
 			if (FInputSystem::IsKeyPressed(EKeyCode::Z))
@@ -436,7 +447,7 @@ void UEditorEngine::BeginFrame(const float DeltaTime)
 			}
 		}
 
-		// 2. Ctrl + S (?????
+		// 2. Ctrl + S (씬 저장)
 		if (FInputSystem::IsKeyDown(EKeyCode::Control) && FInputSystem::IsKeyPressed(EKeyCode::S))
 		{
 			SaveCurrentScene();
@@ -1020,6 +1031,39 @@ void UEditorEngine::RenderGameFrame(FGameViewportClient* GameClient, const FScen
 		if (!bIsSIEMode) return;
 		const FViewportSettings ViewportSetting{ 0, 0, Targets.SceneColor->GetWidth(),
 			Targets.SceneColor->GetHeight(), 0.0f, 1.0f };
+
+		AActor* SelectedActor = (Gizmo && Gizmo->GetTarget())
+			? Gizmo->GetTarget()->GetOwner()
+			: (OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr);
+
+		if (SelectedActor)
+		{
+			bool bHasShape = false;
+			for (UActorComponent* Comp : SelectedActor->GetComponents())
+			{
+				if (Cast<UShapeComponent>(Comp))
+				{
+					bHasShape = true;
+					break;
+				}
+			}
+			if (bHasShape)
+			{
+				Overlays.EditorLines = [this, &SceneView, SelectedActor]
+					{
+						LineBatcher->BeginFrame();
+						for (UActorComponent* Comp : SelectedActor->GetComponents())
+						{
+							if (UShapeComponent* ShapeComp = Cast<UShapeComponent>(Comp))
+							{
+								ShapeComp->DrawDebug(LineBatcher.get());
+							}
+						}
+						LineBatcher->OnRender(SceneView.ViewProjectionMatrix);
+					};
+			}
+		}
+
 		if (Outline->GetTarget())
 			Overlays.SIEOutline = [this, &SceneView, ViewportSetting]
 				{
@@ -1225,10 +1269,27 @@ void UEditorEngine::RenderFrame(FEditorViewportClient* ViewClient,
 			 Cast<APointLightActor>(Gizmo->GetTarget()->GetOwner()) ||
 			 Cast<ARectLightActor>(Gizmo->GetTarget()->GetOwner()));
 
-		const bool bDrawCascadeBounds = SettingsPanel->GetSettings().bDrawCascadeBounds;
-		if (SettingsPanel->GetSettings().bDrawBatchLine || bDrawSelectedLight || bDrawCascadeBounds)
+		AActor* SelectedActor = (Gizmo && Gizmo->GetTarget())
+			? Gizmo->GetTarget()->GetOwner()
+			: (OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr);
+
+		bool bDrawSelectedShape = false;
+		if (bIsActiveViewport && SelectedActor)
 		{
-			Overlays.EditorLines = [this, ViewClient, &SceneView, bDrawSelectedLight, bDrawCascadeBounds]
+			for (UActorComponent* Comp : SelectedActor->GetComponents())
+			{
+				if (Cast<UShapeComponent>(Comp))
+				{
+					bDrawSelectedShape = true;
+					break;
+				}
+			}
+		}
+
+		const bool bDrawCascadeBounds = SettingsPanel->GetSettings().bDrawCascadeBounds;
+		if (SettingsPanel->GetSettings().bDrawBatchLine || bDrawSelectedLight || bDrawSelectedShape || bDrawCascadeBounds)
+		{
+			Overlays.EditorLines = [this, ViewClient, &SceneView, bDrawSelectedLight, bDrawSelectedShape, SelectedActor, bDrawCascadeBounds]
 				{
 					LineBatcher->BeginFrame();
 					if (bDrawCascadeBounds)
@@ -1268,6 +1329,16 @@ void UEditorEngine::RenderFrame(FEditorViewportClient* ViewClient,
 							Light->GetPointLightComponent()->DrawDebug(LineBatcher.get());
 						else if (ARectLightActor* Light = Cast<ARectLightActor>(Gizmo->GetTarget()->GetOwner()))
 							Light->GetRectLightComponent()->DrawDebug(LineBatcher.get());
+					}
+					if (bDrawSelectedShape && SelectedActor)
+					{
+						for (UActorComponent* Comp : SelectedActor->GetComponents())
+						{
+							if (UShapeComponent* ShapeComp = Cast<UShapeComponent>(Comp))
+							{
+								ShapeComp->DrawDebug(LineBatcher.get());
+							}
+						}
 					}
 					LineBatcher->OnRender(SceneView.ViewProjectionMatrix);
 				};
@@ -1683,13 +1754,14 @@ void UEditorEngine::SnapSelectedActorsToFloor()
 		if (Actor->TryGetActorBounds(Bounds))
 		{
 			PivotOffsetFromBottom = Actor->GetActorLocation().Z - Bounds.Min.Z;
-			RayStartHeight = Bounds.Max.Z + 0.5f; // ?≫꽣 理쒖긽?⑤낫??0.5m ?꾩뿉??諛쒖궗
+			RayStartHeight = Bounds.Max.Z + 0.5f; // 액터 최상단보다 0.5m 위에서 발사
 		}
 
 		FVector Loc = Actor->GetActorLocation();
 		FRay Ray{ FVector(Loc.X, Loc.Y, RayStartHeight), FVector(0.0f, 0.0f, -1.0f) };
 		FHitResult Hit;
-		// ?먭린 ?먯떊(Actor)??臾댁떆?섍퀬 ?꾨옒 諛⑺뼢?쇰줈 ?덉씠罹먯뒪??		if (World->LineTraceSingle(Ray, Hit, nullptr, nullptr, Actor))
+		// 자기 자신(Actor)은 무시하고 아래 방향으로 레이캐스트
+		if (World->LineTraceSingle(Ray, Hit, nullptr, nullptr, Actor))
 		{
 			FVector NewLoc = Loc;
 			NewLoc.Z = Hit.ImpactPoint.Z + PivotOffsetFromBottom;
@@ -1791,4 +1863,51 @@ void UEditorEngine::DuplicateActors(const TArray<AActor*>& InActors)
 		FEditorUndoManager::Get().PushAction(std::make_unique<FActorLifetimeUndoAction>(
 			World, Level, NewDuplicatedActors, true, true, "Duplicate Actor(s)"));
 	}
+}
+
+void UEditorEngine::DrawViewportUIOverlay(ImDrawList* DrawList, int32 ViewIndex, const ImVec2& ViewMin, const FRect& Rect)
+{
+	if (!ViewportsPanel || ViewIndex != ViewportsPanel->GetActiveViewIndex())
+		return;
+
+	UPrimitiveComponent* SelectedUI = nullptr;
+	if (DetailsPanel)
+	{
+		SelectedUI = Cast<UUIImageComponent>(DetailsPanel->GetTargetComponent());
+		if (!SelectedUI) SelectedUI = Cast<UUITextComponent>(DetailsPanel->GetTargetComponent());
+
+		if (!SelectedUI && DetailsPanel->GetTarget())
+		{
+			for (UActorComponent* Comp : DetailsPanel->GetTarget()->GetComponents())
+			{
+				if (Cast<UUIImageComponent>(Comp) || Cast<UUITextComponent>(Comp))
+				{
+					SelectedUI = Cast<UPrimitiveComponent>(Comp);
+					break;
+				}
+			}
+		}
+	}
+
+	if (!SelectedUI)
+		return;
+
+	FVector2 Pos = FVector2(0.0f, 0.0f);
+	FVector2 Size = FVector2(0.0f, 0.0f);
+
+	if (auto* Img = Cast<UUIImageComponent>(SelectedUI))
+	{
+		Pos = Img->GetPosition();
+		Size = Img->GetSize();
+	}
+	else if (auto* Txt = Cast<UUITextComponent>(SelectedUI))
+	{
+		Pos = Txt->GetPosition();
+		Size = Txt->GetSize();
+	}
+
+	const ImVec2 UIMin = ImVec2(ViewMin.x + Pos.X, ViewMin.y + Pos.Y);
+	const ImVec2 UIMax = ImVec2(UIMin.x + Size.X, UIMin.y + Size.Y);
+
+	DrawList->AddRect(UIMin, UIMax, IM_COL32(0, 153, 255, 255), 0.0f, 0, 2.0f);
 }
