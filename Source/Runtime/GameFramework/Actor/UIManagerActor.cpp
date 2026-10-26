@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "UIManagerActor.h"
 #include "HUDCanvasActor.h"
 #include "TitleCanvasActor.h"
@@ -177,6 +177,10 @@ void AUIManagerActor::SetUIMode(EUIMode NewMode)
 			HUDCanvas->StopTimer();
 			HUDCanvas->ResetTimer();
 			SetCrosshairState("unfilled");
+			if (EndingCanvas)
+			{
+				EndingCanvas->SetEndingType(EEndingType::Success);
+			}
 		}
 	}
 

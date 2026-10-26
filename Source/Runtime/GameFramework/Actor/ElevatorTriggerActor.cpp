@@ -1,6 +1,7 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "ElevatorTriggerActor.h"
 #include "GameFramework/Actor/UIManagerActor.h"
+#include "GameFramework/Actor/EndingCanvasActor.h"
 #include "GameFramework/PortalPawn.h"
 #include "Engine/World.h"
 #include <cmath>
@@ -90,6 +91,10 @@ void AElevatorTriggerActor::TriggerEnding()
 	{
 		bTriggered = true;
 		HTR_LOG(Info, "[AElevatorTriggerActor] Player entered elevator! Triggering Ending UI.");
+		if (AEndingCanvasActor* EndingCanvas = AUIManagerActor::Get()->GetEndingCanvas())
+		{
+			EndingCanvas->SetEndingType(EEndingType::Success);
+		}
 		AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
 	}
 }

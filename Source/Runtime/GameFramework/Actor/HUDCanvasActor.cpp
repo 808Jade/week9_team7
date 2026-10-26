@@ -1,9 +1,10 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "HUDCanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
 #include "Input/InputSystem.h"
 #include "GameFramework/Actor/UIManagerActor.h"
+#include "GameFramework/Actor/EndingCanvasActor.h"
 #include "Asset/AssetManager.h"
 #include <cstdio>
 #include <imgui.h>
@@ -274,15 +275,20 @@ void AHUDCanvasActor::DrawSettingsWindow()
 
 		ImGui::SameLine(0.0f, 20.0f);
 
-		// 종료 버튼은 붉은색 계열로 강조
+		// 그만두기 버튼은 붉은색 계열로 강조 (엔딩 실패 화면으로 전환)
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.20f, 0.20f, 1.00f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.25f, 0.25f, 1.00f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.55f, 0.15f, 0.15f, 1.00f));
-		if (ImGui::Button(U8("게임 종료"), ImVec2(ButtonWidth, ButtonHeight)))
+		if (ImGui::Button(U8("그만두기"), ImVec2(ButtonWidth, ButtonHeight)))
 		{
-			if (GEngine)
+			SetSettingsWindowVisible(false);
+			if (AUIManagerActor::Get())
 			{
-				GEngine->GetEngineLoop().RequestExit();
+				if (AEndingCanvasActor* EndingCanvas = AUIManagerActor::Get()->GetEndingCanvas())
+				{
+					EndingCanvas->SetEndingType(EEndingType::Fail);
+				}
+				AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
 			}
 		}
 		ImGui::PopStyleColor(3);
