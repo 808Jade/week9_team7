@@ -37,6 +37,7 @@
 #include "GameFramework/Actor/CanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
+#include "GameFramework/Actor/PortalActor.h"
 
 #include "Asset/AssetManager.h"
 #include "Render/RenderResourceManager.h"
@@ -1023,6 +1024,10 @@ void UEditorEngine::BuildSceneRenderOptions(FEditorViewportClient* ViewClient, b
 void UEditorEngine::RenderGameFrame(FGameViewportClient* GameClient, const FSceneView& SceneView, const FSceneRenderOptions& RenderOptions, FSceneRenderer& SceneRenderer, bool bIsSIEMode)
 {
 	if (!GameClient) return;
+
+	// 포탈 뷰 먼저 렌더링
+	APortalActor::RenderPortalViews(GameClient->GetWorld(), Renderer, SkyboxRenderer.get(),
+		SceneView, RenderOptions);
 
 	FSceneViewTargets& Targets = GameClient->GetViewTargets();
 	const bool bRendered = RenderScene(Targets, SceneView, SceneRenderer, GameClient->GetWorld(), RenderOptions,

@@ -9,6 +9,8 @@
 #include <bit>
 
 class FPrimitiveSceneProxy;
+class UPrimitiveComponent;
+
 inline constexpr uint32 InvalidObjectSlot = ~0u;
 
 struct FRenderPacket
@@ -40,6 +42,8 @@ struct FViewContext
 	bool bGameView = false;
 	float CameraDepth = 0.0f;
 	FMatrix ViewProjection = FMatrix::Identity;
+	const TArray<const UPrimitiveComponent*>* HiddenComponents = nullptr;
+
 	void Prepare()
 	{
 		CameraDepth = CameraPosition.X * CameraForward.X
@@ -66,6 +70,11 @@ struct FViewContext
 		Matrix.M[2][0] = RealUp.X * Height; Matrix.M[2][1] = RealUp.Y * Height; Matrix.M[2][2] = RealUp.Z * Height;
 		Matrix.M[3][0] = WorldPosition.X; Matrix.M[3][1] = WorldPosition.Y; Matrix.M[3][2] = WorldPosition.Z;
 		return Matrix;
+	}
+
+	bool IsHidden(const UPrimitiveComponent* Component) const
+	{
+		return HiddenComponents && HiddenComponents->Find(Component) != INDEX_NONE;
 	}
 };
 
