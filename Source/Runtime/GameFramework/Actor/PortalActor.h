@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "Render/SceneViewTargets.h"
+#include "Render/SceneRenderData.h"
 
 class UStaticMeshComponent;
 
@@ -23,10 +25,22 @@ public:
 	UStaticMeshComponent* GetPortalMesh() const { return PortalMesh; }
 	FVector GetPortalNormal() const { return GetActorQuat().GetForwardVector(); }
 
+	// 렌더링 직전에 매 프레임 호출. 크기가 같으면 아무 일도 안 한다.
+	bool EnsureRenderTarget(uint32 Width, uint32 Height) { return ViewTargets.Resize(Width, Height); }
+
+	FSceneViewTargets& GetViewTargets() { return ViewTargets; }
+	FSceneRenderData& GetRenderData() { return RenderData; }
+
+	// 포탈 면 셰이더가 읽을 텍스처
+	FTexture2D* GetPortalTexture() const { return ViewTargets.SceneColor.get(); }
+
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
 	APortalActor* LinkedPortal = nullptr;
 	bool bPlaced = false;
+
+	FSceneViewTargets ViewTargets;   // 포탈 카메라가 그린 결과 (Color + Depth)
+	FSceneRenderData  RenderData;    // 포탈 뷰 전용 렌더 큐/그림자 캐시
 
 	float PortalWidth = 1.0f;
 	float PortalHeight = 2.0f;
