@@ -76,6 +76,6 @@ private:
 	FSceneViewTargets ViewTargets;   // 포탈 카메라가 그린 결과 (Color + Depth)
 	FSceneRenderData  RenderData;    // 포탈 뷰 전용 렌더 큐/그림자 캐시
 
-	float PortalWidth = 1.0f;
-	float PortalHeight = 2.0f;
+	float PortalWidth = 2.0f;
+	float PortalHeight = 4.0f;
 };
