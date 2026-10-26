@@ -4,6 +4,9 @@
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 #include "Math/Frustum.h"
+#include "Render/SceneRenderer.h"
+#include "Render/RenderCommand.h"
+#include "Engine/Level.h"
 #include <cmath>
 
 namespace
@@ -149,4 +152,46 @@ bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& O
 	}
 
 	return true;
+}
+
+void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkyboxRenderer* Skybox,
+	const FSceneView& MainView, const FSceneRenderOptions& MainOptions)
+{
+	if (!World || !Renderer || !World->GetPersistentLevel()) return;
+
+	FSceneRenderOptions Options = MainOptions;
+	Options.bEnableFog = false;
+	Options.bEnableFXAA = false;
+	Options.bShowSceneDepth = false;
+	Options.bShowCascade = false;
+	Options.bShowWorldNormal = false;
+	Options.bShowLightCulling = false;
+
+	FGPUOcclusionSettings& Occlusion = Renderer->GetGPUOcclusion().GetSettings();
+	const bool bPrevOcclusion = Occlusion.bEnabled;
+	Occlusion.bEnabled = false;
+
+	const uint32 Width = static_cast<uint32>(MainView.ViewRect.Width);
+	const uint32 Height = static_cast<uint32>(MainView.ViewRect.Height);
+
+	for (AActor* Actor : World->GetPersistentLevel()->GetActors())
+	{
+		APortalActor* Portal = Cast<APortalActor>(Actor);
+		if (!Portal || !Portal->IsActive()) continue;
+		if (!Portal->EnsureRenderTarget(Width, Height)) continue;
+
+		FSceneView PortalView;
+		if (!Portal->CalcPortalSceneView(MainView, PortalView)) continue;
+
+		FSceneRenderer SceneRenderer(World, PortalView, Portal->GetRenderData());
+		SceneRenderer.InitViews(Renderer, Options);
+
+		FRenderGraphBuilder Graph;
+		FScenePassCallbacks Callbacks;   // 파이어볼·안개·텍스트·에디터 오버레이 없음
+		if (SceneRenderer.AddViewportPasses(Graph, Renderer, Portal->GetViewTargets(), Options, Skybox, Callbacks))
+			Graph.Execute();
+		RenderCommand::EndRenderPass();
+	}
+
+	Occlusion.bEnabled = bPrevOcclusion;
 }

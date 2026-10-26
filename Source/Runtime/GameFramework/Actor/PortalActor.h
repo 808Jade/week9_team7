@@ -5,6 +5,11 @@
 #include "Render/SceneRenderData.h"
 #include "Render/SceneView.h"
 
+class FRenderer;
+class FSkyboxRenderer;
+struct FSceneRenderOptions;
+
+
 class UStaticMeshComponent;
 
 // FSceneView를 채울 때 사용
@@ -52,6 +57,10 @@ public:
 
 	// 메인 뷰 → 이 포탈을 통해 본 뷰 (FSceneRenderer에 넘김)
 	bool CalcPortalSceneView(const FSceneView& MainView, FSceneView& OutView) const;
+
+	// 메인 뷰를 그리기 직전에 호출. 활성 포탈마다 씬을 한 번씩 포탈 텍스처에 그린다.
+	static void RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkyboxRenderer* Skybox,
+		const FSceneView& MainView, const FSceneRenderOptions& MainOptions);
 
 private:
 	UStaticMeshComponent* PortalMesh = nullptr;
