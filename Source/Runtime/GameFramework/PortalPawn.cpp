@@ -142,24 +142,15 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 // 포탈건으로 모든 무기 동작 위임
 void APortalPawn::PrimaryAction()
 {
-	if (PortalGun)
-	{
-		PortalGun->PrimaryAction();
-	}
+
 }
 
 void APortalPawn::TogglePortalType()
 {
-	if (PortalGun)
-	{
-		PortalGun->TogglePortalType();
-	}
+
 }
 
 void APortalPawn::Interact()
 {
-	if (PortalGun)
-	{
-		PortalGun->Interact();
-	}
+
 }
