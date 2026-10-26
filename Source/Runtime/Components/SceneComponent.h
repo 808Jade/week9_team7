@@ -36,6 +36,7 @@ public:
 	const FVector& GetRelativeLocation() const { return Transform.Location; }
 	void SetRelativeLocation(const FVector& InLocation) 
 	{
+		if (Transform.Location == InLocation) return;
 		Transform.Location = InLocation;
 		MarkTransformDirty();
 	}
@@ -44,13 +45,15 @@ public:
 	const FRotator& GetRelativeRotation() const { return Transform.Rotation; }
 	void SetRelativeRotation(const FRotator& InRotation) 
 	{
-		Transform.Rotation = InRotation; 
+		if (Transform.Rotation == InRotation) return;
+		Transform.Rotation = InRotation;
 		MarkTransformDirty();
 	}
 	void SetRelativeLocationAndRotation(const FVector& NewLocation, const FRotator& NewRotation);
 	const FVector& GetRelativeScale3D() const { return Transform.Scale; }
 	void SetRelativeScale3D(const FVector& InScale) 
 	{
+		if (Transform.Scale == InScale) return;
 		Transform.Scale = InScale;
 		MarkTransformDirty();
 	}
@@ -61,6 +64,7 @@ public:
 	const FTransform& GetTransform() const { return Transform; }
 	void SetTransform(const FTransform& InTransform) 
 	{
+		if (Transform == InTransform) return;
 		Transform = InTransform;
 		MarkTransformDirty();
 	}

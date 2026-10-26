@@ -42,6 +42,7 @@ USceneComponent::~USceneComponent()
 
 void USceneComponent::SetRelativeLocationAndRotation(const FVector& NewLocation, const FRotator& NewRotation)
 {
+	if (Transform.Location == NewLocation && Transform.Rotation == NewRotation) return;
 	Transform.Location = NewLocation;
 	Transform.Rotation = NewRotation;
 	MarkTransformDirty();

@@ -162,7 +162,11 @@ bool FEngineLoop::Tick()
 		return true;
 	}
 
-	FScriptWatcher::Get().Tick(EngineTimer::GetDeltaTime());
+	// 에디터 환경에서만 스크립트 파일 변경 감지 틱을 실행
+	if (GEngine && GEngine->GetEditorWorld() != nullptr)
+	{
+		FScriptWatcher::Get().Tick(EngineTimer::GetDeltaTime());
+	}
 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_EngineTick);
