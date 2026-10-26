@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "LuaScriptComponent.h"
 #include "Lua/LuaManager.h"
 #include "Engine/World.h"
@@ -24,6 +24,25 @@ namespace
 	}
 
 	// luaL_loadfile(fopen)은 ANSI 경로만 받으므로 파일은 직접 읽어서 load_buffer로 넘긴다
+	// 실행 위치(프로젝트 루트 또는 Build/Bin/...)에 따른 상대 경로 폴백 확인
+	std::filesystem::path ResolveScriptPath(const std::filesystem::path& InPath)
+	{
+		std::error_code EC;
+		if (std::filesystem::exists(InPath, EC))
+		{
+			return InPath;
+		}
+		if (std::filesystem::exists("../../../" + InPath.string(), EC))
+		{
+			return "../../../" + InPath.string();
+		}
+		if (std::filesystem::exists("../../" + InPath.string(), EC))
+		{
+			return "../../" + InPath.string();
+		}
+		return InPath;
+	}
+
 	bool ReadFileToString(const std::filesystem::path& InPath, std::string& OutCode)
 	{
 		std::ifstream File(InPath, std::ios::in | std::ios::binary);
@@ -127,19 +146,20 @@ void ULuaScriptComponent::SetScriptPath(const FString& InPath)
 
 bool ULuaScriptComponent::LoadScript(const std::filesystem::path& InScriptPath)
 {
-	const FString PathString = PathToUtf8(InScriptPath);
+	const std::filesystem::path ResolvedPath = ResolveScriptPath(InScriptPath);
+	const FString PathString = PathToUtf8(ResolvedPath);
 	LastLoadError.clear();
 
 	// 스크립트 파일이 존재하는지 확인
 	std::error_code ErrorCode;
-	if (!std::filesystem::exists(InScriptPath, ErrorCode))
+	if (!std::filesystem::exists(ResolvedPath, ErrorCode))
 	{
-		LastLoadError = "Script file not found: " + PathString;
+		LastLoadError = "Script file not found: " + PathToUtf8(InScriptPath);
 		return false;
 	}
 
 	std::string Code;
-	if (!ReadFileToString(InScriptPath, Code))
+	if (!ReadFileToString(ResolvedPath, Code))
 	{
 		LastLoadError = "Failed to read script file: " + PathString;
 		return false;
@@ -292,8 +312,9 @@ void ULuaScriptComponent::StartWatchingScript()
 
 	// 멤버 함수 바인딩(AddDynamic). 델리게이트가 this를 들고 있으므로
 	// 이 컴포넌트가 사라지기 전에 반드시 StopWatchingScript가 불려야 한다
+	const std::filesystem::path ResolvedPath = ResolveScriptPath(Utf8ToPath(ScriptPath));
 	ScriptWatchHandle = FScriptWatcher::Get().Register(
-		Utf8ToPath(ScriptPath),
+		ResolvedPath,
 		this,
 		&ULuaScriptComponent::OnScriptFileChanged);
 }
