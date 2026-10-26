@@ -220,6 +220,12 @@ void UGameEngine::SetSettingsWindowVisible(bool bVisible)
 {
     bShowSettingsWindow = bVisible;
 
+    if (bImGuiInitialized)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        io.MouseDrawCursor = bShowSettingsWindow;
+    }
+
     if (bShowSettingsWindow)
     {
         // 설정창 열림: 마우스 커서 표시 및 잠금 해제
@@ -230,7 +236,8 @@ void UGameEngine::SetSettingsWindowVisible(bool bVisible)
                 PPC->SetMouseCapture(false);
             }
         }
-        while (::ShowCursor(TRUE) < 0);
+        while (::ShowCursor(TRUE) < 1);
+        ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
     }
     else
     {
@@ -242,10 +249,7 @@ void UGameEngine::SetSettingsWindowVisible(bool bVisible)
                 PPC->SetMouseCapture(true);
             }
         }
-        else
-        {
-            while (::ShowCursor(FALSE) >= 0);
-        }
+        while (::ShowCursor(FALSE) >= 0);
     }
 }
 
@@ -336,6 +340,11 @@ void UGameEngine::TickInput(float DeltaTime)
     // 설정창이 열려있는 동안에는 인게임 마우스 시점 회전 및 플레이어 조작 차단 (ImGui만 조작)
     if (bShowSettingsWindow)
     {
+        if (bImGuiInitialized)
+        {
+            ImGui::GetIO().MouseDrawCursor = true;
+        }
+        ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
         return;
     }
 
@@ -477,15 +486,19 @@ void UGameEngine::PreExit()
         bImGuiInitialized = false;
     }
 
-    if (GameInstance)
-    {
-        GameInstance->Shutdown();
-        GameInstance = nullptr;
-    }
+    // 1. GameWorld를 먼저 정리하여 모든 액터와 컴포넌트(LuaScriptComponent 등)의 EndPlay 및 OnUnregister가
+    //    GameInstance(FLuaManager)가 살아있을 때 정상적으로 호출되도록 합니다.
     if (GameWorld)
     {
         GameWorld->ClearWorld();
         GameWorld = nullptr;
+    }
+
+    // 2. 월드 정리가 완료된 후 GameInstance(FLuaManager)를 안전하게 셧다운합니다.
+    if (GameInstance)
+    {
+        GameInstance->Shutdown();
+        GameInstance = nullptr;
     }
     if (GameViewport)
     {

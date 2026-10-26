@@ -84,10 +84,10 @@ public:
 	// PIE 컨텍스트는 게임 인스턴스와 복제 월드까지 함께 정리한다.
 	void DestroyWorldContext(UWorld* InWorld);
 
+	FEngineLoop& GetEngineLoop() const { return *EngineLoop; }
+
 protected:
 	UAssetManager* AssetManager;
-
-	FEngineLoop& GetEngineLoop() const { return *EngineLoop; }
 
 	TIndirectArray<FWorldContext> WorldContextlist;
 	//UWorld* World = nullptr;

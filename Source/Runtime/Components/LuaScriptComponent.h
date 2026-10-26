@@ -1,6 +1,7 @@
 #pragma once
 #include "ActorComponent.h"
 #include "Scripting/ScriptWatcher.h"
+#include "Lua/LuaManager.h"
 #include <sol/sol.hpp>
 #include <filesystem>
 #include <memory>
@@ -71,6 +72,8 @@ private:
 	bool CallLuaFunction(const char* FunctionName, Args&&... InArgs)
 	{
 		if (!bIsLoaded) return false;
+		if (!ScriptEnv.valid() || !ScriptEnv.lua_state()) return false;
+		if (!FLuaManager::GetActive() || !FLuaManager::GetActive()->GetState().lua_state()) return false;
 
 		sol::protected_function Function = ScriptEnv[FunctionName];
 		if (!Function.valid()) return true;

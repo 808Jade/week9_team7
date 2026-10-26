@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "LuaScriptComponent.h"
 #include "Lua/LuaManager.h"
 #include "Engine/World.h"
@@ -299,7 +299,10 @@ void ULuaScriptComponent::OnUnregister()
 	// Destroy / DestroyComponent / PIE 종료 모두 여기를 거친다.
 	if (bIsLoaded && bLuaBegunPlay)
 	{
-		EndPlay();
+		if (ScriptEnv.valid() && ScriptEnv.lua_state() && FLuaManager::GetActive() && FLuaManager::GetActive()->GetState().lua_state())
+		{
+			EndPlay();
+		}
 	}
 
 	FCoroutineScheduler::Get().StopAllForOwner(this);

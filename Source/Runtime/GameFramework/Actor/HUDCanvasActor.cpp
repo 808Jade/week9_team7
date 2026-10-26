@@ -14,7 +14,7 @@ AHUDCanvasActor::AHUDCanvasActor()
 	// 1. 포탈 크로스헤어 (뷰포트 정중앙 자동 배치, Layer 10)
 	CrosshairImage = CreateDefaultSubobject<UUIImageComponent>("CrosshairImage");
 	CrosshairImage->SetupAttachment(GetRootComponent());
-	CrosshairImage->SetSize(64.0f, 64.0f);
+	CrosshairImage->SetSize(100.0f, 200.0f);
 	CrosshairImage->SetCenterOnViewport(true); // 항상 화면 정중앙
 	CrosshairImage->SetColor(FColor(255, 255, 255, 255));
 	CrosshairImage->SetLayer(10);
@@ -76,7 +76,7 @@ void AHUDCanvasActor::BeginPlay()
 
 	if (CrosshairImage)
 	{
-		CrosshairImage->SetSize(64.0f, 64.0f);
+		CrosshairImage->SetSize(100.0f, 200.0f);
 		CrosshairImage->SetCenterOnViewport(true);
 	}
 

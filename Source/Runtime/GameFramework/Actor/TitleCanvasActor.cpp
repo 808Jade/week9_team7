@@ -5,6 +5,8 @@
 #include "Input/InputSystem.h"
 #include "GameFramework/Actor/UIManagerActor.h"
 #include "Asset/AssetManager.h"
+#include "Launch/LaunchEngineLoop.h"
+#include "Engine/Engine.h"
 
 ATitleCanvasActor::ATitleCanvasActor()
 {
@@ -115,6 +117,9 @@ void ATitleCanvasActor::Tick(float DeltaTime)
 	else if (FInputSystem::IsKeyPressed(EKeyCode::Escape))
 	{
 		// ESC 키 누르면 -> 게임 종료
-		::PostQuitMessage(0);
+		if (GEngine)
+		{
+			GEngine->GetEngineLoop().RequestExit();
+		}
 	}
 }
