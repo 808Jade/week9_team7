@@ -17,7 +17,7 @@ struct alignas(16) FPortalSurfaceConstants
 };
 static_assert(sizeof(FPortalSurfaceConstants) == 160, "Portal constant buffer layout mismatch");
 
-// 톤매핑이 끝난 SceneColor 위에 포탈 면을 그린다. 9단계에서 메인 뷰 패스에 연결.
+// 톤매핑이 끝난 SceneColor 위에 포탈 면을 그린다.
 class FPortalSurfaceRenderer
 {
 public:
