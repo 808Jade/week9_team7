@@ -15,11 +15,11 @@ void FTransformUndoAction::Undo()
 {
 	for (const FActorTransformRecord& Rec : Records)
 	{
-		if (Rec.Component)
+		if (Rec.Component && GUObjectArray.Contains(Rec.Component))
 		{
 			Rec.Component->SetTransform(Rec.BeforeTransform);
 		}
-		else if (Rec.Actor && Rec.Actor->GetRootComponent())
+		else if (Rec.Actor && GUObjectArray.Contains(Rec.Actor) && Rec.Actor->GetRootComponent())
 		{
 			Rec.Actor->GetRootComponent()->SetTransform(Rec.BeforeTransform);
 		}
@@ -30,11 +30,11 @@ void FTransformUndoAction::Redo()
 {
 	for (const FActorTransformRecord& Rec : Records)
 	{
-		if (Rec.Component)
+		if (Rec.Component && GUObjectArray.Contains(Rec.Component))
 		{
 			Rec.Component->SetTransform(Rec.AfterTransform);
 		}
-		else if (Rec.Actor && Rec.Actor->GetRootComponent())
+		else if (Rec.Actor && GUObjectArray.Contains(Rec.Actor) && Rec.Actor->GetRootComponent())
 		{
 			Rec.Actor->GetRootComponent()->SetTransform(Rec.AfterTransform);
 		}
@@ -53,7 +53,7 @@ FActorLifetimeUndoAction::~FActorLifetimeUndoAction()
 	{
 		for (AActor* Act : Actors)
 		{
-			if (Act)
+			if (Act && GUObjectArray.Contains(Act))
 			{
 				delete Act;
 			}
@@ -68,7 +68,7 @@ void FActorLifetimeUndoAction::DetachActors()
 
 	for (AActor* Act : Actors)
 	{
-		if (!Act) continue;
+		if (!Act || !GUObjectArray.Contains(Act)) continue;
 		Act->UnregisterAllComponents();
 		Act->RegisterAllActorTickFunctions(false);
 		Level->RemoveActor(Act);
@@ -82,7 +82,7 @@ void FActorLifetimeUndoAction::AttachActors()
 
 	for (AActor* Act : Actors)
 	{
-		if (!Act) continue;
+		if (!Act || !GUObjectArray.Contains(Act)) continue;
 		Level->AddActor(Act);
 		Act->RegisterAllComponents();
 		Act->RegisterAllActorTickFunctions(true);

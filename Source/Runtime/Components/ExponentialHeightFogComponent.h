@@ -8,7 +8,7 @@ class UExponentialHeightFogComponent final : public USceneComponent
 	REFLECT_START(UExponentialHeightFogComponent)
 		PROPERTY(FogDensity)
 		PROPERTY(FogHeightFalloff)
-		PROPERTY_TYPE(FogColor, Color)
+		PROPERTY_TYPE(FogColor, LinearColor)
 		PROPERTY(StartDistance)
 		PROPERTY(FogMaxOpacity)
 		PROPERTY(FogCutoffDistance)
