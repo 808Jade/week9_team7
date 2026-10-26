@@ -41,6 +41,7 @@ struct FQuat
 	FVector GetRightVector() const;
 	FVector GetUpVector() const;
 
+	bool Equals(const FQuat& Q, float Tolerance) const;
 
 	/* Static */
 	static FQuat Identity();

@@ -44,4 +44,46 @@ FQuat FTransform::GetOrientation() const
     return FQuat::MakeFromEuler(FMath::DegreesToRadians(Rotation.Roll), FMath::DegreesToRadians(Rotation.Pitch), FMath::DegreesToRadians(Rotation.Yaw));
 }
 
+FTransform FTransform::GetRelativeTransformNoScale(const FTransform& Other) const
+{
+    FVector DeltaLocation = Location - Other.Location;
+    FQuat InvOtherQuat = Other.Rotation.Quaternion().Inverse();
+
+    FVector RelativeLocation = InvOtherQuat.RotateVector(DeltaLocation);
+    FQuat RelativeQuat = InvOtherQuat * Rotation.Quaternion();
+       
+    return FTransform(RelativeQuat.ToFRotator(), RelativeLocation);
+}
+
+FVector FTransform::TransformPosition(const FVector& V) const
+{
+    const FVector ScaleVec = Scale * V;
+    const FVector RotatedVec = Rotation.Quaternion().RotateVector(ScaleVec);
+    const FVector TranslatedVec = RotatedVec + Location;
+
+    return TranslatedVec;
+}
+
+FVector FTransform::TransformVectorNoScale(const FVector& V) const
+{
+    const FVector RotatedVec = Rotation.Quaternion().RotateVector(V);
+
+    return RotatedVec;
+}
+
+FVector FTransform::InverseTransformVector(const FVector& V) const
+{
+    FVector QuatInverseRotateVector = Rotation.Quaternion().Inverse().RotateVector(V);
+
+    return QuatInverseRotateVector / Scale;
+}
+
+FVector FTransform::InverseTransformPosition(const FVector& V) const
+{
+    FVector TranslatedVec = V - Location;
+    FVector QuatInverseRotateVector = Rotation.Quaternion().Inverse().RotateVector(TranslatedVec);
+
+    return QuatInverseRotateVector / Scale;
+}
+
 FTransform FTransform::Identity = FTransform(FVector(0, 0, 0), FVector(1, 1, 1), FRotator(0, 0, 0));

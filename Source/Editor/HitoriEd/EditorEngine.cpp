@@ -31,6 +31,9 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/FireBallComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Actor/CanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
@@ -1028,6 +1031,39 @@ void UEditorEngine::RenderGameFrame(FGameViewportClient* GameClient, const FScen
 		if (!bIsSIEMode) return;
 		const FViewportSettings ViewportSetting{ 0, 0, Targets.SceneColor->GetWidth(),
 			Targets.SceneColor->GetHeight(), 0.0f, 1.0f };
+
+		AActor* SelectedActor = (Gizmo && Gizmo->GetTarget())
+			? Gizmo->GetTarget()->GetOwner()
+			: (OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr);
+
+		if (SelectedActor)
+		{
+			bool bHasShape = false;
+			for (UActorComponent* Comp : SelectedActor->GetComponents())
+			{
+				if (Cast<UShapeComponent>(Comp))
+				{
+					bHasShape = true;
+					break;
+				}
+			}
+			if (bHasShape)
+			{
+				Overlays.EditorLines = [this, &SceneView, SelectedActor]
+					{
+						LineBatcher->BeginFrame();
+						for (UActorComponent* Comp : SelectedActor->GetComponents())
+						{
+							if (UShapeComponent* ShapeComp = Cast<UShapeComponent>(Comp))
+							{
+								ShapeComp->DrawDebug(LineBatcher.get());
+							}
+						}
+						LineBatcher->OnRender(SceneView.ViewProjectionMatrix);
+					};
+			}
+		}
+
 		if (Outline->GetTarget())
 			Overlays.SIEOutline = [this, &SceneView, ViewportSetting]
 				{
@@ -1233,10 +1269,27 @@ void UEditorEngine::RenderFrame(FEditorViewportClient* ViewClient,
 			 Cast<APointLightActor>(Gizmo->GetTarget()->GetOwner()) ||
 			 Cast<ARectLightActor>(Gizmo->GetTarget()->GetOwner()));
 
-		const bool bDrawCascadeBounds = SettingsPanel->GetSettings().bDrawCascadeBounds;
-		if (SettingsPanel->GetSettings().bDrawBatchLine || bDrawSelectedLight || bDrawCascadeBounds)
+		AActor* SelectedActor = (Gizmo && Gizmo->GetTarget())
+			? Gizmo->GetTarget()->GetOwner()
+			: (OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr);
+
+		bool bDrawSelectedShape = false;
+		if (bIsActiveViewport && SelectedActor)
 		{
-			Overlays.EditorLines = [this, ViewClient, &SceneView, bDrawSelectedLight, bDrawCascadeBounds]
+			for (UActorComponent* Comp : SelectedActor->GetComponents())
+			{
+				if (Cast<UShapeComponent>(Comp))
+				{
+					bDrawSelectedShape = true;
+					break;
+				}
+			}
+		}
+
+		const bool bDrawCascadeBounds = SettingsPanel->GetSettings().bDrawCascadeBounds;
+		if (SettingsPanel->GetSettings().bDrawBatchLine || bDrawSelectedLight || bDrawSelectedShape || bDrawCascadeBounds)
+		{
+			Overlays.EditorLines = [this, ViewClient, &SceneView, bDrawSelectedLight, bDrawSelectedShape, SelectedActor, bDrawCascadeBounds]
 				{
 					LineBatcher->BeginFrame();
 					if (bDrawCascadeBounds)
@@ -1276,6 +1329,16 @@ void UEditorEngine::RenderFrame(FEditorViewportClient* ViewClient,
 							Light->GetPointLightComponent()->DrawDebug(LineBatcher.get());
 						else if (ARectLightActor* Light = Cast<ARectLightActor>(Gizmo->GetTarget()->GetOwner()))
 							Light->GetRectLightComponent()->DrawDebug(LineBatcher.get());
+					}
+					if (bDrawSelectedShape && SelectedActor)
+					{
+						for (UActorComponent* Comp : SelectedActor->GetComponents())
+						{
+							if (UShapeComponent* ShapeComp = Cast<UShapeComponent>(Comp))
+							{
+								ShapeComp->DrawDebug(LineBatcher.get());
+							}
+						}
 					}
 					LineBatcher->OnRender(SceneView.ViewProjectionMatrix);
 				};

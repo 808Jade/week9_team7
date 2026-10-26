@@ -6,8 +6,11 @@
 #include "Render/RenderPacket.h"
 #include "Render/GeometryGenerator.h"
 #include "Collision/HitResult.h"
+#include "Core/Delegate.h"
 
+class UPrimitiveComponent;
 class FPrimitiveSceneProxy;
+struct FOverlapResult;
 
 enum class EPrimitiveType
 {
@@ -19,6 +22,17 @@ enum class EPrimitiveType
 	Particle,
 	ParticleQuad
 };
+
+enum class ECollisionResponse
+{
+	NoCollision,
+	Overlap,
+	Block
+};
+
+DECLARE_DELEGATE(FComponentHitSignature /*OnComponentHit*/, UPrimitiveComponent* /*HitComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, FVector /*NormalImpulse*/, const FHitResult& /*SweepResult*/);
+DECLARE_DELEGATE(FComponentBeginOverlapSignature /*OnComponentBeginOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/, bool /*bFromSweep*/, const FHitResult& /*SweepResult*/);
+DECLARE_DELEGATE(FComponentEndOverlapSignature /*OnComponentEndOverlap*/, UPrimitiveComponent* /*OverlappedComponent*/, AActor* /*OtherActor*/, UPrimitiveComponent* /*OtherComp*/);
 
 class UPrimitiveComponent :public USceneComponent
 {
@@ -70,6 +84,7 @@ public:
 	virtual void OnTransformDirty() override;
 
 	virtual bool MoveComponent(const FVector& Delta, const FRotator& NewRotation, bool bSweep, FHitResult* Hit = nullptr) override;
+	virtual bool MoveComponent(const FVector& Delta, const FQuat& NewRotation, bool bSweep, FHitResult* OutHit = nullptr) override;
 
 	virtual void PostEditChangeProperty(const FProperty& Property) override;
 
@@ -95,4 +110,21 @@ protected:
 private:
 	friend class FScene;
 	FPrimitiveSceneProxy* SceneProxy = nullptr;
+
+public:
+	virtual bool UpdateOverlaps();
+	
+	const TArray<UPrimitiveComponent*>& GetOverlappingComponents() const;
+
+	const ECollisionResponse GetCurrentCollisionResponse() { return CurrentCollisionResponse; }
+	void SetCurrentCollisionResponse(const ECollisionResponse InCollisionResponse) { CurrentCollisionResponse = InCollisionResponse; }
+
+	FComponentHitSignature OnComponentHit;
+	FComponentBeginOverlapSignature OnComponentBeginOverlap;
+	FComponentEndOverlapSignature OnComponentEndOverlap;
+
+private:
+	TArray<UPrimitiveComponent*> OverlappingComponents;
+	
+	ECollisionResponse CurrentCollisionResponse = ECollisionResponse::NoCollision;
 };
