@@ -37,6 +37,7 @@
 #include "GameFramework/Actor/CanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
+#include "GameFramework/Actor/PortalActor.h"
 
 #include "Asset/AssetManager.h"
 #include "Render/RenderResourceManager.h"
@@ -1024,6 +1025,10 @@ void UEditorEngine::RenderGameFrame(FGameViewportClient* GameClient, const FScen
 {
 	if (!GameClient) return;
 
+	// 포탈 뷰 먼저 렌더링
+	APortalActor::RenderPortalViews(GameClient->GetWorld(), Renderer, SkyboxRenderer.get(),
+		SceneView, RenderOptions);
+
 	FSceneViewTargets& Targets = GameClient->GetViewTargets();
 	const bool bRendered = RenderScene(Targets, SceneView, SceneRenderer, GameClient->GetWorld(), RenderOptions,
 		[this, &Targets, &SceneView, bIsSIEMode](FSceneOverlayCallbacks& Overlays)
@@ -1504,6 +1509,13 @@ void UEditorEngine::StartPlayInEditorSession()
 	const bool bNewWindow = (PlayMode == EPlayModeType::InEditorFloating);
 
 	PIEStartEditorViewIndex = ViewportsPanel ? ViewportsPanel->GetActiveViewIndex() : 0;
+
+	if (FEditorViewportClient* Client = ViewportsPanel ? ViewportsPanel->GetViewportClient(PIEStartEditorViewIndex) : nullptr)
+	{
+		SavedEditorCameraLocation = Client->GetViewLocation();
+		SavedEditorCameraRotation = Client->GetViewRotation();
+	}
+
 	if (bNewWindow && CreatePIEWindow())
 		PIEViewIndex = -2;
 	else
@@ -1568,6 +1580,15 @@ void UEditorEngine::EndPlayMap()
 		return;
 	bIsPaused = false;
 	bStepRequested = false;
+
+	if (PIEStartEditorViewIndex >= 0 && ViewportsPanel)
+	{
+		if (FEditorViewportClient* Client = ViewportsPanel->GetViewportClient(PIEStartEditorViewIndex))
+		{
+			Client->SetViewLocation(SavedEditorCameraLocation);
+			Client->SetViewRotation(SavedEditorCameraRotation);
+		}
+	}
 
 	ResetSceneSelection();
 	if (ViewportsPanel)

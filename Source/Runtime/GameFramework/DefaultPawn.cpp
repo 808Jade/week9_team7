@@ -5,6 +5,7 @@
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor/ProjectileActor.h"
+#include "GameFramework/Actor/PortalActor.h"
 
 ADefaultPawn::ADefaultPawn()
 {
@@ -27,6 +28,8 @@ void ADefaultPawn::BeginPlay()
 	if (!PawnWorld || PawnWorld->GetWorldType() != EWorldType::PIE) return;
 	for (AProjectileActor*& Projectile : Projectiles)
 		if (!Projectile) Projectile = PawnWorld->SpawnActor<AProjectileActor>();
+
+	APortalActor::SpawnPair(PawnWorld, BluePortal, OrangePortal);
 }
  
 void ADefaultPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
