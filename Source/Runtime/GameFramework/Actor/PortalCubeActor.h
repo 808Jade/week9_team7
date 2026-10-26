@@ -6,6 +6,7 @@
 class UBoxComponent;
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
+class APortalActor;
 
 class APortalCubeActor : public AActor
 {
@@ -39,4 +40,16 @@ private:
 	float PullStrength = 120.0f;
 	float DampingRatio = 12.0f;
 	float RotationInterSpeed = 10.0f;
+
+public:
+	void TeleportThroughPortal(const FVector& NewLoc, const FRotator& NewRot, const FVector& NewVel);
+	bool CanTeleport() const { return TeleportCooldownTimer <= 0.0f; }
+
+private:
+	APortalActor* CurrentOverlappingPortal = nullptr;
+	FVector PreviousLocation = FVector::ZeroVector;
+	float TeleportCooldownTimer = 0.0f;
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);
+
 };

@@ -12,7 +12,7 @@
 
 APortalGunActor::APortalGunActor()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;	
 	SetActorEnableCollision(false);
 
 	// 1. 루트 메시 컴포넌트

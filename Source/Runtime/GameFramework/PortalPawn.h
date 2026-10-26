@@ -8,6 +8,7 @@ class UBoxComponent;
 class UCameraComponent;
 class APortalGunActor;
 class APlayerStart;
+class APortalActor;
 enum class EPortalType : int32;   // 정의: PortalGunActor.h
 
 class APortalPawn : public APawn
@@ -161,4 +162,8 @@ private:
 
 	// 보유 중인 포탈건 액터
 	APortalGunActor* PortalGun = nullptr;
+	APortalActor* CurrentOverlappingPortal = nullptr;
+
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);
 };
