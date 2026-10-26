@@ -767,7 +767,7 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 		// 표시 상태는 프록시 캐시로 판정해 오클루전과 드로우 수집 전에 제외한다.
 		const auto Visit = [&](FPrimitiveSceneProxy* Proxy)
 		{
-			if (Proxy->IsShown(View.bGameView)) VisibleProxies.Add(Proxy);
+			if (Proxy->IsShown(View.bGameView) && !View.IsHidden(Proxy->GetComponent())) VisibleProxies.Add(Proxy);
 		};
 
 		if (Frustum)
