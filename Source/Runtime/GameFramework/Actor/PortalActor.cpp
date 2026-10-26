@@ -67,7 +67,7 @@ APortalActor::APortalActor()
 
 	PortalTrigger = CreateDefaultSubobject<UBoxComponent>("PortalTrigger");
 	PortalTrigger->SetupAttachment(GetRootComponent());
-	PortalTrigger->SetBoxExtent(FVector(1.0f, PortalWidth * 0.35f, PortalHeight * 0.35f));
+	PortalTrigger->SetBoxExtent(FVector(1.0f, PortalWidth * 0.25f, PortalHeight * 0.25f));
 	PortalTrigger->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
 }
 
@@ -256,12 +256,12 @@ FMatrix APortalActor::GetTeleportMatrix() const
 	return GetPortalMatrix().Inverse() * Flip * LinkedPortal->GetPortalMatrix();
 }
 
-bool APortalActor::IsPointWithinPortalBounds(const FVector& Point, const float Margin) const
+bool APortalActor::IsPointWithinPortalBounds(const FVector& Point) const
 {
 	const FVector Local = GetPortalMatrix().Inverse().TransformPosition(Point);
 
-	return (std::abs(Local.Y) <= (PortalWidth * 0.5f + Margin)) &&
-		(std::abs(Local.Z) <= (PortalHeight * 0.5f + Margin));
+	return (std::abs(Local.Y) <= (PortalWidth * 0.5f)) &&
+		(std::abs(Local.Z) <= (PortalHeight * 0.5f));
 }
 
 bool APortalActor::Checkcrossing(const FVector& PrevPos, const FVector& CurPos) const
@@ -279,7 +279,7 @@ bool APortalActor::Checkcrossing(const FVector& PrevPos, const FVector& CurPos) 
 		// 평면과 교차한 지점 계산
 		const float T = DPrev / (DPrev - DCur);
 		const FVector IntersectPoint = PrevPos + (CurPos - PrevPos) * T;
-		return IsPointWithinPortalBounds(IntersectPoint, 0.2f);
+		return IsPointWithinPortalBounds(IntersectPoint);
 	}
 
 	return false;

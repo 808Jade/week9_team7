@@ -112,7 +112,7 @@ namespace
 		DeleteObject(BackBrush);
 
 		RECT BarFill = { 0, H - ProgressBarHeight, static_cast<LONG>(W * Progress), H };
-		HBRUSH FillBrush = CreateSolidBrush(RGB(0, 150, 255));
+		HBRUSH FillBrush = CreateSolidBrush(RGB(0, 166, 62));
 		FillRect(MemDC, &BarFill, FillBrush);
 		DeleteObject(FillBrush);
 
