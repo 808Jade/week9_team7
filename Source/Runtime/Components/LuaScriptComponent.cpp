@@ -248,6 +248,15 @@ void ULuaScriptComponent::BeginPlay()
 			HTR_LOG(Error, "[Lua] {} load failed: {}", GetScriptFileName(), LastLoadError);
 			HTR_LOG(Warning, "[Lua] {} is not running. Fix and save the file to load it (Hot Reload)", GetScriptFileName());
 		}
+		else
+		{
+			HTR_LOG(Info, "[Lua] {} loaded successfully ({})", GetScriptFileName(), ScriptPath);
+		}
+	}
+	else if (!HasScriptPath())
+	{
+		const FString OwnerName = GetOwner() ? GetOwner()->GetName() : FString("None");
+		HTR_LOG(Warning, "[Lua] LuaScriptComponent on {} has empty ScriptPath", OwnerName);
 	}
 	CallLuaBeginPlay();
 	StartWatchingScript();
@@ -347,6 +356,10 @@ void ULuaScriptComponent::CallLuaBeginPlay()
 
 	// 에러로 중간에 멈췄으면 '실행 안 함'으로 둔다 -> 고쳐서 저장하면 재로드 때 BeginPlay를 다시 부른다
 	bLuaBegunPlay = CallLuaFunction("BeginPlay");
+	if (bLuaBegunPlay)
+	{
+		HTR_LOG(Info, "[Lua] {} BeginPlay completed successfully", GetScriptFileName());
+	}
 }
 
 FString ULuaScriptComponent::GetScriptFileName() const

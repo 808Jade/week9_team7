@@ -14,6 +14,8 @@ AWeightedButtonActor::AWeightedButtonActor()
         ButtonMesh->SetStaticMesh(Button);
     }
 
+    TriggerBox->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
+
     // 버튼 메시의 최소 외접 큐브(AABB) 계산 및 TriggerBox 설정
     FBox LocalBounds = ButtonMesh ? ButtonMesh->CalcLocalBounds() : FBox();
     FVector Extent = LocalBounds.GetExtent();
@@ -56,9 +58,21 @@ void AWeightedButtonActor::BeginPlay()
         }
     }
 
+    if (BaseCollisionBox)
+    {
+        FBox BaseBounds = BaseMesh->CalcLocalBounds();
+        FVector Extent = BaseBounds.GetExtent();
+        if (Extent.X > 0.001f && Extent.Y > 0.001f && Extent.Z > 0.001f)
+        {
+            BaseCollisionBox->SetBoxExtent(Extent);
+            BaseCollisionBox->SetRelativeLocation(BaseBounds.GetCenter());
+        }
+    }
+
     // 델리게이트 바인딩: 트리거 박스 오버랩 이벤트 등록
     if (TriggerBox)
     {
+        TriggerBox->SetCurrentCollisionResponse(ECollisionResponse::Overlap);
         TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AWeightedButtonActor::OnTriggerBeginOverlap);
         TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AWeightedButtonActor::OnTriggerEndOverlap);
     }

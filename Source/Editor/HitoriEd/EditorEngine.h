@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Engine/Engine.h"
 #include "Core/Window.h"
@@ -15,7 +15,7 @@
 #include "Editor/Rendering/SceneDepthRenderer.h"
 #include "Editor/Rendering/CascadeFloorRenderer.h"
 #include "Editor/Rendering/HeightFogRenderer.h"
-#include "Editor/Rendering/FXAARenderer.h"
+#include "Render/FXAARenderer.h"
 #include "Editor/Rendering/FireBallRenderer.h"
 #include "Render/SceneRenderOptions.h"
 #include "Render/SceneViewTargets.h"

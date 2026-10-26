@@ -119,7 +119,7 @@ private:
 	float GroundFriction = 12.0f;          // 지상 마찰력 계수
 	float BrakingDeceleration = 35.0f;     // 키를 뗐을 때 즉시 멈추는 제동력 (얼음판 슬라이딩 완전 제거)
 	float WallFriction = 0.25f;            // 벽면 미끄러짐 시 마찰력 (0.0: 얼음벽, 1.0: 즉시 멈춤)
-	float MaxStepHeight = 0.3f;            // 계단 및 문턱 최대 넘기 높이 (0.3m = 30cm)
+	float MaxStepHeight = 0.4f;            // 계단 및 문턱 최대 넘기 높이 (0.5m = 50cm)
 	float MaxPreservedFlingSpeed = 9.0f;    // 포탈 플링 시 보존되는 수평 최대 속도 한도
 
 	// 포탈 재진입 핑퐁 방지 쿨다운
@@ -143,9 +143,9 @@ private:
 	// 콜라이더 및 눈높이
 	float CollisionRadius = 0.5f;
 	float CrouchRadius = 0.35f;
-	float EyeHeight = 1.1f;
-	float CrouchEyeHeight = 0.55f;
-	float CurrentEyeHeight = 1.1f;
+	float EyeHeight = 0.75f;
+	float CrouchEyeHeight = 0.25f;
+	float CurrentEyeHeight = 0.75f;
 
 	// 중력, 점프, 3D 속도
 	bool bEnableGravity = true;

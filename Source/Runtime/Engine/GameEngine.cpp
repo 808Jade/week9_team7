@@ -14,6 +14,13 @@
 #include "Render/SkyboxRenderer.h"
 #include "UObject/UObjectIterator.h"
 #include "GameFramework/Actor/PortalActor.h"
+#include "Engine/Level.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/DefaultPawn.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PortalPawn.h"
+#include "GameFramework/PortalPlayerController.h"
+#include "Components/LuaScriptComponent.h"
 
 FEngineConfig UGameEngine::GetConfig() const
 {
@@ -38,6 +45,13 @@ bool UGameEngine::Init()
     FWorldContext& Context = CreateNewWorldContext(EWorldType::Game);
     GameWorld = UWorld::CreateWorld(EWorldType::Game, true);
     Context.SetCurrentWorld(GameWorld);
+
+    // GameInstance 생성 및 초기화 (LuaManager 활성화 포함)
+    ULuaScriptComponent::StaticClass();
+    GameInstance = NewObject<UGameInstance>();
+    GameInstance->SetWorldContext(&Context);
+    GameWorld->SetGameInstance(GameInstance);
+    GameInstance->Init();
 
     // 2. 게임 뷰포트 클라이언트 생성 및 초기화
     GameViewport = MakeShared<FGameViewportClient>();
@@ -102,9 +116,80 @@ bool UGameEngine::Init()
     TextRenderer = MakeUnique<FTextRenderer>();
     TextRenderer->Init();
 
-    // 4. 게임 플레이 시작
+    FXAARenderer = MakeUnique<FFXAARenderer>();
+    FXAARenderer->Init(Renderer);
+
+    APawn* PlayerPawn = GameWorld->GetPlayerPawn();
+    if (!PlayerPawn)
+    {
+        if (ULevel* PersistentLevel = GameWorld->GetPersistentLevel())
+        {
+            for (AActor* Actor : PersistentLevel->GetActors())
+            {
+                if (APawn* Pawn = Cast<APawn>(Actor))
+                {
+                    PlayerPawn = Pawn;
+                    break;
+                }
+            }
+        }
+    }
+    if (!PlayerPawn)
+    {
+        ACameraActor* MainCamera = GameWorld->GetMainCamera();
+        FTransform Transform = MainCamera ? MainCamera->GetActorTransform() : FTransform::Identity;
+        PlayerPawn = GameWorld->SpawnActor<ADefaultPawn>(NAME_None, &Transform);
+    }
+    GameWorld->SetPlayerPawn(PlayerPawn);
+
+    APlayerController* PlayerController = GameWorld->GetPlayerController();
+    if (!PlayerController)
+    {
+        if (Cast<APortalPawn>(PlayerPawn))
+            PlayerController = GameWorld->SpawnActor<APortalPlayerController>();
+        else
+            PlayerController = GameWorld->SpawnActor<APlayerController>();
+    }
+    GameWorld->SetPlayerController(PlayerController);
+
+    if (PlayerController && PlayerPawn)
+    {
+        PlayerController->Possess(PlayerPawn);
+    }
+    // 5. Start gameplay
     GameWorld->BeginPlay();
     return true;
+}
+
+void UGameEngine::TickInput(float DeltaTime)
+{
+    if (!GameViewport) return;
+
+    // 키보드 입력
+    for (int32 Key = 0; Key < 256; ++Key)
+    {
+        EKeyCode KeyCode = static_cast<EKeyCode>(Key);
+        if (FInputSystem::IsKeyPressed(KeyCode))
+            GameViewport->InputKey(nullptr, Key, true);
+        if (FInputSystem::IsKeyReleased(KeyCode))
+            GameViewport->InputKey(nullptr, Key, false);
+    }
+
+    // 마우스 입력
+    constexpr EMouseButton MouseButtons[] = { EMouseButton::Left, EMouseButton::Right, EMouseButton::Middle };
+    for (EMouseButton Button : MouseButtons)
+    {
+        const int32 Key = Button == EMouseButton::Left ? static_cast<int32>(EKeyCode::LButton)
+            : (Button == EMouseButton::Right ? static_cast<int32>(EKeyCode::RButton) : static_cast<int32>(EKeyCode::MButton));
+        if (FInputSystem::IsMousePressed(Button))
+            GameViewport->InputKey(nullptr, Key, true);
+        if (FInputSystem::IsMouseReleased(Button))
+            GameViewport->InputKey(nullptr, Key, false);
+    }
+    const float MouseX = static_cast<float>(FInputSystem::GetMouseDeltaX());
+    const float MouseY = static_cast<float>(FInputSystem::GetMouseDeltaY());
+    GameViewport->InputAxis(nullptr, 0, EGameInputAxis::MouseX, MouseX, DeltaTime);
+    GameViewport->InputAxis(nullptr, 0, EGameInputAxis::MouseY, MouseY, DeltaTime);
 }
 
 // 입력 업데이트 및 액터/컴포넌트 틱 (World->Tick(DeltaTime))
@@ -113,6 +198,7 @@ void UGameEngine::Tick(float DeltaTime)
 {
     if (!GameWorld || !GameViewport) return;
 
+    TickInput(DeltaTime);
     GameWorld->Tick(DeltaTime);
     GameWorld->GetScene().UpdateAllTransforms();
 
@@ -186,6 +272,11 @@ void UGameEngine::RenderFrame()
 // 로드된 월드 및 UObject 자원 정리
 void UGameEngine::PreExit()
 {
+    if (GameInstance)
+    {
+        GameInstance->Shutdown();
+        GameInstance = nullptr;
+    }
     if (GameWorld)
     {
         GameWorld->ClearWorld();
