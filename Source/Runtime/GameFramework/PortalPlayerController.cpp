@@ -159,7 +159,7 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	// 6. 마우스 우클릭: 포탈 타입 변경 (Blue <-> Orange 모드 토글)
 	else if (Key == static_cast<int32>(EKeyCode::RButton) && bMouseCaptured)
 	{
-		PortalPawn->TogglePortalType();
+		
 	}
 	// 7. E 키: 상호작용 (큐브 잡기/놓기)
 	else if (Key == static_cast<int32>(EKeyCode::E))

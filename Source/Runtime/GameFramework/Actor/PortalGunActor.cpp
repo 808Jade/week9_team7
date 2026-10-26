@@ -69,6 +69,8 @@ void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
 		return;
 	}
 
+	HTR_LOG(Warning, "Hold");
+
 	HeldCube = CubeToGrab;
 	HeldCube->OnGrabbed();
 }
@@ -77,6 +79,8 @@ void APortalGunActor::Unhold()
 {
 	if(HeldCube)
 	{
+		HTR_LOG(Warning, "Unhold");
+
 		HeldCube->OnDropped(FVector::ZeroVector);
 		HeldCube = nullptr;
 	}
@@ -95,7 +99,7 @@ void APortalGunActor::Tick(float DeltaTime)
 		}
 		
 		FVector CamLoc = Cam->GetWorldLocation();
-		FVector CamForward = Cam->GetTransform().GetForward();
+		FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
 		FVector TargetLocation = CamLoc + (CamForward * HoldDistance);
 		FRotator TargetRotation = Cam->GetWorldRotation();
 

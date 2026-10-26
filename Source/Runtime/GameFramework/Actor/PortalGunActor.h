@@ -19,7 +19,8 @@ class APortalGunActor : public AActor
 
 	REFLECT_START(ClassName)
 		PROPERTY(HoldDistance)
-		PROPERTY(PickupRange)
+		PROPERTY(PickUpRange)
+		PROPERTY(MaxBreakDistance)
 		REFLECT_END()
 
 public:
@@ -39,6 +40,7 @@ public:
 
 	UStaticMeshComponent* GetGunMeshComponent() const { return GunMeshComponent; }
 	const bool IsHoldingCube() { return HeldCube != nullptr; }
+	const float GetPickUpRange() { return PickUpRange; }
 
 private:
 	// 포탈건 3D 메시 컴포넌트
@@ -50,7 +52,8 @@ private:
 	// 큐브 홀딩 상태
 	APortalCubeActor* HeldCube = nullptr;
 	float HoldDistance = 2.0f;     // 카메라 앞 2m에 큐브를 띄움
-	float MaxBreakDistance = 3.5f;	
+	float PickUpRange = 3.0f;
+	float MaxBreakDistance = 4.0f;	
 
 	// 1인칭 카메라 기준 포탈건 오프셋 (전방 40cm, 우측 25cm, 아래 25cm)
 	FVector GunOffsetLocation = FVector(0.4f, 0.25f, -0.25f);

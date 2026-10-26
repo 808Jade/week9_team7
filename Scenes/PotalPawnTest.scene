@@ -240,7 +240,9 @@
                         "Gravity": 9.800000190734863,
                         "GroundFriction": 12.0,
                         "JumpVelocity": 5.5,
+                        "KillZ": -40.0,
                         "LookSensitivity": 1.0,
+                        "MaxStepHeight": 0.30000001192092896,
                         "MoveSpeed": 6.0,
                         "SprintSpeed": 9.0,
                         "Velocity": {
@@ -250,7 +252,8 @@
                         },
                         "WallFriction": 0.25,
                         "bActorEnableCollision": true,
-                        "bEnableGravity": true
+                        "bEnableGravity": true,
+                        "bEnableHeadBob": true
                     }
                 },
                 {
@@ -609,9 +612,9 @@
                                         "Yaw": 0.0
                                     },
                                     "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
                                     }
                                 },
                                 "bAutoActivate": true,
@@ -620,13 +623,39 @@
                                 "bReceiveShadow": true,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 1.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": true,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
                         }
                     ],
                     "Name": "APortalCubeActor_0",
                     "Properties": {
-                        "Gravity": 9.800000190734863,
-                        "bActorEnableCollision": true,
-                        "bEnableGravity": true
+                        "bActorEnableCollision": true
                     }
                 },
                 {
