@@ -352,7 +352,7 @@ void APortalPawn::Tick(float DeltaTime)
 		bool bInWallPortal = false;
 		bool bInFloorPortal = false;
 
-		if(TargetPortal && TargetPortal->IsPointWithinPortalBounds(PreMoveLocation, 0.2f))
+		if(TargetPortal && TargetPortal->IsPointWithinPortalBounds(PreMoveLocation, 0.0f))
 		{
 			const FVector Normal = TargetPortal->GetPortalNormal();
 			if(std::abs(Normal.Z) > 0.7f)
@@ -370,7 +370,7 @@ void APortalPawn::Tick(float DeltaTime)
 		{
 			FHitResult Hit;
 			const bool bSweepHoriz = !bInWallPortal;
-			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), !bInPortal, &Hit);
+			GetRootComponent()->MoveComponent(HorizontalDelta, GetActorRotation(), bSweepHoriz, &Hit);
 
 			if (bSweepHoriz && Hit.bBlockingHit)
 			{
@@ -470,13 +470,21 @@ void APortalPawn::Tick(float DeltaTime)
 		{
 			const FVector PostMoveLocation = GetActorLocation();
 
-			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation))
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f))
 			{
 				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
 
 				FVector NewLocation = TelportMatrix.TransformPosition(PostMoveLocation);
-				NewLocation += ExitPortal->GetPortalNormal() * 0.10f;
+				// 출구 포탈의 안전 경계 내로 로컬 좌표 클램핑 (출구 모서리 벽/바닥 파고듦 방지)
+				FVector ExitLocal = ExitPortal->GetPortalMatrix().Inverse().TransformPosition(NewLocation);
+				const float MaxY = (ExitPortal->GetPortalWidth() * 0.5f) - 0.35f;
+				const float MaxZ = (ExitPortal->GetPortalHeight() * 0.5f) - 0.35f;
+				ExitLocal.Y = FMath::Clamp(ExitLocal.Y, -MaxY, MaxY);
+				ExitLocal.Z = FMath::Clamp(ExitLocal.Z, -MaxZ, MaxZ);
+				NewLocation = ExitPortal->GetPortalMatrix().TransformPosition(ExitLocal);
+
+				NewLocation += ExitPortal->GetPortalNormal() * 0.40f;
 
 				FVector NewVelocity = TelportMatrix.TransformVector(Velocity);
 				
@@ -487,6 +495,29 @@ void APortalPawn::Tick(float DeltaTime)
 				TeleportThroughPortal(NewLocation, NewCamRotation, NewVelocity);
 				SetTeleportCooldown(0.15f);
 				CurrentOverlappingPortal = nullptr;
+			}
+			else
+			{
+				// 포탈 평면을 가로질렀으나 모서리 바깥 벽이나 바닥으로 들어간 경우 안전장치
+				const float DPrev = TargetPortal->GetDistanceToPlane(PreMoveLocation);
+				const float DPost = TargetPortal->GetDistanceToPlane(PostMoveLocation);
+				if (DPrev > 0.0f && DPost <= 0.0f)
+				{
+					const FVector Normal = TargetPortal->GetPortalNormal();
+					const FVector SafeLocation = PostMoveLocation + Normal * (-DPost + 0.05f);
+					GetRootComponent()->SetWorldLocation(SafeLocation, false);
+
+					const float NormalSpeed = FVector::Dot(Velocity, Normal);
+					if (NormalSpeed < 0.0f)
+					{
+						Velocity -= Normal * NormalSpeed;
+					}
+
+					if (std::abs(Normal.Z) > 0.7f && Normal.Z > 0.0f)
+					{
+						bIsGrounded = true;
+					}
+				}
 			}
 		}
 	}
