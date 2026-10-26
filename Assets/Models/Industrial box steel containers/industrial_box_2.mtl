@@ -1,0 +1,5 @@
+# MTL file for industrial_box_2
+newmtl box_steel_2
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd e1c3b2fcac49bb63bed05d6067be3dc8.jpg

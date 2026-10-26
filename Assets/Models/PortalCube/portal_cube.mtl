@@ -1,0 +1,27 @@
+# MTL file for portal_cube
+newmtl Main
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd dirtMain2.jpg
+map_bump normal.jpg
+
+newmtl Border
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd dirt.jpg
+map_bump normal.jpg
+
+newmtl Contour
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd dirt.jpg
+
+newmtl Heart
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd apertureTexture.jpg
+
+newmtl Lights
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd dirt.jpg

@@ -1,0 +1,11 @@
+# MTL file for portal_gun
+newmtl portal_gun
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd portal_gun_BaseColor.png
+map_bump portal_gun_Normal.png
+
+newmtl glass
+Kd 1.0 1.0 1.0
+d 0.8
+map_Kd glass_DirtMask.png
