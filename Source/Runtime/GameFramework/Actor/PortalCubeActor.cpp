@@ -73,29 +73,51 @@ void APortalCubeActor::Tick(float DeltaTime)
 	{
 		const FVector PortalNormal = TargetPortal->GetPortalNormal();
 		const float DistToPlane = TargetPortal->GetDistanceToPlane(CurrentLocation);
+		const bool bIsFloorPortal = (std::abs(PortalNormal.Z) > 0.7f);
 
 		FVector CurrentVel = ProjectileMovementComponent ? ProjectileMovementComponent->Velocity : FVector::ZeroVector;
 		const float VelocityIntoPortal = FVector::Dot(CurrentVel, -PortalNormal);
-		// 큐브 중심 기준 거리 0.55m (큐브 반경 0.5m) 이내로 포탈 표면에 접촉했는지 검사
-		// 1) 포탈 안쪽으로 이동 중이거나 들려 있는 상태
-		// 2) 포탈 표면 0.55m 이내에 도달
-		// 3) 포탈 개구부(가로/세로 범위) 내부인지 검사
-		const bool bHeadingIntoPortal = (VelocityIntoPortal > -0.1f) || bIsHeld;
-		const bool bTouchingPortalPlane = (DistToPlane <= 0.55f && DistToPlane >= -0.55f);
-		if(bHeadingIntoPortal && bTouchingPortalPlane && TargetPortal->IsPointWithinPortalBounds(CurrentLocation))
+		
+		// 큐브 중심 기준 거리 0.60m 이내로 포탈 표면에 접촉했는지 검사
+		const bool bInBounds = TargetPortal->IsPointWithinPortalBounds(CurrentLocation, 0.15f);
+		const bool bTouchingPortalPlane = (DistToPlane <= 0.55f && DistToPlane >= -0.70f);
+
+		// 포탈 진입 조건: 들려있거나, 바닥 포탈이거나, 포탈로 이동 중이거나, 이미 평면에 닿은 경우
+		const bool bHeadingIntoPortal = bIsHeld || bIsFloorPortal || (VelocityIntoPortal > -0.2f) || (DistToPlane < 0.2f);
+
+		// 포탈 개구부 안쪽이면 바닥/벽 콜라이더에 걸리지 않도록 Sweep을 끄고, 바깥이면 켠다
+		if(ProjectileMovementComponent)
+		{
+			ProjectileMovementComponent->bSweepCollision = !bInBounds;
+		}
+
+		if(bInBounds && bTouchingPortalPlane && bHeadingIntoPortal)
 		{
 			APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 			if(ExitPortal)
 			{
 				const FMatrix TeleportMatrix = TargetPortal->GetTeleportMatrix();
-				// 1. 위치 변환: 큐브 반경(0.5m)을 고려하여 출구 벽 밖으로 0.6m 확실하게 배치
+				// 1. 위치 변환
 				FVector NewLoc = TeleportMatrix.TransformPosition(CurrentLocation);
-				NewLoc += ExitPortal->GetPortalNormal() * 0.6f;
+
+				// 출구 포탈의 안전 경계 내로 로컬 좌표 클램핑 (출구 모서리 벽/바닥 끼임 방지)
+				FVector ExitLocal = ExitPortal->GetPortalMatrix().Inverse().TransformPosition(NewLoc);
+				const float SafeHalfWidth = (ExitPortal->GetPortalWidth() * 0.5f) - 0.40f;
+				const float SafeHalfHeight = (ExitPortal->GetPortalHeight() * 0.5f) - 0.40f;
+				ExitLocal.Y = FMath::Clamp(ExitLocal.Y, -SafeHalfWidth, SafeHalfWidth);
+				ExitLocal.Z = FMath::Clamp(ExitLocal.Z, -SafeHalfHeight, SafeHalfHeight);
+				NewLoc = ExitPortal->GetPortalMatrix().TransformPosition(ExitLocal);
+
+				// 큐브 반경(0.5m)을 고려하여 출구 벽 밖으로 0.65m 확실하게 배치
+				NewLoc += ExitPortal->GetPortalNormal() * 0.65f;
+
 				// 2. 회전 변환
 				FMatrix RotMat = GetActorRotation().Quaternion().ToFMatrix() * TeleportMatrix;
 				FRotator NewRot = MatrixToRotator(RotMat);
+
 				// 3. 속도 벡터 변환
 				FVector NewVel = TeleportMatrix.TransformVector(CurrentVel);
+
 				// 4. 최소 사출 속도 보정 (벽에서 시원하게 튀어나오도록)
 				const FVector ExitNormal = ExitPortal->GetPortalNormal();
 				const float OutwardSpeed = FVector::Dot(NewVel, ExitNormal);
@@ -104,6 +126,7 @@ void APortalCubeActor::Tick(float DeltaTime)
 				{
 					NewVel += ExitNormal * (MinExitSpeed - OutwardSpeed);
 				}
+
 				// 5. 들려 있는 상태에서 들어갔다면 홀딩 해제(자연스럽게 사출)
 				if(bIsHeld)
 				{
@@ -118,6 +141,20 @@ void APortalCubeActor::Tick(float DeltaTime)
 
 				TeleportCooldownTimer = 0.25f;
 				CurrentOverlappingPortal = nullptr;
+			}
+		}
+		else if(!bInBounds && DistToPlane < 0.50f)
+		{
+			// 모서리 바깥 벽이나 바닥을 뚫고 들어간 경우: 안전장치 (표면 밖으로 밀어내고 반사)
+			SetActorLocation(CurrentLocation + PortalNormal * (0.52f - DistToPlane));
+			if(ProjectileMovementComponent)
+			{
+				const float NormalVel = FVector::Dot(ProjectileMovementComponent->Velocity, PortalNormal);
+				if(NormalVel < 0.0f)
+				{
+					ProjectileMovementComponent->Velocity -= PortalNormal * (NormalVel * (1.0f + ProjectileMovementComponent->Bounciness));
+				}
+				ProjectileMovementComponent->bSweepCollision = true;
 			}
 		}
 	}
@@ -187,8 +224,7 @@ void APortalCubeActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		if(Portal->IsActive())
 		{
 			CurrentOverlappingPortal = Portal;
-
-			if(ProjectileMovementComponent)
+			if(ProjectileMovementComponent && Portal->IsPointWithinPortalBounds(GetActorLocation(), 0.15f))
 			{
 				ProjectileMovementComponent->bSweepCollision = false;
 			}
