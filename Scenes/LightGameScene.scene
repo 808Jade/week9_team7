@@ -544205,7 +544205,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": 0.25,
                                 "RelativeY": 0.6000000238418579,
-                                "Text": "[ Enter ]  시작",
+                                "Text": "[ Enter ]  \uc2dc\uc791",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544249,7 +544249,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": 0.25,
                                 "RelativeY": 0.6800000071525574,
-                                "Text": "[ ESC ]  종료",
+                                "Text": "[ ESC ]  \uc885\ub8cc",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544418,7 +544418,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.47999998927116394,
-                                "Text": "[ ESC ]  계속하기",
+                                "Text": "[ ESC ]  \uacc4\uc18d\ud558\uae30",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544462,7 +544462,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.550000011920929,
-                                "Text": "[ R ]  챔버 재시작",
+                                "Text": "[ R ]  \ucc54\ubc84 \uc7ac\uc2dc\uc791",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544506,7 +544506,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.6200000047683716,
-                                "Text": "[ M ]  메인 메뉴로",
+                                "Text": "[ M ]  \uba54\uc778 \uba54\ub274\ub85c",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544675,7 +544675,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.41999998688697815,
-                                "Text": "모든 테스트 챔버를 탈출하였습니다.",
+                                "Text": "\ubaa8\ub4e0 \ud14c\uc2a4\ud2b8 \ucc54\ubc84\ub97c \ud0c8\ucd9c\ud558\uc600\uc2b5\ub2c8\ub2e4.",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544719,7 +544719,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.5,
-                                "Text": "탈출 시간: 00:00.00",
+                                "Text": "\ud0c8\ucd9c \uc2dc\uac04: 00:00.00",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544763,7 +544763,7 @@
                                 "PosY": 100.0,
                                 "RelativeX": -1.0,
                                 "RelativeY": 0.6000000238418579,
-                                "Text": "[ Enter ]  시작 화면으로",
+                                "Text": "[ Enter ]  \uc2dc\uc791 \ud654\uba74\uc73c\ub85c",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
@@ -544888,12 +544888,12 @@
                                     "Location": {
                                         "X": 120.8744888305664,
                                         "Y": -0.7480000257492065,
-                                        "Z": 12.372634887695313
+                                        "Z": 12.372634887695312
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
                                         "Roll": 0.0,
-                                        "Yaw": -90.00003051757813
+                                        "Yaw": -90.00003051757812
                                     },
                                     "Scale": {
                                         "X": 0.019999999552965164,
@@ -548170,6 +548170,666 @@
                         }
                     ],
                     "Name": "ASpotLightActor_4_9",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalCubeActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 0.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 500.0,
+                                        "Y": 505.0,
+                                        "Z": 50.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "StaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "BoxComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalCube/portal_cube.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ReservePortalCube_1",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalCubeActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 0.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 500.0,
+                                        "Y": 510.0,
+                                        "Z": 50.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "StaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "BoxComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalCube/portal_cube.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ReservePortalCube_2",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalCubeActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 0.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 500.0,
+                                        "Y": 515.0,
+                                        "Z": 50.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "StaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "BoxComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalCube/portal_cube.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ReservePortalCube_3",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalCubeActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 0.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 500.0,
+                                        "Y": 520.0,
+                                        "Z": 50.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "StaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "BoxComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalCube/portal_cube.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ReservePortalCube_4",
+                    "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalCubeActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "BoxComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.5,
+                                    "Y": 0.5,
+                                    "Z": 0.5
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 500.0,
+                                        "Y": 525.0,
+                                        "Z": 50.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "StaticMeshComponent",
+                            "OverrideMaterials": [],
+                            "Parent": "BoxComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalCube/portal_cube.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 0.25,
+                                        "Y": 0.25,
+                                        "Z": 0.25
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UProjectileMovementComponent",
+                            "Name": "ProjectileComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Bounciness": 0.30000001192092896,
+                                "Friction": 0.4000000059604645,
+                                "Gravity": 9.8100004196167,
+                                "HomingAccelerationMagnitude": 0.0,
+                                "InintialSpeed": 0.0,
+                                "MaxSpeed": 0.0,
+                                "ProjectileGravityScale": 1.0,
+                                "Velocity": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "bAutoActivate": true,
+                                "bConstrainToPlane": false,
+                                "bHiddenInGame": false,
+                                "bIsHomingProjectile": false,
+                                "bRotationFollowsVelocity": false,
+                                "bShouldBounce": true,
+                                "bSimulationEnabled": false,
+                                "bSweepCollision": true,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ReservePortalCube_5",
                     "Properties": {
                         "bActorEnableCollision": true
                     }
