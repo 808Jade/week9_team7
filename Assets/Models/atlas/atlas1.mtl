@@ -1,6 +1,0 @@
-# MTL file for atlas1
-newmtl Material
-Kd 1.0 1.0 1.0
-d 1.0
-map_Kd atlas1_Material_BaseColor.png
-map_bump atlas1_Material_Normal.png

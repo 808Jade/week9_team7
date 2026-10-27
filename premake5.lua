@@ -257,6 +257,7 @@ project "HitoriGame"
 	{
 		"Source/Programs/HitoriGame/**.h",
 		"Source/Programs/HitoriGame/**.cpp",
+		"Source/Programs/HitoriGame/**.rc",   -- exe·창 아이콘 (Portal 3)
 	}
 
 	includedirs
