@@ -81,7 +81,11 @@ void ATitleCanvasActor::BeginPlay()
 	}
 
 	// 씬 파일에서 로드된 이후에도 화면 중앙(0.5)에서 0.25 왼쪽(0.25 비율) 위치에 가로 중앙 정렬 적용
-	if (TitleText) TitleText->SetRelativeX(0.25f);
+	if (TitleText) 
+	{
+		TitleText->SetRelativeX(0.25f);
+		TitleText->SetText("PORTAL3");
+	}
 	if (SubtitleText) SubtitleText->SetRelativeX(0.25f);
 	if (StartPromptText) StartPromptText->SetRelativeX(0.25f);
 	if (QuitPromptText) QuitPromptText->SetRelativeX(0.25f);

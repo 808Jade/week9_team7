@@ -30,4 +30,6 @@ function OnHit(OtherActor)
 end
 
 function OnHotReload()
+    print("[Lua HotReload] Complex_Door2.lua reloaded! Re-binding button and door...")
+    BeginPlay()
 end
