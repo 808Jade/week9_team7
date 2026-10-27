@@ -28,6 +28,15 @@ namespace
 	std::atomic<uint32> GCascadeCount{ 4 };
 	std::atomic<float> GCascadeLogRatio{ 0.8f };
 
+	// ToneMapShader.hlsl의 cbuffer ToneMapConstants와 바이트 단위로 같아야 한다.
+	struct alignas(16) FToneMapConstants
+	{
+		float Gamma = 2.2f;
+		uint32 bEnableCamma = 1;
+		float Padding[2] = {};
+	};
+	static_assert(sizeof(FToneMapConstants) == 16);
+
 	FRenderGraphRasterPassDesc MakeViewportPass(const std::string& Name, FRenderGraphTextureRef Color,
 		FRenderGraphTextureRef DepthTarget = {},
 		ERenderGraphLoadAction DepthLoad = ERenderGraphLoadAction::Load)
@@ -568,6 +577,9 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 		})) return false;
 	}
 
+	if (!RenderData.ToneMapCB)
+		RenderData.ToneMapCB = RenderCommand::CreateConstantBuffer(sizeof(FToneMapConstants));
+
 	FRenderGraphRasterPassDesc ToneMap{};
 	ToneMap.Name = "ToneMap";
 	ToneMap.ReadTextures = { LightingHDR };
@@ -580,6 +592,13 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 					Pipeline && Pipeline->Shader && Pipeline->Shader->VertexShader && Pipeline->Shader->PixelShader)
 				{
 					RenderCommand::BindPipelineState(*Pipeline);
+
+					FToneMapConstants Constants{};
+					Constants.Gamma = 2.2f;
+					Constants.bEnableCamma = 1;
+					RenderCommand::UpdateBufferData(RenderData.ToneMapCB.get(), &Constants);
+					RenderCommand::BindConstantBuffer(0, RenderData.ToneMapCB.get(), EShaderBindFlagBits::Pixel);
+
 					RenderCommand::BindVertexBuffer(nullptr);
 					RenderCommand::Draw(3);
 				}
