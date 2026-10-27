@@ -32,7 +32,7 @@ namespace
 	struct alignas(16) FToneMapConstants
 	{
 		float Gamma = 2.2f;
-		uint32 bEnableCamma = 1;
+		uint32 bEnableGamma = 1;
 		float Padding[2] = {};
 	};
 	static_assert(sizeof(FToneMapConstants) == 16);
@@ -584,7 +584,7 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 	ToneMap.Name = "ToneMap";
 	ToneMap.ReadTextures = { LightingHDR };
 	ToneMap.ColorAttachments = { { SceneColor, ERenderGraphLoadAction::Clear, { 0.0f, 0.0f, 0.0f, 1.0f } } };
-	if (!Graph.AddRasterPass(std::move(ToneMap), [this, Renderer, &Graph, LightingHDR]
+	if (!Graph.AddRasterPass(std::move(ToneMap), [this, Renderer, &Graph, LightingHDR, PostProcess = Options.PostProcess]
 		{
 			if (bCorePassSucceeded)
 			{
@@ -594,8 +594,8 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 					RenderCommand::BindPipelineState(*Pipeline);
 
 					FToneMapConstants Constants{};
-					Constants.Gamma = 2.2f;
-					Constants.bEnableCamma = 1;
+					Constants.Gamma = PostProcess.Gamma;
+					Constants.bEnableGamma = PostProcess.bEnableGammaCorrection ? 1u : 0u;
 					RenderCommand::UpdateBufferData(RenderData.ToneMapCB.get(), &Constants);
 					RenderCommand::BindConstantBuffer(0, RenderData.ToneMapCB.get(), EShaderBindFlagBits::Pixel);
 

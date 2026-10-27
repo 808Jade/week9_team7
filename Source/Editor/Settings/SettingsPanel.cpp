@@ -86,6 +86,18 @@ void FSettingsPanel::OnRender()
 	//////////////////////////////////////////////////////////
 
 	ImGui::Dummy(ImVec2(0.0f, SectionGap));
+	ImGui::SeparatorText("Post Process");
+
+	ImGui::Checkbox("Gamma Correction", &Settings.PostProcess.bEnableGammaCorrection);
+	ImGui::BeginDisabled(!Settings.PostProcess.bEnableGammaCorrection);
+	ImGui::SetNextItemWidth(200.0f);
+	ImGui::SliderFloat("Gamma", &Settings.PostProcess.Gamma, 1.0f, 3.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::EndDisabled();
+	ImGui::TextDisabled("Off shows raw linear output (darker). Standard is 2.2.");
+
+	//////////////////////////////////////////////////////////
+
+	ImGui::Dummy(ImVec2(0.0f, SectionGap));
 	ImGui::SeparatorText("Grid");
 
 	ImGui::Checkbox("Draw Batch Line / Grid", &Settings.bDrawBatchLine);
@@ -168,6 +180,8 @@ bool FSettingsPanel::SaveSettings() const
 	File << "DrawPSGrid=" << Settings.bDrawPSGrid << "\n";
 	File << "SceneDepthMaxRange=" << Settings.SceneDepthMaxRange << "\n";
 	File << "EnableFXAA=" << Settings.bEnableFXAA << "\n";
+	File << "EnableGammaCorrection=" << Settings.PostProcess.bEnableGammaCorrection << "\n";
+	File << "Gamma=" << Settings.PostProcess.Gamma << "\n";
 	File << "LightCullingMode=" << (Settings.LightCullingMode == ELightCullingMode::Off ? "Off" : Settings.LightCullingMode == ELightCullingMode::Tiled ? "Tiled" : "Clustered") << "\n";
 	File << "RenderingPath=" << (Settings.RenderingPath == ERenderingPath::Forward ? "Forward" : "Deferred") << "\n";
 	File << "LightingModel=" << (Settings.LightingModel == ELightingModel::Gouraud ? "Gouraud" :
@@ -312,6 +326,8 @@ bool FSettingsPanel::LoadSettings()
 				else if (Key == "DrawPSGrid") Settings.bDrawPSGrid = std::stoi(ValueStr);
 				else if (Key == "SceneDepthMaxRange") Settings.SceneDepthMaxRange = std::stof(ValueStr);
 				else if (Key == "EnableFXAA") Settings.bEnableFXAA = std::stoi(ValueStr);
+				else if (Key == "EnableGammaCorrection") Settings.PostProcess.bEnableGammaCorrection = std::stoi(ValueStr);
+				else if (Key == "Gamma") Settings.PostProcess.Gamma = std::stof(ValueStr);
 				else if (Key == "LightCullingMode")
 				{
 					if (ValueStr == "Off") Settings.LightCullingMode = ELightCullingMode::Off;

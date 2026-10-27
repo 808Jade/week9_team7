@@ -220,6 +220,10 @@ void UGameEngine::TickInput(float DeltaTime)
 {
     if (!GameViewport) return;
 
+    // Show Flag 토글: F9 = Gamma Correction (게임 조작 키와 겹치지 않는 디버그 키)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F9))
+        PostProcess.bEnableGammaCorrection = !PostProcess.bEnableGammaCorrection;
+
     // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단
     if (bImGuiInitialized && (ImGui::GetIO().MouseDrawCursor || ImGui::GetIO().WantCaptureMouse))
     {
@@ -292,6 +296,7 @@ void UGameEngine::RenderFrame()
     Options.PointShadowMapSize = 512;
     Options.SpotShadowMapSize = 512;
     Options.PcfMode = EPcfMode::Sample8;
+    Options.PostProcess = PostProcess;
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),
