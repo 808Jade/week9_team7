@@ -49,7 +49,7 @@ FEngineConfig UGameEngine::GetConfig() const
 	Desc.SyncInterval = 0;
 	Desc.bCreateDepthBuffer = true;   
 	Desc.bExitOnEscape = true;        
-	Desc.SplashImage = "Resources/JalveSplash.png";   // Valve 패러디 로고
+	Desc.SplashImage = "Resources/Splash.png"; 
 	Desc.SplashMinSeconds = 3.0f;
 	Desc.bExitOnEscape = false; // ESC 누를 때 게임이 즉시 종료되지 않고 설정창을 열도록 false 설정
 	return Desc;
