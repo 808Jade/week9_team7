@@ -51,5 +51,3 @@ FRotator operator+(FRotator Rot, const FVector& Vec)
 
 	return Rot;
 }
-
-const FRotator FRotator::ZeroRotator(0.0f, 0.0f, 0.0f);

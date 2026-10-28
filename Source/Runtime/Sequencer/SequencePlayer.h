@@ -37,4 +37,10 @@ private:
 	float PlayRate = 1.0f;
 	bool bIsPlaying = false;
 	bool bIsLooping = true;
+
+	AActor* OriginalViewTarget = nullptr; // 원래 플레이어 시점 백업용
+	bool bHasCameraCutActive = false;     // 카메라 컷이 활성화되었는지 플래그
+	// 시점 전환 및 복구 헬퍼 함수
+	void ApplyCameraCut(UWorld* World);
+	void RestoreCameraCut(UWorld* World);
 };

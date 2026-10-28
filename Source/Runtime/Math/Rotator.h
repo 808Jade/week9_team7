@@ -56,8 +56,6 @@ struct FRotator
 	{
 		return !(*this == Other);
 	}
-
-	static const FRotator ZeroRotator;
 };
 
 FRotator operator+(FRotator Rot, const FVector& Vec);

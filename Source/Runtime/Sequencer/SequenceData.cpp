@@ -27,7 +27,7 @@ static FRotator LerpRotator(const FRotator& A, const FRotator& B, float Alpha)
 	);
 }
 
-bool FSequencerTrack::Evaluate(float Time, FVector& OutLoc, FRotator& OutRot, FVector& OutScale) const
+bool FSequencerTrack::EvaluateTransform(float Time, FVector& OutLoc, FRotator& OutRot, FVector& OutScale) const
 {
     if (Keys.IsEmpty()) return false;
     if (Keys.Num() == 1 || Time <= Keys.Front().Time)
@@ -47,8 +47,8 @@ bool FSequencerTrack::Evaluate(float Time, FVector& OutLoc, FRotator& OutRot, FV
 
     for (int32 i = 0; i < Keys.Num() - 1; ++i)
     {
-        const auto& K0 = Keys[i];
-        const auto& K1 = Keys[i + 1];
+        const FSequencerKey& K0 = Keys[i];
+        const FSequencerKey& K1 = Keys[i + 1];
         if (Time >= K0.Time && Time <= K1.Time)
         {
             const float Duration = K1.Time - K0.Time;
@@ -63,12 +63,40 @@ bool FSequencerTrack::Evaluate(float Time, FVector& OutLoc, FRotator& OutRot, FV
     return false;
 }
 
+bool FSequencerTrack::EvaluateFloat(float Time, float& OutValue) const
+{
+	if (Keys.IsEmpty()) return false;
+	if (Keys.Num() == 1 || Time <= Keys.Front().Time)
+	{
+		OutValue = Keys.Front().Value;
+		return true;
+	}
+	if (Time >= Keys.Last().Time)
+	{
+		OutValue = Keys.Last().Value;
+		return true;
+	}
+	for (int32 i = 0; i < Keys.Num() - 1; ++i)
+	{
+		const FSequencerKey& K0 = Keys[i];
+		const FSequencerKey& K1 = Keys[i + 1];
+		if (Time >= K0.Time && Time <= K1.Time)
+		{
+			const float Duration = K1.Time - K0.Time;
+			const float Alpha = (Duration > 1e-5f) ? (Time - K0.Time) / Duration : 0.0f;
+			OutValue = K0.Value + (K1.Value - K0.Value) * Alpha;
+			return true;
+		}
+	}
+	return false;
+}
+
 void FSequencerTrack::SortKeys()
 {
 	std::sort(Keys.begin(), Keys.end());
 }
 
-void FSequencerTrack::AddOrUpdateKey(float Time, const FVector& Location, const FRotator& Rotation, const FVector& Scale)
+void FSequencerTrack::AddOrUpdateTransformKey(float Time, const FVector& Location, const FRotator& Rotation, const FVector& Scale)
 {
 	for (int32 i = 0; i < Keys.Num(); ++i)
 	{
@@ -83,6 +111,22 @@ void FSequencerTrack::AddOrUpdateKey(float Time, const FVector& Location, const 
 	}
 
 	Keys.Add({ Time, Location, Rotation, Scale });
+	SortKeys();
+}
+
+void FSequencerTrack::AddOrUpdateFloatKey(float Time, float Value)
+{
+	for (int32 i = 0; i < Keys.Num(); ++i)
+	{
+		if (std::abs(Keys[i].Time - Time) < 0.02f)
+		{
+			Keys[i].Time = Time;
+			Keys[i].Value = Value;
+			return;
+		}
+	}
+
+	Keys.Add({ Time, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.0f, 1.0f, 1.0f), Value });
 	SortKeys();
 }
 
@@ -103,11 +147,14 @@ FSequencerTrack* FLevelSequence::FindTrack(const FString& InActorName)
 	return nullptr;
 }
 
-FSequencerTrack* FLevelSequence::AddTrack(const FString& InActorName)
+FSequencerTrack* FLevelSequence::AddTrack(const FString& InActorName, ETrackType InType)
 {
 	if (FSequencerTrack* ExistingTrack = FindTrack(InActorName))
 		return ExistingTrack;
-	Tracks.Add({ InActorName, { } });
+	FSequencerTrack NewTrack;
+	NewTrack.ActorName = InActorName;
+	NewTrack.Type = InType;
+	Tracks.Add(NewTrack);
 	return &Tracks.Last();
 }
 
@@ -138,6 +185,8 @@ bool FLevelSequence::SaveToFile(const FString& FilePath) const
 		Root["SequenceName"] = Name;
 		Root["Duration"] = Duration;
 		Root["FrameRate"] = FrameRate;
+		Root["CameraCutTarget"] = CameraCutTarget;
+		Root["CameraBlendTime"] = CameraBlendTime;
 
 		json TracksArray = json::array();
 		for (int32 i = 0; i < Tracks.Num(); ++i)
@@ -145,7 +194,17 @@ bool FLevelSequence::SaveToFile(const FString& FilePath) const
 			const auto& Track = Tracks[i];
 			json TrackJson;
 			TrackJson["ActorName"] = Track.ActorName;
-			TrackJson["TrackType"] = "Transform";
+
+			std::string TypeStr = "Transform";
+			switch (Track.Type)
+			{
+			case ETrackType::Transform: TypeStr = "Transform"; break;
+			case ETrackType::Fade: TypeStr = "Fade"; break;
+			case ETrackType::LetterBox: TypeStr = "LetterBox"; break;
+			case ETrackType::CameraShake: TypeStr = "CameraShake"; break;
+			default: TypeStr = "None"; break;
+			}
+			TrackJson["TrackType"] = TypeStr;
 
 			json KeysArray = json::array();
 			for (int32 k = 0; k < Track.Keys.Num(); ++k)
@@ -156,6 +215,8 @@ bool FLevelSequence::SaveToFile(const FString& FilePath) const
 				KeyJson["Location"] = { Key.Location.X, Key.Location.Y, Key.Location.Z };
 				KeyJson["Rotation"] = { Key.Rotation.Pitch, Key.Rotation.Yaw, Key.Rotation.Roll };
 				KeyJson["Scale"] = { Key.Scale.X, Key.Scale.Y, Key.Scale.Z };
+				KeyJson["Value"] = Key.Value;
+				KeyJson["Duration"] = Key.Duration;
 				KeysArray.push_back(KeyJson);
 			}
 			TrackJson["Keys"] = KeysArray;
@@ -187,6 +248,8 @@ bool FLevelSequence::LoadFromFile(const FString& FilePath)
 		Name = Root.value("SequenceName", Root.value("Name", "NewSequence"));
 		Duration = Root.value("Duration", 10.0f);
 		FrameRate = Root.value("FrameRate", 30.0f);
+		CameraCutTarget = Root.value("CameraCutTarget", "");
+		CameraBlendTime = Root.value("CameraBlendTime", 0.0f);
 
 		Tracks.Empty();
 
@@ -197,12 +260,20 @@ bool FLevelSequence::LoadFromFile(const FString& FilePath)
 				FSequencerTrack Track;
 				Track.ActorName = TrackJson.value("ActorName", "");
 
+				std::string TypeStr = TrackJson.value("TrackType", "Transform");
+				if (TypeStr == "Fade") Track.Type = ETrackType::Fade;
+				else if (TypeStr == "LetterBox") Track.Type = ETrackType::LetterBox;
+				else if (TypeStr == "CameraShake") Track.Type = ETrackType::CameraShake;
+				else Track.Type = ETrackType::Transform;
+
 				if (TrackJson.contains("Keys") && TrackJson["Keys"].is_array())
 				{
 					for (const auto& KeyJson : TrackJson["Keys"])
 					{
-						FTransformKey Key;
+						FSequencerKey Key;
 						Key.Time = KeyJson.value("Time", 0.0f);
+						Key.Value = KeyJson.value("Value", 0.0f);
+						Key.Duration = KeyJson.value("Duration", 0.5f);
 
 						if (KeyJson.contains("Location") && KeyJson["Location"].is_array() && KeyJson["Location"].size() >= 3)
 						{

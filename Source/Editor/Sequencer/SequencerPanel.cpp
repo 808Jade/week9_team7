@@ -178,7 +178,7 @@ void FSequencerPanel::DrawToolbar()
             }
             if (Track)
             {
-                Track->AddOrUpdateKey(Player->GetCurrentTime(), SelectedActor->GetActorLocation(), SelectedActor->GetActorRotation(), SelectedActor->GetActorScale3D());
+                Track->AddOrUpdateTransformKey(Player->GetCurrentTime(), SelectedActor->GetActorLocation(), SelectedActor->GetActorRotation(), SelectedActor->GetActorScale3D());
             }
         }
     }
