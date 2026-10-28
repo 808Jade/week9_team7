@@ -35,7 +35,7 @@ public:
 	void AttachToPawn(APortalPawn* InOwnerPawn);
 
 	// 세부 동작
-	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult);
+	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
 	void ResetPortals();

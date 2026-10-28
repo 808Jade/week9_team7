@@ -9,6 +9,9 @@
 #include "Render/RenderCommand.h"
 #include "Render/PortalSurfaceRenderer.h"
 #include "Engine/Level.h"
+#include "Collision/Ray.h"
+#include "Collision/HitResult.h"
+#include "GameFramework/Pawn.h"
 #include <cmath>
 
 namespace
@@ -289,4 +292,286 @@ float APortalActor::GetDistanceToPlane(const FVector& Point) const
 {
 	const FVector Normal = GetPortalNormal();
 	return FVector::Dot(Point - GetActorLocation(), Normal);
+}
+
+bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerForward)
+{
+	if (!InHitResult.bBlockingHit)
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: No blocking hit");
+		return false;
+	}
+
+	const FVector SurfaceNormal = InHitResult.ImpactNormal;
+	FVector TargetLocation = InHitResult.ImpactPoint;
+	FRotator TargetRotation;
+
+	if (!CalculatePortalRotation(SurfaceNormal, ViewerForward, TargetRotation))
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: CalculatePortalRotation");
+		return false;
+	}
+
+	if (!AdjustLocationForEdges(TargetLocation, TargetRotation, SurfaceNormal))
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: AdjustLocationForEdges");
+		return false;
+	}
+
+	if (IsOverlappingLinkedPortal(TargetLocation, SurfaceNormal))
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: IsOverlappingLinkedPortal");
+		return false;
+	}
+
+	if (!HasEntryClearance(TargetLocation, TargetRotation, SurfaceNormal))
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: HasEntryClearance");
+		return false;
+	}
+
+	SetActorLocation(TargetLocation + SurfaceNormal * 0.01f);
+	SetActorRotation(TargetRotation);
+	bPlaced = true;
+	HTR_LOG(Warning, "PlaceAt Success!");
+
+	return true;
+}
+
+bool APortalActor::IsPortableSurface(UPrimitiveComponent* HitComponent) const
+{
+	return true;
+}
+
+bool APortalActor::CalculatePortalRotation(const FVector& SurfaceNormal, const FVector& ViewerForward, FRotator& OutRotation) const
+{
+	const FVector Forward = SurfaceNormal.GetSafeNormal();
+
+	// 바닥 또는 천장 (수평면: 경사 45도 이상)
+	if (std::abs(Forward.Z) >= 0.707f)
+	{
+		float ViewerYaw = atan2f(ViewerForward.Y, ViewerForward.X) * (180.0f / PI);
+		if (std::isnan(ViewerYaw))
+		{
+			ViewerYaw = 0.0f;
+		}
+
+		float Pitch = 0.0f;
+		float Yaw = 0.0f;
+
+		if (Forward.Z > 0.0f) // 바닥 (Normal = +Z)
+		{
+			Pitch = -90.0f;
+			Yaw = ViewerYaw + 180.0f;
+		}
+		else // 천장 (Normal = -Z)
+		{
+			Pitch = 90.0f;
+			Yaw = ViewerYaw;
+		}
+
+		while (Yaw > 180.0f) Yaw -= 360.0f;
+		while (Yaw < -180.0f) Yaw += 360.0f;
+
+		OutRotation = FRotator(Pitch, Yaw, 0.0f);
+	}
+	else
+	{
+		// 수직/경사 벽면
+		const float Yaw = atan2f(Forward.Y, Forward.X) * (180.0f / PI);
+		const float Pitch = -asinf(FMath::Clamp(Forward.Z, -1.0f, 1.0f)) * (180.0f / PI);
+		OutRotation = FRotator(Pitch, Yaw, 0.0f);
+	}
+
+	return true;
+}
+
+bool APortalActor::AdjustLocationForEdges(FVector& InOutLocation, const FRotator& Rotation, const FVector& SurfaceNormal) const
+{
+	if (!GetWorld())
+	{
+		return true;
+	}
+
+	const FQuat Quat = Rotation.Quaternion();
+	const FVector Right = Quat.GetRightVector();
+	const FVector Up = Quat.GetUpVector();
+
+	const float HalfWidth = PortalWidth * 0.5f;
+	const float HalfHeight = PortalHeight * 0.5f;
+	const float EdgeMargin = 0.02f; // 2cm 여유
+
+	FVector CurrentLocation = InOutLocation;
+	const int32 MaxIterations = 5;
+
+	for (int32 Iter = 0; Iter < MaxIterations; ++Iter)
+	{
+		FVector PushOffset = FVector::ZeroVector;
+		bool bHitObstacle = false;
+
+		// 1. 인접 면(바닥, 천장, 측면 벽) 관통/묻힘 검사 (Boundary Push)
+		struct FEdgeCheck
+		{
+			FVector Dir;
+			float RequiredDist;
+		};
+
+		const FEdgeCheck Edges[4] = {
+			{ -Up, HalfHeight },    // 하단 (바닥면 묻힘 방지)
+			{ Up, HalfHeight },     // 상단 (천장면 묻힘 방지)
+			{ -Right, HalfWidth },  // 좌측 벽
+			{ Right, HalfWidth }    // 우측 벽
+		};
+
+		for (int32 i = 0; i < 4; ++i)
+		{
+			// 표면에서 5cm 띄운 위치에서 에지 방향으로 두께 없는 선분(Radius=0) 레이 발사
+			const FVector Start = CurrentLocation + SurfaceNormal * 0.05f;
+			const FRay EdgeRay{ Start, Edges[i].Dir };
+			FHitResult Hit;
+
+			if (GetWorld()->SweepSingle(EdgeRay, Edges[i].RequiredDist, 0.0f, Hit, const_cast<APortalActor*>(this)))
+			{
+				AActor* HitActor = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+				if (HitActor && HitActor != this && HitActor != LinkedPortal && !HitActor->IsA<APawn>())
+				{
+					// 자신이 붙어 있는 뒷벽 자체에 긁힌 경우 무시 (인접면은 법선이 서로 직교해야 함)
+					if (FVector::Dot(Hit.ImpactNormal, SurfaceNormal) > 0.5f)
+					{
+						continue;
+					}
+
+					const float HitDist = FVector::Distance(Start, Hit.ImpactPoint);
+					if (HitDist < Edges[i].RequiredDist)
+					{
+						const float Penetration = (Edges[i].RequiredDist - HitDist) + EdgeMargin;
+						PushOffset += (-Edges[i].Dir) * Penetration;
+						bHitObstacle = true;
+					}
+				}
+			}
+		}
+
+		// 2. 모서리가 벽을 벗어나 허공에 뜨는지 검사 (Overhang Check)
+		const FVector CornerOffsets[4] = {
+			Right * (HalfWidth * 0.9f) + Up * (HalfHeight * 0.9f),
+			-Right * (HalfWidth * 0.9f) + Up * (HalfHeight * 0.9f),
+			-Right * (HalfWidth * 0.9f) - Up * (HalfHeight * 0.9f),
+			Right * (HalfWidth * 0.9f) - Up * (HalfHeight * 0.9f)
+		};
+
+		int32 MissingCornerCount = 0;
+		for (int32 i = 0; i < 4; ++i)
+		{
+			const FVector CornerPos = CurrentLocation + CornerOffsets[i];
+			const FRay BackRay{ CornerPos + SurfaceNormal * 0.1f, -SurfaceNormal };
+			FHitResult Hit;
+
+			if (!GetWorld()->SweepSingle(BackRay, 0.3f, 0.0f, Hit, const_cast<APortalActor*>(this)))
+			{
+				MissingCornerCount++;
+				PushOffset -= CornerOffsets[i] * 0.3f;
+			}
+		}
+
+		if (MissingCornerCount >= 4)
+		{
+			HTR_LOG(Warning, "AdjustLocationForEdges: All corners in empty air");
+			return false;
+		}
+
+		if (!bHitObstacle && MissingCornerCount == 0)
+		{
+			InOutLocation = CurrentLocation;
+			return true;
+		}
+
+		if (PushOffset.SizeSquared() > 1e-4f)
+		{
+			CurrentLocation += PushOffset;
+		}
+
+		if (FVector::Distance(CurrentLocation, InOutLocation) > HalfHeight * 1.2f)
+		{
+			HTR_LOG(Warning, "AdjustLocationForEdges: Pushed too far");
+			return false;
+		}
+	}
+
+	InOutLocation = CurrentLocation;
+	return true;
+}
+
+bool APortalActor::IsOverlappingLinkedPortal(const FVector& DesiredLocation, const FVector& SurfaceNormal) const
+{
+	if (!LinkedPortal || !LinkedPortal->bPlaced)
+	{
+		return false;
+	}
+
+	const FVector LinkedNormal = LinkedPortal->GetPortalNormal();
+	if (FVector::Dot(SurfaceNormal, LinkedNormal) < 0.95f)
+	{
+		return false;
+	}
+
+	const FVector LinkedLoc = LinkedPortal->GetActorLocation();
+	const float PlaneDist = std::abs(FVector::Dot(DesiredLocation - LinkedLoc, SurfaceNormal));
+	if (PlaneDist > 0.1f)
+	{
+		return false;
+	}
+
+	const FVector Delta = DesiredLocation - LinkedLoc;
+	const FVector LinkedRight = LinkedPortal->GetActorQuat().GetRightVector();
+	const FVector LinkedUp = LinkedPortal->GetActorQuat().GetUpVector();
+
+	const float DistRight = std::abs(FVector::Dot(Delta, LinkedRight));
+	const float DistUp = std::abs(FVector::Dot(Delta, LinkedUp));
+
+	if (DistRight < PortalWidth && DistUp < PortalHeight)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool APortalActor::HasEntryClearance(const FVector& Location, const FRotator& Rotation, const FVector& SurfaceNormal) const
+{
+	if (!GetWorld())
+	{
+		return true;
+	}
+
+	const FQuat Quat = Rotation.Quaternion();
+	const FVector Forward = Quat.GetForwardVector();
+	const FVector Up = Quat.GetUpVector();
+
+	const float CheckDistance = 0.5f;
+	const FVector StartPoints[3] = {
+		Location + SurfaceNormal * 0.05f,
+		Location + SurfaceNormal * 0.05f + Up * (PortalHeight * 0.35f),
+		Location + SurfaceNormal * 0.05f - Up * (PortalHeight * 0.35f)
+	};
+
+	for (int32 i = 0; i < 3; ++i)
+	{
+		const FRay Ray{ StartPoints[i], Forward };
+		FHitResult Hit;
+		if (GetWorld()->SweepSingle(Ray, CheckDistance, 0.0f, Hit, const_cast<APortalActor*>(this)))
+		{
+			AActor* HitActor = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+			if (HitActor && HitActor != this && HitActor != LinkedPortal && !HitActor->IsA<APawn>())
+			{
+				if (FVector::Dot(Hit.ImpactNormal, SurfaceNormal) > 0.7f)
+				{
+					continue;
+				}
+				return false;
+			}
+		}
+	}
+
+	return true;
 }

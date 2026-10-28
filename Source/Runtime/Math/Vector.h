@@ -129,6 +129,8 @@ public:
 
 	static FVector Min(const FVector& V1, const FVector& V2);
 	static FVector Max(const FVector& V1, const FVector& V2);
+
+	bool IsNearlyZero();
 };
 
 /* Global Operator */

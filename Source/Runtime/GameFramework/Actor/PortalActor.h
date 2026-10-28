@@ -8,8 +8,10 @@
 class FRenderer;
 class FSkyboxRenderer;
 struct FSceneRenderOptions;
+class UPrimitiveComponent;
 class UStaticMeshComponent;
 class UBoxComponent;
+struct FHitResult;
 
 // FSceneView를 채울 때 사용
 struct FPortalCameraPose
@@ -31,6 +33,7 @@ public:
 
 	// 포탈건이 맞힌 지점/법선으로 이동
 	void PlaceAt(const FVector& Location, const FVector& Normal);
+	bool PlaceAt(const FHitResult& InHitResult, const FVector& ViewerForward);
 
 	// 나와 상대가 모두 설치됐을 때만 건너편을 그린다
 	bool IsActive() const { return bPlaced && LinkedPortal && LinkedPortal->bPlaced; }
@@ -101,4 +104,11 @@ public:
 
 	float GetDistanceToPlane(const FVector& Point) const;
 
+private:
+	// Portal 설치 조건 함수
+	bool IsPortableSurface(UPrimitiveComponent* HitComponent) const;
+	bool CalculatePortalRotation(const FVector& SurfaceNormal, const FVector& ViewerForward, FRotator& OutRotation) const;
+	bool AdjustLocationForEdges(FVector& InOutLocation, const FRotator& Rotation, const FVector& SurfaceNormal) const;
+	bool IsOverlappingLinkedPortal(const FVector& DesiredLocation, const FVector& SurfaceNormal) const;
+	bool HasEntryClearance(const FVector& Location, const FRotator& Rotation, const FVector& SurfaceNormal) const;
 };
