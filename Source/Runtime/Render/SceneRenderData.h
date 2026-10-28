@@ -12,6 +12,7 @@
 #include <iterator>
 #include <vector>
 #include "Math/QuadTree.h"
+#include "Render/Buffer.h"
 
 struct FRenderStats
 {
@@ -76,6 +77,8 @@ struct FSceneRenderData
 
 	TArray<FPerObjectConstants> ObjectConstants;
 	FSceneLightResources ViewLightResources;
+	TUniquePtr<FConstantBuffer> ToneMapCB;
+	TUniquePtr<FConstantBuffer> PostProcessCB;
 
 	FAmbientLightRenderData AmbientLight{};
 	FSkyLightRenderData SkyLight{};

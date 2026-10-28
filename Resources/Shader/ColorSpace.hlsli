@@ -25,4 +25,10 @@ float3 LinearToSRGB(float3 C)
     return lerp(Low, High, step(0.0031308f, C));
 }
 
+// Linear -> 디스플레이 Gamma
+float3 LinearToGamma(float3 C, float Gamma)
+{
+    return pow(saturate(C), 1.f / max(Gamma, 0.01f));
+}
+
 #endif

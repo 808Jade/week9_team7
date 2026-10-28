@@ -5,6 +5,7 @@
 #include "Math/Quat.h"
 #include "Math/Vector.h"
 #include "Render/RenderEnums.h"
+#include "Render/PostProcessSettings.h"
 
 class UWorld;
 
@@ -26,6 +27,7 @@ struct FEditorSettings
 	bool bDrawCascadeBounds = false;
 	bool bDrawPSGrid = false;
 	bool bEnableFXAA = false;
+	FPostProcessSettings PostProcess; // Gamma Correction 등 후처리
 	ELightCullingMode LightCullingMode = ELightCullingMode::Tiled;
 	ERenderingPath RenderingPath = ERenderingPath::Deferred;
 	ELightingModel LightingModel = ELightingModel::Gouraud;
@@ -56,7 +58,7 @@ struct FEditorSettings
 
 	int32 DirectionalShadowMapSizeLevel = 2;
 	int32 PointShadowMapSizeLevel = 2;
-	int32 SpotShadowMapSizeLevel = 2;
+	int32 SpotShadowMapSizeLevel = 4;
 
 	inline uint32 GetDirectionalShadowMapSize() const { return DirectionalShadowMapSizePerLevels[DirectionalShadowMapSizeLevel]; }
 	inline uint32 GetPointShadowMapSize() const { return PointShadowMapSizePerLevels[PointShadowMapSizeLevel]; }

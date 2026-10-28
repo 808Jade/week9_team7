@@ -28,6 +28,31 @@ namespace
 	std::atomic<uint32> GCascadeCount{ 4 };
 	std::atomic<float> GCascadeLogRatio{ 0.8f };
 
+	// ToneMapShader.hlsl의 cbuffer ToneMapConstants와 바이트 단위로 같아야 한다.
+	struct alignas(16) FToneMapConstants
+	{
+		float Gamma = 2.2f;
+		uint32 bEnableGamma = 1;
+	};
+	static_assert(sizeof(FToneMapConstants) == 16);
+
+	struct alignas(16) FPostProcessConstants
+	{
+		FVector2 ViewSize;
+		FVector2 InvViewSize;
+
+		FVector VignetteColor{ 0.f, 0.f, 0.f };
+		float VignetteIntensity = 0.f;
+		float VignetteRadius = 0.f;
+		float VignetteSmoothness = 0.f;
+		uint32 bEnableVignette = 0;
+		float LetterBoxSize = 0.f;
+
+		FVector FadeColor{ 0.f, 0.f, 0.f };
+		float FadeAlpha = 0.f;
+	};
+	static_assert(sizeof(FPostProcessConstants) == 64);
+
 	FRenderGraphRasterPassDesc MakeViewportPass(const std::string& Name, FRenderGraphTextureRef Color,
 		FRenderGraphTextureRef DepthTarget = {},
 		ERenderGraphLoadAction DepthLoad = ERenderGraphLoadAction::Load)
@@ -568,11 +593,14 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 		})) return false;
 	}
 
+	if (!RenderData.ToneMapCB)
+		RenderData.ToneMapCB = RenderCommand::CreateConstantBuffer(sizeof(FToneMapConstants));
+
 	FRenderGraphRasterPassDesc ToneMap{};
 	ToneMap.Name = "ToneMap";
 	ToneMap.ReadTextures = { LightingHDR };
 	ToneMap.ColorAttachments = { { SceneColor, ERenderGraphLoadAction::Clear, { 0.0f, 0.0f, 0.0f, 1.0f } } };
-	if (!Graph.AddRasterPass(std::move(ToneMap), [this, Renderer, &Graph, LightingHDR]
+	if (!Graph.AddRasterPass(std::move(ToneMap), [this, Renderer, &Graph, LightingHDR, PostProcess = Options.PostProcess]
 		{
 			if (bCorePassSucceeded)
 			{
@@ -580,6 +608,13 @@ bool FSceneRenderer::AddCorePasses(FRenderGraphBuilder& Graph, FRenderer* Render
 					Pipeline && Pipeline->Shader && Pipeline->Shader->VertexShader && Pipeline->Shader->PixelShader)
 				{
 					RenderCommand::BindPipelineState(*Pipeline);
+
+					FToneMapConstants Constants{};
+					Constants.Gamma = PostProcess.Gamma;
+					Constants.bEnableGamma = PostProcess.bEnableGammaCorrection ? 1u : 0u;
+					RenderCommand::UpdateBufferData(RenderData.ToneMapCB.get(), &Constants);
+					RenderCommand::BindConstantBuffer(0, RenderData.ToneMapCB.get(), EShaderBindFlagBits::Pixel);
+
 					RenderCommand::BindVertexBuffer(nullptr);
 					RenderCommand::Draw(3);
 				}
@@ -662,6 +697,50 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 		if (!Graph.AddRasterPass(std::move(Pass), [this, ApplyFXAA = Callbacks.FXAA]
 			{
 			bFXAAPassSucceeded = ApplyFXAA();
+			})) return false;
+	}
+
+	if (!Options.bShowWorldNormal)
+	{
+		if (!RenderData.PostProcessCB)
+			RenderData.PostProcessCB = RenderCommand::CreateConstantBuffer(sizeof(FPostProcessConstants));
+
+		const uint32 Width = Targets.SceneColor->GetWidth();
+		const uint32 Height = Targets.SceneColor->GetHeight();
+
+		const float ViewAspect = static_cast<float>(Width) / static_cast<float>(Height);
+		const float FullBar = std::max(0.f, 0.5f * (1.f - ViewAspect / View.LetterBoxAspect));
+		const float LetterBoxSize = FullBar * std::clamp(View.LetterBoxAmount, 0.f, 1.f);
+
+		const float FadeAlpha = std::clamp(View.FadeAlpha, 0.f, 1.f);
+		const FVector FadeColor = View.FadeColor;
+
+		if (!Graph.AddRasterPass(MakeViewportPass("PostProcess", FinalColor),
+			[this, Width, Height, LetterBoxSize, FadeAlpha, FadeColor, PostProcess = Options.PostProcess]
+			{
+				FPipelineState* Pipeline = FRenderResourceManager::GetPSO(EPSOType::PostProcess);
+				if (!Pipeline || !Pipeline->Shader) return;
+				RenderCommand::BindPipelineState(*Pipeline);
+
+				FPostProcessConstants Constants{};
+				Constants.ViewSize = FVector2(static_cast<float>(Width), static_cast<float>(Height));
+				Constants.InvViewSize = FVector2(1.f / Width, 1.f / Height);
+
+				Constants.bEnableVignette = PostProcess.bEnableVignette ? 1u : 0u;
+				Constants.VignetteIntensity = PostProcess.VignetteIntensity;
+				Constants.VignetteRadius = PostProcess.VignetteRadius;
+				Constants.VignetteSmoothness = PostProcess.VignetteSmoothness;
+				Constants.VignetteColor = PostProcess.VignetteColor;
+				Constants.LetterBoxSize = LetterBoxSize;
+
+				Constants.FadeAlpha = FadeAlpha;
+				Constants.FadeColor = FadeColor;
+
+				RenderCommand::UpdateBufferData(RenderData.PostProcessCB.get(), &Constants);
+				RenderCommand::BindConstantBuffer(0, RenderData.PostProcessCB.get(), EShaderBindFlagBits::Pixel);
+
+				RenderCommand::BindVertexBuffer(nullptr);
+				RenderCommand::Draw(3);
 			})) return false;
 	}
 

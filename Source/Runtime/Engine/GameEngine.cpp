@@ -220,6 +220,14 @@ void UGameEngine::TickInput(float DeltaTime)
 {
     if (!GameViewport) return;
 
+    // Show Flag 토글: F9 = Gamma Correction (게임 조작 키와 겹치지 않는 디버그 키)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F9))
+        PostProcess.bEnableGammaCorrection = !PostProcess.bEnableGammaCorrection;
+
+    // Show Flag 토글: F6 = Vignetting (F10은 Windows 시스템 키라 WM_KEYDOWN으로 오지 않음)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F6))
+        PostProcess.bEnableVignette = !PostProcess.bEnableVignette;
+
     // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단
     if (bImGuiInitialized && (ImGui::GetIO().MouseDrawCursor || ImGui::GetIO().WantCaptureMouse))
     {
@@ -290,8 +298,9 @@ void UGameEngine::RenderFrame()
     FSceneRenderOptions Options;
     Options.DirectionalShadowMapSize = 2048;
     Options.PointShadowMapSize = 512;
-    Options.SpotShadowMapSize = 512;
-    Options.PcfMode = EPcfMode::Sample8;
+    Options.SpotShadowMapSize = 2048; // Very High (2048)
+    Options.PcfMode = EPcfMode::Sample32;
+    Options.PostProcess = PostProcess;
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),
