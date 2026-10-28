@@ -3,8 +3,8 @@
 #include "GameFramework/Actor/PortalGunActor.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "GameFramework/PlayerStart.h"
-#include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
@@ -21,14 +21,10 @@ APortalPawn::APortalPawn()
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorEnableCollision(true);
 
-	// 1. 루트 구 콜라이더
-	//SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-	//SetRootComponent(SphereComponent);
-	//SphereComponent->SetSphereRadius(CollisionRadius);
-
-	BoxComponent = CreateDefaultSubobject<UBoxComponent>("BoxComponet");
-	SetRootComponent(BoxComponent);
-	BoxComponent->SetBoxExtent(FVector(0.25f, 0.25f, 0.9f));
+	// 1. 루트 콜라이더	
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
+	SetRootComponent(CapsuleComponent);
+	CapsuleComponent->SetCapsuleSize(0.5f, 1.0f);
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
@@ -101,11 +97,11 @@ void APortalPawn::BeginPlay()
 		}
 	}
 
-	if(BoxComponent)
+	if(CapsuleComponent)
 	{
-		BoxComponent->SetCurrentCollisionResponse(ECollisionResponse::Block);
-		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APortalPawn::OnBeginOverlap);
-		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &APortalPawn::OnEndOverlap);
+		CapsuleComponent->SetCurrentCollisionResponse(ECollisionResponse::Block);
+		CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &APortalPawn::OnBeginOverlap);
+		CapsuleComponent->OnComponentEndOverlap.AddDynamic(this, &APortalPawn::OnEndOverlap);
 	}
 
 	// 크로스헤어 상태 관리 루아 스크립트가 아직 부착되어 있지 않다면 자동 부착
@@ -182,9 +178,9 @@ void APortalPawn::Tick(float DeltaTime)
 	const float TargetRadius = bIsCrouched ? CrouchRadius : CollisionRadius;
 	CurrentEyeHeight += (TargetEyeHeight - CurrentEyeHeight) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
 
-	if (SphereComponent)
+	if (CapsuleComponent)
 	{
-		SphereComponent->SetSphereRadius(TargetRadius);
+		CapsuleComponent->SetCapsuleHalfHeight(TargetRadius);
 	}
 
 	// 3. 착지 충격 반동 (Landing Dip) 복구
@@ -644,9 +640,9 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 {
 	Super::PostEditChangeProperty(Property);
 
-	if (SphereComponent)
+	if (CapsuleComponent)
 	{
-		SphereComponent->SetSphereRadius(CollisionRadius);
+		CapsuleComponent->SetCapsuleRadius(CollisionRadius);
 	}
 	if (CameraComponent)
 	{
