@@ -44,6 +44,8 @@ public:
 	void CreateUIImageMaterial();
 	void CreateUITextMaterial();
 	void CreateParticleMaterial();
+	// 포탈건 홀드 레이저: 단색 1x1 텍스처 + 언릿 반투명 스태틱 메시 머티리얼
+	void CreateLaserMaterials();
 	void CreateEditorArrowMaterial();
 
 	template <typename T>
