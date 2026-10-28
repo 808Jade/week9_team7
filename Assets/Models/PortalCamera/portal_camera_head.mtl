@@ -1,0 +1,68 @@
+# Portal Camera Material
+
+newmtl Shell
+Kd 1.0 1.0 1.0
+map_Kd textures/Shell_Base_Color.png
+map_bump textures/Shell_Normal_DirectX.png
+
+newmtl Shell_Cut
+Kd 1.0 1.0 1.0
+map_Kd textures/Shell_Cut_Base_Color.png
+map_bump textures/Shell_Cut_Normal_DirectX.png
+
+newmtl Cut_Out
+Kd 1.0 1.0 1.0
+map_Kd textures/Cut_Out_Base_Color.png
+map_bump textures/Cut_Out_Normal_DirectX.png
+
+newmtl Frame_Inside
+Kd 1.0 1.0 1.0
+map_Kd textures/Frame_Inside_Base_Color.png
+map_bump textures/Frame_Inside_Normal_DirectX.png
+
+newmtl Lens_Frame
+Kd 1.0 1.0 1.0
+map_Kd textures/Lens_Frame_Base_Color.png
+map_bump textures/Lens_Frame_Normal_DirectX.png
+
+newmtl Lens
+Kd 0.5 0.5 0.6
+d 0.7
+map_Kd textures/Lens_Frame_Base_Color.png
+map_bump textures/Lens_Normal_DirectX.png
+
+newmtl Lens_
+Kd 0.5 0.5 0.6
+d 0.7
+map_Kd textures/Lens_Frame_Base_Color.png
+map_bump textures/Lens_Normal_DirectX.png
+
+newmtl Lens_2
+Kd 0.5 0.1 0.1
+map_Kd textures/Lens_2_Base_Color.png
+map_bump textures/Lens_2_Normal_DirectX.png
+
+newmtl Lens_3
+Kd 0.5 0.5 0.5
+map_Kd textures/Lens_3_Base_Color.png
+map_bump textures/Lens_3_Normal_DirectX.png
+
+newmtl Sensor_Shell
+Kd 1.0 1.0 1.0
+map_Kd textures/Sensor_Shell_Base_Color.png
+map_bump textures/Sensor_Shell_Normal_DirectX.png
+
+newmtl Sensor_Inside
+Kd 1.0 1.0 1.0
+map_Kd textures/Sensor_Inside_Base_Color.png
+map_bump textures/Sensor_Inside_Normal_DirectX.png
+
+newmtl Sensor_Lens
+Kd 1.0 0.1 0.1
+map_Kd textures/Sensor_Lens_Emissive.png
+map_bump textures/Sensor_Lens_Normal_DirectX.png
+
+newmtl Material.006
+Kd 0.2 0.2 0.2
+map_Kd textures/Lens_Frame_Base_Color.png
+map_bump textures/Lens_Frame_Normal_DirectX.png

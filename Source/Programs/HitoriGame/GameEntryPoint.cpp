@@ -18,6 +18,9 @@
 
 // Gameplay & Puzzles
 #include "GameFramework/Actor/DoorActor.h"
+#include "GameFramework/Actor/CubeDropActor.h"
+#include "GameFramework/Actor/PortalCameraActor.h"
+#include "GameFramework/Actor/PortalTurretActor.h"
 #include "GameFramework/Actor/StandButtonActor.h"
 #include "GameFramework/Actor/WeightedButtonActor.h"
 #include "GameFramework/Actor/ElevatorTriggerActor.h"
@@ -62,6 +65,9 @@ UClass* GetEngineClass()
     APortalCubeActor::StaticClass();
 
     ADoorActor::StaticClass();
+    ACubeDropActor::StaticClass();
+    APortalCameraActor::StaticClass();
+    APortalTurretActor::StaticClass();
     AStandButtonActor::StaticClass();
     AWeightedButtonActor::StaticClass();
     AElevatorTriggerActor::StaticClass();
