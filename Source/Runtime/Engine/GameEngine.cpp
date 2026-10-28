@@ -309,6 +309,8 @@ void UGameEngine::RenderFrame()
     Options.SpotShadowMapSize = 2048; // Very High (2048)
     Options.PcfMode = EPcfMode::Sample32;
     Options.PostProcess = PostProcess;
+    Options.RenderingPath = ERenderingPath::Forward;   // editor.ini와 동일 (기본값 Deferred)
+    Options.LightingModel = ELightingModel::Phong;     // editor.ini와 동일 (기본값 Gouraud)
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),
