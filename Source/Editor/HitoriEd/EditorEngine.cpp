@@ -34,6 +34,7 @@
 #include "Components/ShapeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor/CanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
@@ -1004,6 +1005,7 @@ void UEditorEngine::BuildSceneRenderOptions(FGameViewportClient* ViewClient, FSc
 	}
 
 	Options.bEnableFXAA = SettingsPanel->GetSettings().bEnableFXAA;
+	Options.PostProcess = SettingsPanel->GetSettings().PostProcess;
 	Options.bCacheShadows = SettingsPanel->GetSettings().bCacheShadows;
 	Options.PcfMode = SettingsPanel->GetSettings().PcfMode;
 	Options.RenderingPath = SettingsPanel->GetSettings().RenderingPath;
@@ -1022,6 +1024,7 @@ void UEditorEngine::BuildSceneRenderOptions(FEditorViewportClient* ViewClient, b
 	}
 
 	Options.bEnableFXAA = SettingsPanel->GetSettings().bEnableFXAA;
+	Options.PostProcess = SettingsPanel->GetSettings().PostProcess;
 	Options.bCacheShadows = SettingsPanel->GetSettings().bCacheShadows;
 	Options.PcfMode = SettingsPanel->GetSettings().PcfMode;
 	Options.RenderingPath = SettingsPanel->GetSettings().RenderingPath;

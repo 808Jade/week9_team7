@@ -139,3 +139,85 @@ bool FMathUtil::LineExtentBoxIntersection(const FBox& InBox, const FVector& Star
 
     return false;
 }
+
+
+FVector FMathUtil::ClosestPointOnSegment(const FVector& Point, const FVector& StartPoint, const FVector& EndPoint)
+{
+	const FVector Segment = EndPoint - StartPoint;
+	const FVector Vect = Point - StartPoint;
+	const float LengthSq = Segment.SizeSquared();
+
+	if (LengthSq <= SMALL_NUMBER)
+	{
+		return StartPoint;
+	}
+
+	const float T = FMath::Clamp(FVector::Dot(Vect, Segment) / LengthSq, 0.0f, 1.0f);
+	return StartPoint + Segment * T;
+}
+
+void FMathUtil::SegmentDistToSegment(FVector A1, FVector B1, FVector A2, FVector B2, FVector& OutP1, FVector& OutP2)
+{
+	const FVector D1 = B1 - A1;
+	const FVector D2 = B2 - A2;
+	const FVector R = A1 - A2;
+
+	const float A = D1.SizeSquared();
+	const float E = D2.SizeSquared();
+	const float F = FVector::Dot(D2, R);
+
+	float S = 0.0f;
+	float T = 0.0f;
+
+	if (A <= SMALL_NUMBER && E <= SMALL_NUMBER)
+	{
+		OutP1 = A1;
+		OutP2 = A2;
+		return;
+	}
+
+	if (A <= SMALL_NUMBER)
+	{
+		S = 0.0f;
+		T = FMath::Clamp(F / E, 0.0f, 1.0f);
+	}
+	else
+	{
+		const float C = FVector::Dot(D1, R);
+		if (E <= SMALL_NUMBER)
+		{
+			T = 0.0f;
+			S = FMath::Clamp(-C / A, 0.0f, 1.0f);
+		}
+		else
+		{
+			const float B = FVector::Dot(D1, D2);
+			const float Denom = A * E - B * B;
+
+			if (Denom != 0.0f)
+			{
+				S = FMath::Clamp((B * F - C * E) / Denom, 0.0f, 1.0f);
+			}
+			else
+			{
+				S = 0.0f;
+			}
+
+			T = (B * S + F) / E;
+
+			if (T < 0.0f)
+			{
+				T = 0.0f;
+				S = FMath::Clamp(-C / A, 0.0f, 1.0f);
+			}
+			else if (T > 1.0f)
+			{
+				T = 1.0f;
+				S = FMath::Clamp((B - C) / A, 0.0f, 1.0f);
+			}
+		}
+	}
+
+	OutP1 = A1 + D1 * S;
+	OutP2 = A2 + D2 * T;
+}

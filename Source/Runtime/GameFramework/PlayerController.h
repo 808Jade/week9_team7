@@ -4,12 +4,14 @@
 #include "Input/InputSystem.h"
 
 class APawn;
+class APlayerCameraManager;
 
 class APlayerController : public AActor
 {
 	DECLARE_CLASS(APlayerController, AActor)
 	REFLECT_START(ClassName)
 	REFLECT_END()
+
 public:
 	APlayerController();
 	void Tick(float DeltaTime) override;
@@ -23,8 +25,14 @@ public:
 	virtual void ClearInputState();
 	float GetLookSensitivity() const { return LookSensitivity; }
 	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
+	
+	APlayerCameraManager* GetPlayerCameraManager() const { return PlayerCameraManager; }
+	void SpawnPlayerCameraManager();
+
 protected:
 	APawn* PossessedPawn = nullptr;
+	APlayerCameraManager* PlayerCameraManager = nullptr;
+
 	bool bKeyDown[256]{};
 	float MouseAxisX = 0.0f;
 	float MouseAxisY = 0.0f;

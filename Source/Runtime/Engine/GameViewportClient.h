@@ -63,6 +63,8 @@ public:
 	void SetWorld(UWorld* InWorld);
 
 	void SetCameraComponent(UCameraComponent* InCameraComponent);
+	void SetLetterBox(bool bEnable, float BlendTime = 0.5f, float TargetAspect = 2.39f);
+	bool IsLetterBoxEnabled() const { return bLetterBox; }
 
 	void Reset();
 
@@ -95,10 +97,17 @@ private:
 	float SIEWheelDelta = 0.0f;
 	bool bExitRequested = false;
 	bool bSIEModeRequested = false;
+	bool bLetterBox = false;
+	float LetterBoxAspect = 2.39f;
+	float LetterBoxBlendTime = 0.5f;
+	float LetterBoxFrom = 0.0f;       // 전환을 시작한 순간의 Amount
+	double LetterBoxStartTime = 0.0;  // 전환 시작 시각 
 
 	// 렌더 타깃 버퍼
 	uint32 Width = 0;
 	uint32 Height = 0;
 	FSceneViewTargets ViewTargets;
 	FSceneRenderData RenderData;
+
+	float EvaluateLetterBoxAmount() const;
 };

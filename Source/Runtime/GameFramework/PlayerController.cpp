@@ -2,6 +2,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/DefaultPawn.h"
+#include "Engine/World.h"
+#include "Camera/PlayerCameraManager.h"
 #include <cstring>
 
 APlayerController::APlayerController()
@@ -12,6 +14,10 @@ APlayerController::APlayerController()
 void APlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!PlayerCameraManager)
+	{
+		SpawnPlayerCameraManager();
+	}
 	ProcessPlayerInput(DeltaTime);
 }
 
@@ -45,7 +51,18 @@ void APlayerController::Possess(APawn* InPawn)
 	if (PossessedPawn == InPawn) return;
 	UnPossess();
 	PossessedPawn = InPawn;
-	if (PossessedPawn) PossessedPawn->PossessedBy(this);
+	if (PossessedPawn)
+	{
+		PossessedPawn->PossessedBy(this);
+		if (!PlayerCameraManager)
+		{
+			SpawnPlayerCameraManager();
+		}
+		if (PlayerCameraManager)
+		{
+			PlayerCameraManager->SetViewTarget(PossessedPawn);
+		}
+	}
 }
 
 void APlayerController::UnPossess()
@@ -73,4 +90,21 @@ void APlayerController::ClearInputState()
 {
 	std::memset(bKeyDown, 0, sizeof(bKeyDown));
 	MouseAxisX = MouseAxisY = 0.0f;
+}
+
+void APlayerController::SpawnPlayerCameraManager()
+{
+	if (GetWorld() && !PlayerCameraManager)
+	{
+		PlayerCameraManager = GetWorld()->SpawnActor<APlayerCameraManager>();
+		if (PlayerCameraManager)
+		{
+			PlayerCameraManager->SetOwnerController(this);
+
+			if (PossessedPawn)
+			{
+				PlayerCameraManager->SetViewTarget(PossessedPawn);
+			}
+		}
+	}
 }

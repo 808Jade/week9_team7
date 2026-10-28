@@ -19,6 +19,7 @@
 #include "Components/ProjectileMovementComponent.h"
 #include "Components/FireBallComponent.h"
 #include "Components/UIImageComponent.h"
+#include "Components/AudioComponent.h"
 #include "Asset/AssetManager.h"
 #include "Render/Material.h"
 #include "Render/Texture2D.h"
