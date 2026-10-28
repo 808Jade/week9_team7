@@ -1,0 +1,11 @@
+# Portal Camera Material
+
+newmtl Wall_Mount_1
+Kd 1.0 1.0 1.0
+map_Kd textures/Wall_Mount_1_Base_Color.png
+map_bump textures/Wall_Mount_1_Normal_DirectX.png
+
+newmtl Wall_Mount_2
+Kd 1.0 1.0 1.0
+map_Kd textures/Wall_Mount_2_Base_Color.png
+map_bump textures/Wall_Mount_2_Normal_DirectX.png

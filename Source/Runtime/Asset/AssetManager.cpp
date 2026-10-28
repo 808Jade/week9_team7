@@ -29,7 +29,7 @@ namespace
 		return Extension;
 	}
 
-	UStaticMesh* CreateStaticMesh(const FStaticMeshData* MeshData)
+	UStaticMesh* CreateStaticMesh(const FStaticMeshData* MeshData, bool bUseWrapSampler = false)
 	{
 		if (!MeshData || !MeshData->Vertices.Num() || !MeshData->Indices.Num())
 			return nullptr;
@@ -84,6 +84,11 @@ namespace
 				return nullptr;
 			}
 			Material->BaseColor = Slot.BaseColor;
+			if (bUseWrapSampler)
+			{
+				// MTL map_Kd/map_bump use repeating UVs unless the file explicitly says otherwise.
+				Material->SamplerState = ESamplerState::LinearWrap;
+			}
 			if (Material->BaseColor.W < 1.0f)
 			{
 				Material->BlendState = EBlendState::AlphaBlend;
@@ -445,7 +450,7 @@ UStaticMesh* UAssetManager::LoadObjStaticMesh(const FString& Path)
 	}
 
 	TUniquePtr<FStaticMeshData> Data = FObjImporter::LoadStaticMeshData(Path);
-	UStaticMesh* Mesh = CreateStaticMesh(Data.get());   // Data가 nullptr이면 nullptr 반환
+	UStaticMesh* Mesh = CreateStaticMesh(Data.get(), true);   // Data가 nullptr이면 nullptr 반환
 	if (!Mesh)
 	{
 		return nullptr;

@@ -1,0 +1,21 @@
+# Portal Camera Material
+
+newmtl Cylinder_2
+Kd 1.0 1.0 1.0
+map_Kd textures/Cylinder_2_Base_Color.png
+map_bump textures/Cylinder_2_Normal_DirectX.png
+
+newmtl Clevis_Pin_Holder
+Kd 1.0 1.0 1.0
+map_Kd textures/Clevis_Pin_Holder_Base_Color.png
+map_bump textures/Clevis_Pin_Holder_Normal_DirectX.png
+
+newmtl Clevis_Pin
+Kd 1.0 1.0 1.0
+map_Kd textures/Clevis_Pin_Base_Color.png
+map_bump textures/Clevis_Pin_Normal_DirectX.png
+
+newmtl Holder
+Kd 1.0 1.0 1.0
+map_Kd textures/Holder_Base_Color.png
+map_bump textures/Holder_Normal_DirectX.png
