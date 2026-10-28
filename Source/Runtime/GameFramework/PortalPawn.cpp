@@ -49,7 +49,7 @@ void APortalPawn::BeginPlay()
 	bIsGrounded = false;
 	bIsCrouched = false;
 	bIsSprinting = false;
-	bIsZooming = false;
+
 	CurrentEyeHeight = EyeHeight;
 	CurrentLandingDip = 0.0f;
 	LandingRecoveryScale = 1.0f;
@@ -91,7 +91,7 @@ void APortalPawn::BeginPlay()
 		{
 			DefaultFOV = 60.0f;
 		}
-		CurrentFOV = DefaultFOV;
+
 	}
 
 	// 게임 시작 시 포탈건 액터 스폰 및 카메라에 장착
@@ -157,12 +157,12 @@ void APortalPawn::Tick(float DeltaTime)
 		TeleportCooldownTimer -= DeltaTime;
 	}
 
-	// 1. 카메라 FOV 줌 보간
+
 	if (CameraComponent)
 	{
-		const float TargetFOV = bIsZooming ? ZoomedFOV : DefaultFOV;
-		CurrentFOV += (TargetFOV - CurrentFOV) * FMath::Clamp(DeltaTime * 15.0f, 0.0f, 1.0f);
-		CameraComponent->SetFieldOfView(CurrentFOV);
+
+
+
 	}
 
 	// 1-A. 카메라 Roll 수평 복구 (Roll Uprighting: 포탈 통과 후 기울어진 시야를 수평으로 부드럽게 세움)
@@ -597,6 +597,21 @@ void APortalPawn::Respawn()
 	}
 }
 
+float APortalPawn::GetZoomScale() const
+{
+	if (APlayerController* PC = GetController())
+	{
+		if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			if (DefaultFOV > 0.0f && PCM->GetCameraViewInfo().FOV > 0.0f)
+			{
+				return PCM->GetCameraViewInfo().FOV / DefaultFOV;
+			}
+		}
+	}
+	return 1.0f;
+}
+
 void APortalPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
 {
 	PendingInputVector += WorldDirection * ScaleValue;
@@ -606,7 +621,7 @@ void APortalPawn::AddControllerYawInput(float Value)
 {
 	if (!GetRootComponent()) return;
 
-	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
+	const float ZoomScale = GetZoomScale();
 	FRotator Rotation = GetActorRotation();
 	Rotation.Yaw += Value * LookSensitivity * ZoomScale;
 	GetRootComponent()->SetRelativeRotation(Rotation);
@@ -616,7 +631,7 @@ void APortalPawn::AddControllerPitchInput(float Value)
 {
 	if (!CameraComponent) return;
 
-	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
+	const float ZoomScale = GetZoomScale();
 	FRotator CamRot = CameraComponent->GetRelativeRotation();
 	CamRot.Pitch = FMath::Clamp(CamRot.Pitch + Value * LookSensitivity * ZoomScale, -89.0f, 89.0f);
 	CameraComponent->SetRelativeRotation(CamRot);

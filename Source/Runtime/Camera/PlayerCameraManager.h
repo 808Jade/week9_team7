@@ -60,12 +60,16 @@ public:
 	{
 		for (UCameraModifier* Existing : ModifierList)
 		{
-			if (T* Casted = Cast<T>(Existing))
+			if (T* Casted = dynamic_cast<T*>(Existing))
 			{
-				return Casted; // 이미 있으면 기존 것 반환
+				return Casted;
 			}
 		}
-		T* NewMod = new T();
+		T* NewMod = NewObject<T>(this);
+		if (!NewMod)
+		{
+			NewMod = new T();
+		}
 		NewMod->Init(this);
 		ModifierList.Add(NewMod);
 		return NewMod;

@@ -67,10 +67,7 @@ public:
 	void ToggleCrouch() { bIsCrouched = !bIsCrouched; }
 	bool IsCrouched() const { return bIsCrouched; }
 
-	// 줌 (Zoom)
-	void SetZooming(bool bZoom) { bIsZooming = bZoom; }
-	void ToggleZoom() { bIsZooming = !bIsZooming; }
-	bool IsZooming() const { return bIsZooming; }
+	float GetZoomScale() const;
 
 	// 사망 및 리스폰
 	void Respawn();
@@ -161,12 +158,9 @@ private:
 	// 상태 플래그
 	bool bIsSprinting = false;
 	bool bIsCrouched = false;
-	bool bIsZooming = false;
 
 	// 줌 FOV
 	float DefaultFOV = 60.0f;
-	float ZoomedFOV = 30.0f;
-	float CurrentFOV = 60.0f;
 
 	// 보유 중인 포탈건 액터
 	APortalGunActor* PortalGun = nullptr;
