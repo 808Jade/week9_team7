@@ -232211,7 +232211,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5034854412078857,
                                         "Z": 1.0
                                     }
                                 },
@@ -232315,7 +232315,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5004770755767822,
                                         "Z": 1.0
                                     }
                                 },
@@ -232627,7 +232627,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.48772335052490234,
                                         "Z": 1.0
                                     }
                                 },
@@ -232731,7 +232731,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.48646438121795654,
                                         "Z": 1.0
                                     }
                                 },
@@ -232835,7 +232835,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5037704706192017,
                                         "Z": 1.0
                                     }
                                 },
@@ -232939,7 +232939,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.49514055252075195,
                                         "Z": 1.0
                                     }
                                 },
@@ -233043,7 +233043,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5383486747741699,
                                         "Z": 1.0
                                     }
                                 },
@@ -233147,7 +233147,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.47978830337524414,
                                         "Z": 1.0
                                     }
                                 },
@@ -233251,7 +233251,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.49251627922058105,
                                         "Z": 1.0
                                     }
                                 },
@@ -233355,7 +233355,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.4997715950012207,
                                         "Z": 1.0
                                     }
                                 },
@@ -233459,7 +233459,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.502105712890625,
                                         "Z": 1.0
                                     }
                                 },
@@ -233563,7 +233563,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5135307312011719,
                                         "Z": 1.0
                                     }
                                 },
@@ -233667,7 +233667,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.5196261405944824,
                                         "Z": 1.0
                                     }
                                 },
@@ -233771,7 +233771,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 1.0,
+                                        "Y": 0.49804115295410156,
                                         "Z": 1.0
                                     }
                                 },
@@ -239872,6 +239872,375 @@
                             }
                         },
                         {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleDimOverlay",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 1594491904,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 6,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": true,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient0",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient1",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient2",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient3",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient4",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient5",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient6",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleGradient7",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 469762048,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 7,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
                             "Class": "UUITextComponent",
                             "Name": "TitleLogoText",
                             "Parent": "DefaultSceneRoot",
@@ -239909,6 +240278,566 @@
                                 "bAutoActivate": true,
                                 "bCastShadow": true,
                                 "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleLogoDivider",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294943232,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 69.12000274658203,
+                                "Layer": 20,
+                                "OffsetX": 373.3912353515625,
+                                "OffsetY": 7.679999828338623,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 6.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleLogoNumber",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4293190884,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 96.0,
+                                "Layer": 20,
+                                "OffsetX": 394.7512512207031,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.07000000029802322,
+                                "RelativeY": 0.09000000357627869,
+                                "Text": "3",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleSelectionBar",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 2776135800,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 65.5,
+                                "Layer": 15,
+                                "OffsetX": -18.0,
+                                "OffsetY": -8.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 1.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleMenuItem0",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 50.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.07000000029802322,
+                                "RelativeY": 0.5,
+                                "Text": "싱 글   플 레 이",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleMenuItem1",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 50.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.07000000029802322,
+                                "RelativeY": 0.5579999685287476,
+                                "Text": "제 작 진",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleMenuItem2",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4291348680,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 50.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.07000000029802322,
+                                "RelativeY": 0.6159999966621399,
+                                "Text": "종 료",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleFooterText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4289372310,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 18.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.07000000029802322,
+                                "RelativeY": 0.8999999761581421,
+                                "Text": "TEAM 7     Aperture Science Enrichment Center",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleHintText",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4287401100,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 16.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.8600000143051147,
+                                "RelativeY": 0.9200000166893005,
+                                "Text": "[ W / S ]  이동      [ Enter ]  선택",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": true,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleCreditsPanel",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 3104705032,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 100.0,
+                                "Layer": 15,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 200.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUIImageComponent",
+                            "Name": "TitleCreditsAccent",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294943232,
+                                "CurrentCollisionResponse": 0,
+                                "Height": 1.0,
+                                "Layer": 16,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "Width": 4.0,
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterOnViewport": false,
+                                "bHiddenInGame": false,
+                                "bMatchViewportSize": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleCreditsTitle",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4294943232,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 60.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.3800000250339508,
+                                "RelativeY": 0.5,
+                                "Text": "TEAM 7",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleCreditsLine0",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4292664540,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 40.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.3800000250339508,
+                                "RelativeY": 0.5799999833106995,
+                                "Text": "김태훈, 황성민, 김종곤, 구민상",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
+                                "bCenterVertically": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UUITextComponent",
+                            "Name": "TitleCreditsLine1",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "Color": 4287401100,
+                                "CurrentCollisionResponse": 0,
+                                "Font": "Assets/Fonts/Pretendard.json",
+                                "FontSize": 30.0,
+                                "Layer": 20,
+                                "OffsetX": 0.0,
+                                "OffsetY": 0.0,
+                                "Opacity": 1.0,
+                                "PosX": 100.0,
+                                "PosY": 100.0,
+                                "RelativeX": 0.3800000250339508,
+                                "RelativeY": 0.621999979019165,
+                                "Text": "",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bCenterHorizontally": false,
                                 "bCenterVertically": false,
                                 "bHiddenInGame": false,
                                 "bReceiveShadow": true,
@@ -242587,6 +243516,7 @@
                     "Properties": {
                         "AirAcceleration": 2.0,
                         "BrakingDeceleration": 35.0,
+                        "CameraFarZ": 100.0,
                         "CollisionRadius": 0.5,
                         "CrouchEyeHeight": 0.5,
                         "CrouchHalfHeight": 0.8999999761581421,
@@ -243211,97 +244141,7 @@
                             "Properties": {
                                 "Transform": {
                                     "Location": {
-                                        "X": 38.0,
-                                        "Y": 1.0,
-                                        "Z": 6.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 4.449651718139648,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UBoxComponent",
-                            "Name": "TriggerBox",
-                            "Parent": "DefaultSceneRoot",
-                            "Properties": {
-                                "CurrentCollisionResponse": 1,
-                                "Extent": {
-                                    "X": 2.0,
-                                    "Y": 2.0,
-                                    "Z": 2.0
-                                },
-                                "ShapeColor": 4288517599,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "ULuaScriptComponent",
-                            "Name": "ULuaScriptComponent_0",
-                            "Parent": "",
-                            "Properties": {
-                                "ScriptPath": "Scripts/NarrationTrigger.lua",
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            },
-                            "ScriptPath": "Scripts/NarrationTrigger.lua"
-                        }
-                    ],
-                    "Name": "Turret",
-                    "Properties": {
-                        "TriggerExtent": {
-                            "X": 2.0,
-                            "Y": 2.0,
-                            "Z": 2.0
-                        },
-                        "bActorEnableCollision": true,
-                        "bTriggerOnce": true
-                    }
-                },
-                {
-                    "Class": "ATriggerActor",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 47.0,
+                                        "X": 45.0,
                                         "Y": 2.0,
                                         "Z": 6.0
                                     },
@@ -243312,7 +244152,7 @@
                                     },
                                     "Scale": {
                                         "X": 1.0,
-                                        "Y": 4.449651718139648,
+                                        "Y": 0.4996110200881958,
                                         "Z": 1.0
                                     }
                                 },
