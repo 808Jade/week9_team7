@@ -174,6 +174,9 @@ private:
 	APortalGunActor* PortalGun = nullptr;
 	APortalActor* CurrentOverlappingPortal = nullptr;
 
+	// 포탈건 휘두르기 범위
+	float SwingRange = 2.2f;
+
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);
 };

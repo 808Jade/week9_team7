@@ -123,6 +123,7 @@ void APortalGunActor::Tick(float DeltaTime)
 		const FRotator StrikeRotation = GunOffsetRotation + FRotator(-15.0f, -25.0f, 35.0f);
 		if (SwingTimer < StrikeTime)
 		{
+			// 진행률
 			const float Alpha = SwingTimer / StrikeTime;
 			const float EasedAlpha = sinf(Alpha * 1.5707963f); // sin(0 ~ PI/2)
 			GunMeshComponent->SetRelativeLocation(GunOffsetLocation + (StrikeLocation - GunOffsetLocation) * EasedAlpha);
