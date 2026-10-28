@@ -199,6 +199,7 @@ void APortalCubeActor::UpdateHoldPhysics(const FVector& TargetLocation, const FR
 
 	ProjectileMovementComponent->MaxSpeed = 7.0f;
 	ProjectileMovementComponent->AddForce(SpringForce + DampingForce);
+	ProjectileMovementComponent->bSimulationEnabled = true;
 }
 
 void APortalCubeActor::TeleportThroughPortal(const FVector& NewLoc, const FRotator& NewRot, const FVector& NewVel)

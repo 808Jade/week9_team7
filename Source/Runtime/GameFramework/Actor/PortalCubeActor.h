@@ -37,7 +37,7 @@ private:
 	APawn* HoldingPawn = nullptr;
 	bool bIsGrounded = false;
 
-	float PullStrength = 120.0f;
+	float PullStrength = 240.0f;
 	float DampingRatio = 12.0f;
 	float RotationInterSpeed = 10.0f;
 
