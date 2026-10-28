@@ -12,14 +12,9 @@
 -- 1. 액터 이름별 나레이션 대사 & 음성 매핑 테이블
 -- 씬에서 TriggerActor의 이름을 아래 Key와 일치시키면 해당 음성과 자막이 출력됩니다.
 local NarrationDatabase = {
-    ["Turret"] = {
-        sound = "Assets/Audio/Turret.wav",
-        text = "터렛이 작동을 안하네요.",
-        duration = 1.0
-    },
     ["NoComplete"] = {
         sound = "Assets/Audio/NoComplete.wav",
-        text = "이렇게 쉽게 재현이 가능한 버그가 있다는건, \'미완성\' 인거죠",
+        text = "터렛이 작동을 안하네요. 이렇게 쉽게 재현이 가능한 버그가 있다는건, \'미완성\' 인거죠",
         duration = 7.0
     },
     ["Curious"] = {
