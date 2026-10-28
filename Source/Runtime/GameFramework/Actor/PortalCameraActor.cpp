@@ -87,9 +87,9 @@ void APortalCameraActor::BeginPlay()
     }
 
     CurrentYaw = 0.0f;
-    CurrentPitch = -10.0f;
+    CurrentPitch = 10.0f;   // Pitch(+) = 하향
     TargetYaw = 0.0f;
-    TargetPitch = -10.0f;
+    TargetPitch = 10.0f;
 }
 
 void APortalCameraActor::Tick(float DeltaTime)
@@ -116,8 +116,10 @@ void APortalCameraActor::Tick(float DeltaTime)
         // Yaw: 수평각 (Y / X)
         float DesiredYaw = FMath::RadiansToDegrees(std::atan2(LocalDir.Y, LocalDir.X));
         // Pitch: 수직각 (Z / 거리)
+        // 주의: 이 엔진의 FRotator는 Pitch(+)가 아래를 향함 (Forward.Z = -sin(Pitch)).
+        //       따라서 위쪽(LocalDir.Z > 0)을 보려면 음수 Pitch가 필요하므로 부호를 반전한다.
         float HorizDist = std::sqrt(LocalDir.X * LocalDir.X + LocalDir.Y * LocalDir.Y);
-        float DesiredPitch = FMath::RadiansToDegrees(std::atan2(LocalDir.Z, HorizDist));
+        float DesiredPitch = -FMath::RadiansToDegrees(std::atan2(LocalDir.Z, HorizDist));
 
         // 가동 범위 제한 (Clamping)
         TargetYaw = FMath::Clamp(DesiredYaw, -MaxYawAngle, MaxYawAngle);
@@ -132,7 +134,7 @@ void APortalCameraActor::Tick(float DeltaTime)
         // 2. 플레이어가 없을 때 부드러운 사인파 스위핑 (CCTV 탐색)
         SweepTimer += DeltaTime * SweepSpeed;
         TargetYaw = std::sin(SweepTimer) * SweepRange;
-        TargetPitch = -12.0f; // 기본 하향 응시
+        TargetPitch = 12.0f; // 기본 하향 응시 (이 엔진은 Pitch(+)가 아래)
 
         CurrentYaw = FInterpTo(CurrentYaw, TargetYaw, DeltaTime, TrackingSpeed * 0.5f);
         CurrentPitch = FInterpTo(CurrentPitch, TargetPitch, DeltaTime, TrackingSpeed * 0.5f);
