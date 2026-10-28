@@ -6,6 +6,12 @@
 #include "Asset/AssetManager.h"
 #include <chrono>
 
+namespace
+{
+	// 포탈 면 깊이를 카메라 쪽으로 당기는 NDC 깊이 바이어스.
+	constexpr float PortalDepthBias = 1.0e-6f;
+}
+
 bool FPortalSurfaceRenderer::EnsureInit()
 {
 	if (bInitialized) return true;
@@ -33,7 +39,7 @@ void FPortalSurfaceRenderer::Draw(UStaticMesh* Mesh, const FMatrix& World, const
 	Constants.World = World;
 	Constants.ViewProjection = ViewProjection;
 	Constants.PortalColor = PortalColor;
-	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, Seconds, 0.0f, 0.0f); // y = 시간
+	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, Seconds, PortalDepthBias, 0.0f); // y = 시간, z = 깊이 바이어스
 
 	RenderCommand::BindPipelineState(PipelineState);
 	RenderCommand::BindMesh(Mesh);
