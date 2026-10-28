@@ -1,10 +1,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "Math/Vector.h"
-#include "Math/Rotator.h"
-#include "Math/Matrix.h"
-#include "Math/Color.h"
+#include "CameraModifier.h"
 
 class APlayerController;
 
@@ -36,8 +33,9 @@ class APlayerCameraManager : public AActor
 	DECLARE_CLASS(APlayerCameraManager, AActor)
 
 public:
-	virtual void UpdateCamera(float DeltaTime);
 	APlayerCameraManager();
+
+	virtual void UpdateCamera(float DeltaTime);
 	virtual void Tick(float DeltaTime) override;
 	virtual void UpdateViewTarget(FViewTarget& OutVT, float DeltaTime);
 
@@ -45,22 +43,43 @@ public:
 
 	void StartCameraFade(float FromAlpha, float ToAlpha, float Duration);
 
-	void AddCameraModifier();
-	void RemoveCameraModifier();
+	void AddCameraModifier(UCameraModifier* NewModifier);
+	void RemoveCameraModifier(UCameraModifier* ModifierToRemove);
 
-	void PlayCameraShake();
+	void PlayCameraShake(float ShakePower, float Duration);
 
 	void SetOwnerController(APlayerController* InController) { PCOwner = InController; }
 	APlayerController* GetOwnerController() const { return PCOwner; }
 	const FViewTarget& GetViewTarget() const { return ViewTarget; }
 	void SetViewTarget(AActor* NewTarget);
 
-
 	const FViewInfo& GetCameraViewInfo() const { return CameraCachePrivate; }
+
+	template<typename T>
+	T* AddNewCameraModifier()
+	{
+		for (UCameraModifier* Existing : ModifierList)
+		{
+			if (T* Casted = dynamic_cast<T*>(Existing))
+			{
+				return Casted;
+			}
+		}
+		T* NewMod = NewObject<T>(this);
+		if (!NewMod)
+		{
+			NewMod = new T();
+		}
+		NewMod->Init(this);
+		ModifierList.Add(NewMod);
+		return NewMod;
+	}
 
 protected:
 	APlayerController* PCOwner = nullptr;
 	FViewTarget ViewTarget;
 	FViewTarget PendingViewTarget;
 	FViewInfo CameraCachePrivate;
+
+	TArray<UCameraModifier*> ModifierList;
 };
