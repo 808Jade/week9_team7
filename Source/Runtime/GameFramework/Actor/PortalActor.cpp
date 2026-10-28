@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
@@ -417,28 +417,32 @@ bool APortalActor::AdjustLocationForEdges(FVector& InOutLocation, const FRotator
 
 	const float HalfWidth = PortalWidth * 0.5f;
 	const float HalfHeight = PortalHeight * 0.5f;
-	const float EdgeMargin = 0.02f; // 2cm 여유
+	const float EdgeMargin = 0.01f; // 1cm 마진
 
 	FVector CurrentLocation = InOutLocation;
-	const int32 MaxIterations = 5;
+	const int32 MaxIterations = 3;
 
 	for (int32 Iter = 0; Iter < MaxIterations; ++Iter)
 	{
 		FVector PushOffset = FVector::ZeroVector;
-		bool bHitObstacle = false;
+		bool bHitBottom = false;
+		bool bHitTop = false;
+		bool bHitLeft = false;
+		bool bHitRight = false;
 
 		// 1. 인접 면(바닥, 천장, 측면 벽) 관통/묻힘 검사 (Boundary Push)
 		struct FEdgeCheck
 		{
 			FVector Dir;
 			float RequiredDist;
+			bool* OutHitFlag;
 		};
 
 		const FEdgeCheck Edges[4] = {
-			{ -Up, HalfHeight },    // 하단 (바닥면 묻힘 방지)
-			{ Up, HalfHeight },     // 상단 (천장면 묻힘 방지)
-			{ -Right, HalfWidth },  // 좌측 벽
-			{ Right, HalfWidth }    // 우측 벽
+			{ -Up, HalfHeight, &bHitBottom },    // 0: 하단 (바닥면)
+			{ Up, HalfHeight, &bHitTop },        // 1: 상단 (천장면)
+			{ -Right, HalfWidth, &bHitLeft },    // 2: 좌측 벽
+			{ Right, HalfWidth, &bHitRight }     // 3: 우측 벽
 		};
 
 		for (int32 i = 0; i < 4; ++i)
@@ -459,28 +463,51 @@ bool APortalActor::AdjustLocationForEdges(FVector& InOutLocation, const FRotator
 						continue;
 					}
 
-					const float HitDist = FVector::Distance(Start, Hit.ImpactPoint);
-					if (HitDist < Edges[i].RequiredDist)
+					const float ProjectedDist = FVector::Dot(Hit.ImpactPoint - Start, Edges[i].Dir);
+					if (ProjectedDist > 0.0f && ProjectedDist < Edges[i].RequiredDist)
 					{
-						const float Penetration = (Edges[i].RequiredDist - HitDist) + EdgeMargin;
+						const float Penetration = (Edges[i].RequiredDist - ProjectedDist) + EdgeMargin;
 						PushOffset += (-Edges[i].Dir) * Penetration;
-						bHitObstacle = true;
+						*Edges[i].OutHitFlag = true;
 					}
 				}
 			}
 		}
 
+		if (bHitBottom && bHitTop)
+		{
+			HTR_LOG(Warning, "AdjustLocationForEdges: Height clearance too narrow");
+			return false;
+		}
+
 		// 2. 모서리가 벽을 벗어나 허공에 뜨는지 검사 (Overhang Check)
 		const FVector CornerOffsets[4] = {
-			Right * (HalfWidth * 0.9f) + Up * (HalfHeight * 0.9f),
-			-Right * (HalfWidth * 0.9f) + Up * (HalfHeight * 0.9f),
-			-Right * (HalfWidth * 0.9f) - Up * (HalfHeight * 0.9f),
-			Right * (HalfWidth * 0.9f) - Up * (HalfHeight * 0.9f)
+			Right * (HalfWidth * 0.95f) + Up * (HalfHeight * 0.95f),   // 0: Top-Right
+			-Right * (HalfWidth * 0.95f) + Up * (HalfHeight * 0.95f),  // 1: Top-Left
+			-Right * (HalfWidth * 0.95f) - Up * (HalfHeight * 0.95f),  // 2: Bottom-Left
+			Right * (HalfWidth * 0.95f) - Up * (HalfHeight * 0.95f)    // 3: Bottom-Right
 		};
 
 		int32 MissingCornerCount = 0;
 		for (int32 i = 0; i < 4; ++i)
 		{
+			if (bHitBottom && (i == 2 || i == 3))
+			{
+				continue;
+			}
+			if (bHitTop && (i == 0 || i == 1))
+			{
+				continue;
+			}
+			if (bHitLeft && (i == 1 || i == 2))
+			{
+				continue;
+			}
+			if (bHitRight && (i == 0 || i == 3))
+			{
+				continue;
+			}
+
 			const FVector CornerPos = CurrentLocation + CornerOffsets[i];
 			const FRay BackRay{ CornerPos + SurfaceNormal * 0.1f, -SurfaceNormal };
 			FHitResult Hit;
@@ -488,7 +515,7 @@ bool APortalActor::AdjustLocationForEdges(FVector& InOutLocation, const FRotator
 			if (!GetWorld()->SweepSingle(BackRay, 0.3f, 0.0f, Hit, const_cast<APortalActor*>(this)))
 			{
 				MissingCornerCount++;
-				PushOffset -= CornerOffsets[i] * 0.3f;
+				PushOffset -= CornerOffsets[i].GetSafeNormal() * 0.05f;
 			}
 		}
 
@@ -498,16 +525,13 @@ bool APortalActor::AdjustLocationForEdges(FVector& InOutLocation, const FRotator
 			return false;
 		}
 
-		if (!bHitObstacle && MissingCornerCount == 0)
+		if (PushOffset.SizeSquared() < 1e-4f)
 		{
 			InOutLocation = CurrentLocation;
 			return true;
 		}
 
-		if (PushOffset.SizeSquared() > 1e-4f)
-		{
-			CurrentLocation += PushOffset;
-		}
+		CurrentLocation += PushOffset;
 
 		if (FVector::Distance(CurrentLocation, InOutLocation) > HalfHeight * 1.2f)
 		{
