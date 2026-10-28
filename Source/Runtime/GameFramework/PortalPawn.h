@@ -68,10 +68,7 @@ public:
 	void ToggleCrouch() { bIsCrouched = !bIsCrouched; }
 	bool IsCrouched() const { return bIsCrouched; }
 
-	// 줌 (Zoom)
-	void SetZooming(bool bZoom) { bIsZooming = bZoom; }
-	void ToggleZoom() { bIsZooming = !bIsZooming; }
-	bool IsZooming() const { return bIsZooming; }
+	float GetZoomScale() const;
 
 	// 사망 및 리스폰
 	void Respawn();
@@ -137,6 +134,7 @@ private:
 
 	// 시각적 연출: 착지 반동 & 헤드 밥빙
 	float CurrentLandingDip = 0.0f;        // 착지 시 카메라가 아래로 내려앉는 오프셋
+	float LandingRecoveryScale = 1.0f;     // 낙하 속도에 따른 착지 딥 복귀 시간 배율
 	bool bEnableHeadBob = true;            // 헤드 밥빙 활성화 여부
 	float BobTimer = 0.0f;                 // 밥빙 타이머
 	float BobAmountVertical = 0.03f;       // 밥빙 상하 흔들림 폭 (3cm)
@@ -162,12 +160,9 @@ private:
 	// 상태 플래그
 	bool bIsSprinting = false;
 	bool bIsCrouched = false;
-	bool bIsZooming = false;
 
 	// 줌 FOV
 	float DefaultFOV = 60.0f;
-	float ZoomedFOV = 30.0f;
-	float CurrentFOV = 60.0f;
 
 	// 보유 중인 포탈건 액터
 	APortalGunActor* PortalGun = nullptr;

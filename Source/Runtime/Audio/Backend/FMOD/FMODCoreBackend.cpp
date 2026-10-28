@@ -42,6 +42,7 @@ void FFMODCoreBackend::Update()
         CoreSystem->update();
     }
 
+    TArray<int32> StoppedVoices;
     for(std::pair<int32, FMOD::Channel*> Voice : VoiceMap)
     {
         bool bIsPlaying = false;
@@ -52,8 +53,13 @@ void FFMODCoreBackend::Update()
 
         if(!bIsPlaying)
         {
-            VoiceMap.Remove(Voice.first);
+            StoppedVoices.Add(Voice.first);
         }
+    }
+
+    for(int32 VoiceID : StoppedVoices)
+    {
+        VoiceMap.Remove(VoiceID);
     }
 }
 
@@ -136,11 +142,7 @@ void FFMODCoreBackend::Stop(int32 VoiceID)
 
 void FFMODCoreBackend::StopAll()
 {
-    for(std::pair<int32, FMOD::Channel*> Voice : VoiceMap)
-    {
-        Voice.second->stop();
-        VoiceMap.Remove(Voice.first);
-    }
+    VoiceMap.Empty();
 }
 
 void FFMODCoreBackend::SetPaused(int32 VoiceID, bool bPaused)

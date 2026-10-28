@@ -8,6 +8,7 @@ class APortalCubeActor;
 class APortalPawn;
 class APortalActor;
 struct FHitResult;
+class UCameraModifier_Recoil;
 
 enum class EPortalType : int32
 {
@@ -41,7 +42,7 @@ public:
 	void AttachToPawn(APortalPawn* InOwnerPawn);
 
 	// 세부 동작
-	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult);
+	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
 	void ResetPortals();
@@ -78,6 +79,7 @@ private:
 
 	// FRotator(Pitch(상하), Yaw(좌우), Roll(기울기))
 	FRotator GunOffsetRotation = FRotator(0.0f, 180.0f, 0.0f);
+	UCameraModifier_Recoil* RecoilModifier = nullptr;
 
 	// ===== 홀드 레이저 =====
 	// 총구 → 큐브를 2차 베지어 곡선으로 잇는다.
@@ -110,4 +112,6 @@ private:
 	static FVector QuadBezier(const FVector& P0, const FVector& P1, const FVector& P2, float T);
 	// 원기둥(로컬 Z축, 높이 1, 반지름 1)을 Start→End 방향으로 늘려 배치
 	static void PlaceCylinder(UStaticMeshComponent* Comp, const FVector& Start, const FVector& End, float Radius);
+
+	void PlayFireSound(EPortalType Type);
 };

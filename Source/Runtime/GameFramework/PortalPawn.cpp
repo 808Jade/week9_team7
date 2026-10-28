@@ -6,6 +6,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+#include "PlayerController.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
@@ -38,14 +40,32 @@ APortalPawn::APortalPawn()
 void APortalPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 구버전 씬(DefaultSceneRoot / BoxComponet 계층)으로 저장된 PortalPawn을 로드하면
+	// 직렬화 과정에서 CameraComponent가 루트가 아닌 오프셋된 컴포넌트에 다시 붙는다.
+	// 그러면 Yaw 회전 시 카메라가 캡슐 중심을 축으로 공전하므로, 1인칭 계층을 강제로 복구한다.
+	if (CapsuleComponent && GetRootComponent() != CapsuleComponent)
+	{
+		CapsuleComponent->DetachFromParent(EAttachmentRule::KeepWorld);
+		SetRootComponent(CapsuleComponent);
+	}
+	if (CameraComponent && CapsuleComponent && CameraComponent->GetAttachParent() != CapsuleComponent)
+	{
+		CameraComponent->SetupAttachment(CapsuleComponent, EAttachmentRule::KeepRelative);
+	}
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
 	bIsGrounded = false;
 	bIsCrouched = false;
 	bIsSprinting = false;
-	bIsZooming = false;
+
 	CurrentEyeHeight = EyeHeight;
 	CurrentLandingDip = 0.0f;
+	LandingRecoveryScale = 1.0f;
 	CurrentBobX = 0.0f;
 	CurrentBobZ = 0.0f;
 	BobTimer = 0.0f;
@@ -84,7 +104,7 @@ void APortalPawn::BeginPlay()
 		{
 			DefaultFOV = 60.0f;
 		}
-		CurrentFOV = DefaultFOV;
+
 	}
 
 	// 게임 시작 시 포탈건 액터 스폰 및 카메라에 장착
@@ -150,12 +170,12 @@ void APortalPawn::Tick(float DeltaTime)
 		TeleportCooldownTimer -= DeltaTime;
 	}
 
-	// 1. 카메라 FOV 줌 보간
+
 	if (CameraComponent)
 	{
-		const float TargetFOV = bIsZooming ? ZoomedFOV : DefaultFOV;
-		CurrentFOV += (TargetFOV - CurrentFOV) * FMath::Clamp(DeltaTime * 15.0f, 0.0f, 1.0f);
-		CameraComponent->SetFieldOfView(CurrentFOV);
+
+
+
 	}
 
 	// 1-A. 카메라 Roll 수평 복구 (Roll Uprighting: 포탈 통과 후 기울어진 시야를 수평으로 부드럽게 세움)
@@ -186,11 +206,13 @@ void APortalPawn::Tick(float DeltaTime)
 	// 3. 착지 충격 반동 (Landing Dip) 복구
 	if (CurrentLandingDip > 0.001f)
 	{
-		CurrentLandingDip += (0.0f - CurrentLandingDip) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
+		const float RecoverySpeed = 12.0f / LandingRecoveryScale;
+		CurrentLandingDip += (0.0f - CurrentLandingDip) * FMath::Clamp(DeltaTime * RecoverySpeed, 0.0f, 1.0f);
 	}
 	else
 	{
 		CurrentLandingDip = 0.0f;
+		LandingRecoveryScale = 1.0f;
 	}
 
 	// 4. 헤드 밥빙 (Head Bobbing) 계산
@@ -433,15 +455,29 @@ void APortalPawn::Tick(float DeltaTime)
 			{
 				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
 				{
-					// 착지 충격 반동 (Landing Dip): 낙하 속도에 비례해 카메라를 아래로 살짝 쿵 내려앉힘
+					// 착지 충격 반동
 					const float ImpactSpeed = -Velocity.Z;
-					if (ImpactSpeed > 2.0f)
+					if (ImpactSpeed > 3.0f)
 					{
-						const float TargetDip = FMath::Clamp((ImpactSpeed - 2.0f) * 0.025f, 0.04f, 0.2f);
+						const float ExtraImpactSpeed = FMath::Max(ImpactSpeed - JumpVelocity, 0.0f);
+						float ImpactScale = 1.0f + ExtraImpactSpeed * 0.05f;
+						if (ImpactScale > 1.9f)
+							ImpactScale = 1.9f;
+						const float TargetDip = FMath::Max((ImpactSpeed - 2.0f) * 0.06f, 0.015f) * ImpactScale;
 						CurrentLandingDip = FMath::Max(CurrentLandingDip, TargetDip);
+						LandingRecoveryScale = FMath::Max(LandingRecoveryScale, ImpactScale);
+
+						if (APlayerController* PC = GetController())
+						{
+							if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+							{
+								const float ShakePower = FMath::Max(ImpactSpeed * 1.2f, 1.0f) * ImpactScale;
+								const float ShakeDuration = 0.3f + ExtraImpactSpeed * 0.035f;
+								PCM->PlayCameraShake(ShakePower, ShakeDuration);
+							}
+						}
 					}
 
-					// 바닥 착지 성공!
 					bIsGrounded = true;
 					Velocity.Z = 0.0f;
 				}
@@ -560,6 +596,7 @@ void APortalPawn::Respawn()
 	PendingInputVector = FVector::ZeroVector;
 	bIsGrounded = false;
 	CurrentLandingDip = 0.0f;
+	LandingRecoveryScale = 1.0f;
 	CurrentBobX = 0.0f;
 	CurrentBobZ = 0.0f;
 	BobTimer = 0.0f;
@@ -573,6 +610,21 @@ void APortalPawn::Respawn()
 	}
 }
 
+float APortalPawn::GetZoomScale() const
+{
+	if (APlayerController* PC = GetController())
+	{
+		if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			if (DefaultFOV > 0.0f && PCM->GetCameraViewInfo().FOV > 0.0f)
+			{
+				return PCM->GetCameraViewInfo().FOV / DefaultFOV;
+			}
+		}
+	}
+	return 1.0f;
+}
+
 void APortalPawn::AddMovementInput(const FVector& WorldDirection, float ScaleValue)
 {
 	PendingInputVector += WorldDirection * ScaleValue;
@@ -582,7 +634,7 @@ void APortalPawn::AddControllerYawInput(float Value)
 {
 	if (!GetRootComponent()) return;
 
-	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
+	const float ZoomScale = GetZoomScale();
 	FRotator Rotation = GetActorRotation();
 	Rotation.Yaw += Value * LookSensitivity * ZoomScale;
 	GetRootComponent()->SetRelativeRotation(Rotation);
@@ -592,7 +644,7 @@ void APortalPawn::AddControllerPitchInput(float Value)
 {
 	if (!CameraComponent) return;
 
-	const float ZoomScale = (DefaultFOV > 0.0f) ? (CurrentFOV / DefaultFOV) : 1.0f;
+	const float ZoomScale = GetZoomScale();
 	FRotator CamRot = CameraComponent->GetRelativeRotation();
 	CamRot.Pitch = FMath::Clamp(CamRot.Pitch + Value * LookSensitivity * ZoomScale, -89.0f, 89.0f);
 	CameraComponent->SetRelativeRotation(CamRot);
@@ -696,7 +748,7 @@ void APortalPawn::FirePortal(EPortalType Type)
 		}
 	}
 
-	PortalGun->FirePortal(Type, Hit);
+	PortalGun->FirePortal(Type, Hit, RayDir);
 }
 
 void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
