@@ -38,6 +38,23 @@ APortalPawn::APortalPawn()
 void APortalPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 구버전 씬(DefaultSceneRoot / BoxComponet 계층)으로 저장된 PortalPawn을 로드하면
+	// 직렬화 과정에서 CameraComponent가 루트가 아닌 오프셋된 컴포넌트에 다시 붙는다.
+	// 그러면 Yaw 회전 시 카메라가 캡슐 중심을 축으로 공전하므로, 1인칭 계층을 강제로 복구한다.
+	if (CapsuleComponent && GetRootComponent() != CapsuleComponent)
+	{
+		CapsuleComponent->DetachFromParent(EAttachmentRule::KeepWorld);
+		SetRootComponent(CapsuleComponent);
+	}
+	if (CameraComponent && CapsuleComponent && CameraComponent->GetAttachParent() != CapsuleComponent)
+	{
+		CameraComponent->SetupAttachment(CapsuleComponent, EAttachmentRule::KeepRelative);
+	}
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
 	bIsGrounded = false;
