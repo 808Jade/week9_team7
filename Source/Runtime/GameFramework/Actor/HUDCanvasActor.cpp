@@ -61,7 +61,7 @@ AHUDCanvasActor::AHUDCanvasActor()
 	SubtitleText->SetFont(UAssetManager::GetAssetByPath<UFont>("Fonts/Pretendard.json"));
 	SubtitleText->SetCenterHorizontally(true);
 	SubtitleText->SetRelativeY(0.88f);
-	SubtitleText->SetColor(FColor(255, 230, 100, 255));
+	SubtitleText->SetColor(FColor(255, 255, 255, 255));
 	SubtitleText->SetLayer(20);
 	SubtitleText->SetVisibility(false);
 
