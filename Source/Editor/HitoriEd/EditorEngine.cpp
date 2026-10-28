@@ -34,6 +34,7 @@
 #include "Components/ShapeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Actor/CanvasActor.h"
 #include "Components/UIImageComponent.h"
 #include "Components/UITextComponent.h"
