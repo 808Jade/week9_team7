@@ -26,6 +26,8 @@ public:
 	virtual void PressButton();
 	virtual void ReleaseButton();
 
+	void PlayButtonPressedSound();
+
 	bool IsPressed() const { return bIsPressed; }
 
 	FOnButtonPressed OnButtonPressed;

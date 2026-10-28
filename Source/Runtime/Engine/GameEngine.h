@@ -26,6 +26,9 @@ public:
 	// 감마 보정 등 화면 후처리 설정. 토글 키나 시네마틱 스크립트가 여기서 값을 바꾼다.
 	FPostProcessSettings& GetPostProcessSettings() { return PostProcess; }
 
+	bool IsFXAAEnabled() const { return bEnableFXAA; }
+	void SetEnableFXAA(bool bEnable) { bEnableFXAA = bEnable; }
+
 private:
 	UGameInstance* GameInstance = nullptr;
 	UWorld* GameWorld = nullptr;
@@ -37,6 +40,8 @@ private:
 	TUniquePtr<FFXAARenderer> FXAARenderer;
 
 	FPostProcessSettings PostProcess;
+
+	bool bEnableFXAA = true;
 
 	// ImGui 프레임워크 상태
 	bool bImGuiInitialized = false;

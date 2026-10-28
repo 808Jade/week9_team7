@@ -46,6 +46,7 @@ public:
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
 	void ResetPortals();
+	void PlayFailSound();
 
 	UStaticMeshComponent* GetGunMeshComponent() const { return GunMeshComponent; }
 	const bool IsHoldingCube() { return HeldCube != nullptr; }
@@ -114,4 +115,8 @@ private:
 	static void PlaceCylinder(UStaticMeshComponent* Comp, const FVector& Start, const FVector& End, float Radius);
 
 	void PlayFireSound(EPortalType Type);
+	void StartHoldSound();
+	void StopHoldSound();
+
+	int32 HoldVoiceID = -1;
 };

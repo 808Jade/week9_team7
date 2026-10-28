@@ -26,7 +26,7 @@ struct FEditorSettings
 	bool bDrawBatchLine = true;
 	bool bDrawCascadeBounds = false;
 	bool bDrawPSGrid = false;
-	bool bEnableFXAA = false;
+	bool bEnableFXAA = true;
 	FPostProcessSettings PostProcess; // Gamma Correction 등 후처리
 	ELightCullingMode LightCullingMode = ELightCullingMode::Tiled;
 	ERenderingPath RenderingPath = ERenderingPath::Deferred;

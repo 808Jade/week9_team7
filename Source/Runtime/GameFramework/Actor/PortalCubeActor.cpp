@@ -5,6 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 #include "Asset/AssetManager.h"
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
 
 APortalCubeActor::APortalCubeActor()
 {
@@ -44,6 +46,7 @@ void APortalCubeActor::BeginPlay()
 	PreviousLocation = GetActorLocation();
 	if(BoxComponent)
 	{
+		BoxComponent->OnComponentHit.AddDynamic(this, &APortalCubeActor::OnHit);
 		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APortalCubeActor::OnBeginOverlap);
 		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &APortalCubeActor::OnEndOverlap);	
 	}
@@ -65,6 +68,11 @@ void APortalCubeActor::Tick(float DeltaTime)
 	if(TeleportCooldownTimer > 0.0f)
 	{
 		TeleportCooldownTimer -= DeltaTime;
+	}
+
+	if(ImpactCooldownTimer > 0.0f)
+	{
+		ImpactCooldownTimer -= DeltaTime;
 	}
 
 	const FVector CurrentLocation = GetActorLocation();
@@ -242,5 +250,43 @@ void APortalCubeActor::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 		{
 			ProjectileMovementComponent->bSweepCollision = true;
 		}
+	}
+}
+
+void APortalCubeActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
+{
+	if (ImpactCooldownTimer > 0.0f)
+	{
+		return;
+	}
+
+	if (Cast<APawn>(OtherActor))
+	{
+		return;
+	}
+
+	const float Speed = ProjectileMovementComponent ? ProjectileMovementComponent->Velocity.Size() : 0.0f;
+	if (Speed < 0.8f)
+	{
+		return;
+	}
+
+	PlayImpactSound(Speed);
+	ImpactCooldownTimer = 0.15f;
+}
+
+void APortalCubeActor::PlayImpactSound(float Speed)
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/impact.mp3");
+	if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{
+		const float Volume = FMath::Clamp(Speed / 8.0f, 0.3f, 1.0f);
+		AudioBackend->Play(SoundWave->GetSoundID(), false, Volume, 1.0f, true, GetActorLocation(), 2.0f, 50.0f);
 	}
 }

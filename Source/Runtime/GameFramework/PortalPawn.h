@@ -175,6 +175,13 @@ private:
 	APortalGunActor* PortalGun = nullptr;
 	APortalActor* CurrentOverlappingPortal = nullptr;
 
+	int32 WalkVoiceID = -1;
+	float WalkStopDelayTimer = 0.0f;
+
+	void PlayLandSound(float ImpactSpeed);
+	void PlayWarpSound();
+	void UpdateWalkSound(float DeltaTime);
+
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);
 };

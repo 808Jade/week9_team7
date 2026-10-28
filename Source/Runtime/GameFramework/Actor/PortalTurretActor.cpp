@@ -78,6 +78,8 @@ APortalTurretActor::APortalTurretActor()
     {
         RightGunsMesh->SetStaticMesh(Mesh);
     }
+
+    SetWingOpenAlpha(bStartDeployed ? 1.0f : 0.0f);
 }
 
 void APortalTurretActor::BeginPlay()
@@ -163,37 +165,46 @@ void APortalTurretActor::SetWingOpenAlpha(float Alpha)
 {
     WingOpenAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
 
-    // 좌/우 날개 회전:
-    // LeftWing: 바깥(-Y)으로 회전 (Yaw = -MaxWingOpenAngle * Alpha)
-    // RightWing: 바깥(+Y)으로 회전 (Yaw = +MaxWingOpenAngle * Alpha)
+    const float ClosedWingY = 0.1930f;
+    const float OpenWingY = 0.3594f;
+    const float CurrentWingY = ClosedWingY + (OpenWingY - ClosedWingY) * WingOpenAlpha;
+
     if (LeftWingMesh)
     {
+        LeftWingMesh->SetRelativeLocation(FVector(InitialLeftWingLoc.X, -CurrentWingY, InitialLeftWingLoc.Z));
         LeftWingMesh->SetRelativeRotation(FRotator(0.0f, -MaxWingOpenAngle * WingOpenAlpha, 0.0f));
     }
     if (RightWingMesh)
     {
+        RightWingMesh->SetRelativeLocation(FVector(InitialRightWingLoc.X, CurrentWingY, InitialRightWingLoc.Z));
         RightWingMesh->SetRelativeRotation(FRotator(0.0f, MaxWingOpenAngle * WingOpenAlpha, 0.0f));
     }
 
-    // 좌/우 총기 전방 돌출:
-    // Guns: 앞으로 튀어나오면서 날개 오픈에 맞춰 살짝 바깥으로 벌어짐
+    const float ClosedGunY = 0.1000f;
+    const float OpenGunY = 0.2210f;
+    const float CurrentGunY = ClosedGunY + (OpenGunY - ClosedGunY) * WingOpenAlpha;
+
+    const float ClosedGunX = 0.1800f;
+    const float OpenGunX = InitialLeftGunsLoc.X + GunsExtendDistance;
+    const float CurrentGunX = ClosedGunX + (OpenGunX - ClosedGunX) * WingOpenAlpha;
+
     if (LeftGunsMesh)
     {
-        FVector Loc = InitialLeftGunsLoc + FVector(GunsExtendDistance * WingOpenAlpha, -0.015f * WingOpenAlpha, 0.0f);
-        LeftGunsMesh->SetRelativeLocation(Loc);
+        LeftGunsMesh->SetRelativeLocation(FVector(CurrentGunX, -CurrentGunY, InitialLeftGunsLoc.Z));
     }
     if (RightGunsMesh)
     {
-        FVector Loc = InitialRightGunsLoc + FVector(GunsExtendDistance * WingOpenAlpha, 0.015f * WingOpenAlpha, 0.0f);
-        RightGunsMesh->SetRelativeLocation(Loc);
+        RightGunsMesh->SetRelativeLocation(FVector(CurrentGunX, CurrentGunY, InitialRightGunsLoc.Z));
     }
 }
 
 void APortalTurretActor::UpdateAnimation(float DeltaTime)
 {
+    float CurrentSpeed = (TargetAlpha > WingOpenAlpha) ? DeploySpeed : RetractSpeed;
+
     if (std::abs(WingOpenAlpha - TargetAlpha) > 0.001f)
     {
-        float NewAlpha = FInterpTo(WingOpenAlpha, TargetAlpha, DeltaTime, DeploySpeed);
+        float NewAlpha = FInterpTo(WingOpenAlpha, TargetAlpha, DeltaTime, CurrentSpeed);
         SetWingOpenAlpha(NewAlpha);
 
         if (std::abs(WingOpenAlpha - TargetAlpha) <= 0.001f)
@@ -216,18 +227,16 @@ void APortalTurretActor::UpdateDetection(float DeltaTime)
     AActor* Target = FindTargetPlayer();
     if (Target)
     {
-        Deploy();
-        AlertTimer = 2.5f; // 감지 중에는 경계 타이머 리셋
+        if (State != ETurretState::Alert && State != ETurretState::Deploying)
+        {
+            Deploy();
+        }
     }
     else
     {
-        if (AlertTimer > 0.0f)
+        if (State != ETurretState::Searching && State != ETurretState::Retracting)
         {
-            AlertTimer -= DeltaTime;
-            if (AlertTimer <= 0.0f)
-            {
-                Retract();
-            }
+            Retract();
         }
     }
 }
