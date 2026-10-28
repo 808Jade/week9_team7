@@ -65,6 +65,14 @@ void UUIImageComponent::SubmitToRenderQueue(FRenderQueue& RenderQueue, const FVi
 		ActualX = (ViewportWidth - Width) * 0.5f + OffsetX;
 		ActualY = (ViewportHeight - Height) * 0.5f + OffsetY;
 	}
+	else if (bUseRelativeRect)
+	{
+		// 뷰포트 비율 기반 배치 (해상도가 바뀌어도 같은 위치/비율 유지)
+		ActualX = ViewportWidth * RelativeX + OffsetX;
+		ActualY = ViewportHeight * RelativeY + OffsetY;
+		if (RelativeW > 0.0f) ActualW = ViewportWidth * RelativeW;
+		if (RelativeH > 0.0f) ActualH = ViewportHeight * RelativeH;
+	}
 
 	UIConstants.Rect = FVector4(ActualX, ActualY, ActualW, ActualH);
 	UIConstants.ViewportSize = FVector4(ViewportWidth, ViewportHeight, 0.0f, 0.0f);
