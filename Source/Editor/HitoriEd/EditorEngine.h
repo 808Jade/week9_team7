@@ -35,6 +35,7 @@
 #include "Editor/Rendering/Outline.h"
 #include "Editor/Rendering/OutLineRenderer.h"
 #include "Editor/Outliner/OutlinerPanel.h"
+#include "Editor/Sequencer/SequencerPanel.h"
 
 #include "Render/SkyboxRenderer.h"
 
@@ -179,6 +180,7 @@ private:
 	TArray<FEditorViewportClient*> AllViewportClients;
 	FOutlinerPanel* OutlinerPanel = nullptr;
 	FContentDrawerPanel* ContentDrawerPanel = nullptr;
+	FSequencerPanel* SequencerPanel = nullptr;
 
 	UWorld* EditorWorld = nullptr;
 	UWorld* PlayWorld = nullptr;

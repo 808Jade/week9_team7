@@ -242,7 +242,7 @@ void AHUDCanvasActor::DrawSettingsWindow()
 
 	ImVec2 Center(ViewportW * 0.5f, ViewportH * 0.5f);
 	ImGui::SetNextWindowPos(Center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-	ImGui::SetNextWindowSize(ImVec2(440.0f, 240.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(880.0f, 480.0f), ImGuiCond_Always);
 
 	ImGuiWindowFlags WindowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 	if (ImGui::Begin(U8("설정 (Settings)"), nullptr, WindowFlags))

@@ -1,0 +1,31 @@
+{
+    "SequenceName": "SampleSequence",
+    "Duration": 10.0,
+    "FrameRate": 30.0,
+    "Tracks": [
+        {
+            "ActorName": "DefaultActor",
+            "TrackType": "Transform",
+            "Keys": [
+                {
+                    "Time": 0.0,
+                    "Location": [0.0, 0.0, 0.0],
+                    "Rotation": [0.0, 0.0, 0.0],
+                    "Scale": [1.0, 1.0, 1.0]
+                },
+                {
+                    "Time": 5.0,
+                    "Location": [0.0, 200.0, 50.0],
+                    "Rotation": [0.0, 90.0, 0.0],
+                    "Scale": [1.5, 1.5, 1.5]
+                },
+                {
+                    "Time": 10.0,
+                    "Location": [0.0, 0.0, 0.0],
+                    "Rotation": [0.0, 180.0, 0.0],
+                    "Scale": [1.0, 1.0, 1.0]
+                }
+            ]
+        }
+    ]
+}

@@ -3,6 +3,7 @@
 #include "Asset/AssetManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/CombatConfig.h"
 #include "Core/EngineLog.h"
 #include <cmath>
 
@@ -26,38 +27,44 @@ const FVector APortalTurretActor::EyeOffset           = FVector(0.2847f,  0.0000
 APortalTurretActor::APortalTurretActor()
 {
     PrimaryActorTick.bCanEverTick = true;
+    SetActorEnableCollision(true);
 
-    // 1. Body Mesh (본체 프레임, 다리, 눈, 안테나 - 루트 컴포넌트)
+    // 1. Collision Box (터렛 전체 충돌체 - 루트 컴포넌트, 높이 1.74m 중심 Z=0)
+    CollisionBox = CreateDefaultSubobject<UBoxComponent>("CollisionBox");
+    CollisionBox->SetBoxExtent(FVector(0.45f, 0.35f, 0.87f));
+    CollisionBox->SetCurrentCollisionResponse(ECollisionResponse::Block);
+    SetRootComponent(CollisionBox);
+
+    // 2. Body Mesh (본체 프레임, 다리, 눈, 안테나 - CollisionBox 바닥 Z=-0.87m에 정렬)
     BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>("BodyMesh");
-    SetRootComponent(BodyMesh);
+    BodyMesh->SetupAttachment(CollisionBox);
+    BodyMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -0.87f));
 
-    // 2. Left Wing Mesh (좌측 날개 커버 - 힌지 피벗 위치 부착)
+    // 3. Left Wing Mesh (좌측 날개 커버 - 힌지 피벗 위치 부착)
     LeftWingMesh = CreateDefaultSubobject<UStaticMeshComponent>("LeftWingMesh");
     LeftWingMesh->SetupAttachment(BodyMesh);
     LeftWingMesh->SetRelativeLocation(InitialLeftWingLoc);
 
-    // 3. Right Wing Mesh (우측 날개 커버 - 힌지 피벗 위치 부착)
+    // 4. Right Wing Mesh (우측 날개 커버 - 힌지 피벗 위치 부착)
     RightWingMesh = CreateDefaultSubobject<UStaticMeshComponent>("RightWingMesh");
     RightWingMesh->SetupAttachment(BodyMesh);
     RightWingMesh->SetRelativeLocation(InitialRightWingLoc);
 
-    // 4. Left Guns Mesh (좌측 기관총 유닛)
+    // 5. Left Guns Mesh (좌측 기관총 유닛)
     LeftGunsMesh = CreateDefaultSubobject<UStaticMeshComponent>("LeftGunsMesh");
     LeftGunsMesh->SetupAttachment(BodyMesh);
     LeftGunsMesh->SetRelativeLocation(InitialLeftGunsLoc);
 
-    // 5. Right Guns Mesh (우측 기관총 유닛)
+    // 6. Right Guns Mesh (우측 기관총 유닛)
     RightGunsMesh = CreateDefaultSubobject<UStaticMeshComponent>("RightGunsMesh");
     RightGunsMesh->SetupAttachment(BodyMesh);
     RightGunsMesh->SetRelativeLocation(InitialRightGunsLoc);
 
-    // 6. Collision Box (터렛 전체 충돌체, 높이 1.74m 중심 Z=0.87m)
-    CollisionBox = CreateDefaultSubobject<UBoxComponent>("CollisionBox");
-    CollisionBox->SetupAttachment(BodyMesh);
-    CollisionBox->SetBoxExtent(FVector(0.60f, 0.40f, 0.87f));
-    CollisionBox->SetRelativeLocation(FVector(0.0f, 0.0f, 0.87f));
+    // 7. Lua Script Component (터렛 스크립트 연결)
+    LuaScriptComponent = CreateDefaultSubobject<ULuaScriptComponent>("LuaScriptComponent");
+    LuaScriptComponent->SetScriptPath("Scripts/PortalTurret.lua");
 
-    // 7. 기본 3D 메시 로드
+    // 8. 기본 3D 메시 로드
     if (UStaticMesh* Mesh = UAssetManager::LoadObjStaticMesh("Assets/Models/PortalTurret/portal_turret_body.obj"))
     {
         BodyMesh->SetStaticMesh(Mesh);
@@ -120,6 +127,73 @@ void APortalTurretActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    const FCombatConfig& Config = FCombatConfig::Get();
+
+    // 1. 중력 적용 (공중에 떠 있거나 넉백 중일 때)
+    if (!bIsGrounded || Velocity.Z > 0.0f)
+    {
+        Velocity.Z -= Config.Gravity * DeltaTime;
+    }
+
+    // 2. 넉백 이동 & 충돌 스위프 (벽/바닥 충돌 감지)
+    const FVector DeltaMove = Velocity * DeltaTime;
+    if (DeltaMove.SizeSquared() > 1e-8f && GetRootComponent())
+    {
+        FHitResult Hit;
+        GetRootComponent()->MoveComponent(DeltaMove, GetActorRotation(), true, &Hit);
+
+        if (Hit.bBlockingHit)
+        {
+            // 바닥 충돌 (아래로 떨어지다 바닥에 닿음)
+            if (Hit.ImpactNormal.Z > 0.5f && Velocity.Z <= 0.0f)
+            {
+                bIsGrounded = true;
+                Velocity.Z = 0.0f;
+            }
+            // 천장 충돌
+            else if (Hit.ImpactNormal.Z < -0.5f && Velocity.Z > 0.0f)
+            {
+                Velocity.Z = 0.0f;
+            }
+
+            // 벽면 충돌 (수평 이동 중 벽에 부딪힘)
+            if (Hit.ImpactNormal.Z <= 0.5f)
+            {
+                Velocity.X = 0.0f;
+                Velocity.Y = 0.0f;
+            }
+        }
+        else
+        {
+            bIsGrounded = false;
+        }
+    }
+
+    // 지상 마찰 감속
+    if (bIsGrounded)
+    {
+        Velocity.X *= FMath::Clamp(1.0f - Config.GroundFriction * DeltaTime, 0.0f, 1.0f);
+        Velocity.Y *= FMath::Clamp(1.0f - Config.GroundFriction * DeltaTime, 0.0f, 1.0f);
+    }
+
+    // 스쿼시 크기 원래대로 복원 (BodyMesh 기준)
+    if (BodyMesh)
+    {
+        FVector CurrentScale = BodyMesh->GetRelativeScale3D();
+        const FVector TargetScale = FVector(1.0f, 1.0f, 1.0f);
+        const float Alpha = FMath::Clamp(Config.SquashRecoverySpeed * DeltaTime, 0.0f, 1.0f);
+        FVector NewScale = CurrentScale + (TargetScale - CurrentScale) * Alpha;
+        BodyMesh->SetRelativeScale3D(NewScale);
+
+        // 넉백과 스쿼시가 모두 끝나면 피격 플래그 리셋 (다시 맞을 수 있도록)
+        if (bIsHit && bIsGrounded && Velocity.SizeSquared() < 0.01f && (CurrentScale - TargetScale).SizeSquared() < 0.001f)
+        {
+            BodyMesh->SetRelativeScale3D(TargetScale);
+            Velocity = FVector::ZeroVector;
+            bIsHit = false;
+        }
+    }
+
     CheckTippedState();
 
     if (State != ETurretState::Tipped)
@@ -131,6 +205,91 @@ void APortalTurretActor::Tick(float DeltaTime)
     }
 
     UpdateAnimation(DeltaTime);
+}
+
+void APortalTurretActor::OnHit(const FVector& Direction, const FVector& ImpactPoint)
+{
+    if (bIsHit) return;
+    bIsHit = true;
+    bIsGrounded = false;
+
+    const FCombatConfig& Config = FCombatConfig::Get();
+
+    // 1. 히트스탑
+    if (GetWorld())
+    {
+        GetWorld()->SetTimeDilation(Config.HitStopDuration, Config.HitStopTimeDilation);
+    }
+
+    // 2. 히트 스쿼시
+    ApplyHitSquash(Direction);
+
+    // 3. 넉백 속도 계산
+    FVector HorizDir = FVector(Direction.X, Direction.Y, 0.0f);
+    if (HorizDir.SizeSquared() > 1e-4f)
+    {
+        HorizDir = HorizDir.Normalized();
+    }
+    else
+    {
+        HorizDir = GetActorQuat().GetForwardVector();
+    }
+
+    Velocity = (HorizDir * Config.KnockbackHorizontal) + FVector(0.0f, 0.0f, Config.KnockbackVertical);
+
+/*    // 4. 피격 시 충격으로 살짝 회전 틸트 (넘어짐 유도)
+    FRotator CurrentRot = GetActorRotation();
+    CurrentRot.Pitch += 15.0f;
+    SetActorRotation(CurrentRot);*/
+
+    // 5. 루아 스크립트 컴포넌트 호출
+    if (LuaScriptComponent && LuaScriptComponent->IsLoaded())
+    {
+        LuaScriptComponent->OnHit(nullptr);
+    }
+}
+
+void APortalTurretActor::ApplyHitSquash(const FVector& HitDirection)
+{
+    if (!BodyMesh) return;
+    FVector SquashScale = GetDirectionalSquashScale(HitDirection);
+    BodyMesh->SetRelativeScale3D(SquashScale);
+}
+
+FVector APortalTurretActor::GetDirectionalSquashScale(const FVector& HitDirection) const
+{
+    const FCombatConfig& Config = FCombatConfig::Get();
+
+    FVector HorizHitDir = FVector(HitDirection.X, HitDirection.Y, 0.0f);
+    if (HorizHitDir.SizeSquared() > 1e-6f)
+    {
+        HorizHitDir = HorizHitDir.Normalized();
+    }
+    else
+    {
+        HorizHitDir = GetActorQuat().GetForwardVector();
+    }
+
+    const FQuat Quat = GetActorQuat();
+    const FVector Forward = Quat.GetForwardVector();
+    const FVector Right = Quat.GetRightVector();
+
+    const float ForwardDot = std::abs(FVector::Dot(HorizHitDir, Forward));
+    const float RightDot = std::abs(FVector::Dot(HorizHitDir, Right));
+
+    const float TotalDot = ForwardDot + RightDot;
+    const float ForwardWeight = (TotalDot > 1e-4f) ? (ForwardDot / TotalDot) : 1.0f;
+    const float RightWeight = (TotalDot > 1e-4f) ? (RightDot / TotalDot) : 0.0f;
+
+    const float MinScale = Config.SquashMinScale;
+    const float MaxScale = Config.SquashMaxScale;
+    const float UpScale = Config.SquashUpScale;
+
+    const float ScaleX = MaxScale - (MaxScale - MinScale) * ForwardWeight;
+    const float ScaleY = MaxScale - (MaxScale - MinScale) * RightWeight;
+    const float ScaleZ = UpScale;
+
+    return FVector(ScaleX, ScaleY, ScaleZ);
 }
 
 void APortalTurretActor::Deploy()
@@ -286,5 +445,9 @@ AActor* APortalTurretActor::FindTargetPlayer()
 
 FVector APortalTurretActor::GetEyeWorldLocation() const
 {
+    if (BodyMesh)
+    {
+        return BodyMesh->GetTransform().TransformPosition(EyeOffset);
+    }
     return GetActorTransform().TransformPosition(EyeOffset);
 }

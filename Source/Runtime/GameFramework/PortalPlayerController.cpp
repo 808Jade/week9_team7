@@ -25,10 +25,10 @@ void APortalPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	// UIManagerActor가 없다면 자동 생성 보장
-	if (!AUIManagerActor::Get() && GetWorld())
+	/*if (!AUIManagerActor::Get() && GetWorld())
 	{
 		GetWorld()->SpawnActor<AUIManagerActor>();
-	}
+	}*/
 
 	// UI 모드가 InGame일 때만 마우스 잠금, Title/Pause/Ending에서는 마우스 해제
 	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() != EUIMode::InGame)
@@ -124,6 +124,7 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 	const FQuat YawQuat = FRotator(0.0f, ActorRot.Yaw, 0.0f).Quaternion();
 	if (Forward != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetForwardVector(), Forward);
 	if (Right != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetRightVector(), Right);
+
 
 	// 4. 마우스 시선 회전 (bMouseCaptured 및 포커스 상태일 때만 1인칭 회전 & 화면 중앙 재고정)
 	if (bMouseCaptured && bIsAppFocused)
@@ -236,5 +237,15 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 				ZoomMod->ToggleZoom();
 			}
 		}
+	}
+	// 9. V 키: 근접 타격 (Melee Swing)
+	else if (Key == static_cast<int32>(EKeyCode::V))
+	{
+		PortalPawn->SwingPortalGun();
+	}
+	// 10. H 키: 슬로모션 (Slomo)
+	else if (Key == static_cast<int32>(EKeyCode::H))
+	{
+		PortalPawn->Slomo(0.0f, 0.0f);
 	}
 }

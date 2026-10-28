@@ -86,6 +86,10 @@ void APlayerCameraManager::UpdateCamera(float DeltaTime)
 	);
 
 	CameraCachePrivate = InOutPOV;
+
+	// 3. [추가] 시퀀서/외부에서 설정한 페이드 정보 반영
+	CameraCachePrivate.FadeAlpha = FadeAlpha;
+	CameraCachePrivate.FadeColor = FadeColor;
 }
 
 void APlayerCameraManager::AddCameraModifier(UCameraModifier* NewModifier)

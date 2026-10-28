@@ -14,6 +14,8 @@
 #include "Asset/AssetManager.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
 #include "GameFramework/Actor/PortalActor.h"
+#include "GameFramework/Actor/PortalTurretActor.h"
+#include "GameFramework/CombatConfig.h"
 #include "GameFramework/Actor/UIManagerActor.h"
 #include "Components/LuaScriptComponent.h"
 #include "Collision/Ray.h"
@@ -1076,5 +1078,57 @@ void APortalPawn::UpdateWalkSound(float DeltaTime)
 				WalkVoiceID = -1;
 			}
 		}
+	}
+}
+
+void APortalPawn::SwingPortalGun()
+{
+	if (PortalGun->IsSwinging()) return;
+
+	if (PortalGun)
+	{
+		PortalGun->Swing();
+
+		FRay Ray;
+		// 포탈건 스윙 시, 카메라 정면 방향으로 레이캐스트를 쏴서 적군 터렛을 맞추면 슬로모션 넉백, 히트 스쿼시
+		if (CameraComponent)
+		{
+			const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+			const FVector RayOrigin = CameraComponent->GetWorldLocation() + (RayDir * 0.5f);
+			Ray = FRay{ RayOrigin, RayDir };
+
+			FHitResult HitResult;
+			const bool bHit = GetWorld()->LineTraceSingle(Ray, HitResult, nullptr, nullptr, this);
+			if (bHit && HitResult.HitComponent)
+			{
+				AActor* HitActor = HitResult.HitComponent->GetOwner();
+				if (HitActor == PortalGun) return;
+				const FCombatConfig& Config = FCombatConfig::Get();
+				if (HitResult.Distance + 0.5f <= Config.MeleeRange)
+				{
+					if (APortalTurretActor* Turret = Cast<APortalTurretActor>(HitActor))
+					{
+						Turret->OnHit(RayDir, HitResult.ImpactPoint);
+					}
+				}
+			}
+		}
+	}
+}
+
+void APortalPawn::Slomo(float Duration, float Dilation)
+{
+	const FCombatConfig& Config = FCombatConfig::Get();
+	if (Duration <= 0.0f)
+	{
+		Duration = Config.SlomoDuration;
+	}
+	if (Dilation <= 0.0f)
+	{
+		Dilation = Config.SlomoTimeDilation;
+	}
+	if (GetWorld())
+	{
+		GetWorld()->SetTimeDilation(Duration, Dilation);
 	}
 }

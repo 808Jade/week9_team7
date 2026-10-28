@@ -2,6 +2,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/LuaScriptComponent.h"
 
 enum class ETurretState : uint8
 {
@@ -45,12 +46,21 @@ public:
 
     FVector GetEyeWorldLocation() const;
 
+    UBoxComponent* GetCollisionBox() const { return CollisionBox; }
     UStaticMeshComponent* GetBodyMesh() const { return BodyMesh; }
     UStaticMeshComponent* GetLeftWingMesh() const { return LeftWingMesh; }
     UStaticMeshComponent* GetRightWingMesh() const { return RightWingMesh; }
     UStaticMeshComponent* GetLeftGunsMesh() const { return LeftGunsMesh; }
     UStaticMeshComponent* GetRightGunsMesh() const { return RightGunsMesh; }
-    UBoxComponent* GetCollisionBox() const { return CollisionBox; }
+    ULuaScriptComponent* GetLuaScriptComponent() const { return LuaScriptComponent; }
+
+    // 피격 및 타격 반응 (Hit Reaction)
+    void OnHit(const FVector& Direction, const FVector& ImpactPoint);
+    void ApplyHitSquash(const FVector& HitDirection);
+    FVector GetDirectionalSquashScale(const FVector& HitDirection) const;
+
+    void SetIsHit(bool bInIsHit) { bIsHit = bInIsHit; }
+    bool GetIsHit() const { return bIsHit; }
 
 protected:
     void UpdateAnimation(float DeltaTime);
@@ -60,17 +70,20 @@ protected:
 
 protected:
     // [컴포넌트 구조]
-    // BodyMesh (본체 프레임, 삼각 다리, 눈, 안테나 - 루트 컴포넌트)
-    //  ├── LeftWingMesh (좌측 날개 커버)
-    //  ├── RightWingMesh (우측 날개 커버)
-    //  ├── LeftGunsMesh (좌측 기관총)
-    //  └── RightGunsMesh (우측 기관총)
+    // CollisionBox (충돌 및 물리 스위프용 루트 컴포넌트)
+    //  └── BodyMesh (본체 프레임, 삼각 다리, 눈, 안테나 - 스쿼시/스트레치 적용 대상)
+    //       ├── LeftWingMesh (좌측 날개 커버)
+    //       ├── RightWingMesh (우측 날개 커버)
+    //       ├── LeftGunsMesh (좌측 기관총)
+    //       └── RightGunsMesh (우측 기관총)
+    // LuaScriptComponent (루아 스크립트 컴포넌트)
+    UBoxComponent* CollisionBox = nullptr;
     UStaticMeshComponent* BodyMesh = nullptr;
     UStaticMeshComponent* LeftWingMesh = nullptr;
     UStaticMeshComponent* RightWingMesh = nullptr;
     UStaticMeshComponent* LeftGunsMesh = nullptr;
     UStaticMeshComponent* RightGunsMesh = nullptr;
-    UBoxComponent* CollisionBox = nullptr;
+    ULuaScriptComponent* LuaScriptComponent = nullptr;
 
     // [전개 및 애니메이션 파라미터]
     bool bStartDeployed = false;
@@ -89,6 +102,11 @@ protected:
     float AlertTimer = 0.0f;
 
     ETurretState State = ETurretState::Searching;
+
+    // [피격 및 물리 파라미터]
+    bool bIsHit = false;               // 피격 상태 플래그
+    bool bIsGrounded = false;          // 바닥 착지 여부
+    FVector Velocity = FVector::ZeroVector; // 넉백 속도
 
     // 컴포넌트 초기 상대 위치
     static const FVector InitialLeftWingLoc;

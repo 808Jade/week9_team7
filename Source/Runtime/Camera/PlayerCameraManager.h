@@ -75,6 +75,12 @@ public:
 		return NewMod;
 	}
 
+	void SetManualFade(float InAlpha, const FColor& InColor = FColor::Black)
+	{
+		FadeAlpha = InAlpha;
+		FadeColor = InColor;
+	}
+	float GetFadeAlpha() const { return FadeAlpha; }
 protected:
 	APlayerController* PCOwner = nullptr;
 	FViewTarget ViewTarget;
@@ -82,4 +88,7 @@ protected:
 	FViewInfo CameraCachePrivate;
 
 	TArray<UCameraModifier*> ModifierList;
+
+	float FadeAlpha = 0.0f;
+	FColor FadeColor = FColor::Black;
 };

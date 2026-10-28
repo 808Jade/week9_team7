@@ -107,6 +107,9 @@ public:
 	float GetCameraFarZ() const { return CameraFarZ; }
 	void SetCameraFarZ(float InFarZ);
 
+	void SwingPortalGun(); // V 키: 팔 휘두르기
+	void Slomo(float Duration, float Dilation = 0.0f); // H 키: 슬로모션 토글
+
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
 	void FirePortal(EPortalType Type);
@@ -189,6 +192,9 @@ private:
 	void PlayLandSound(float ImpactSpeed);
 	void PlayWarpSound();
 	void UpdateWalkSound(float DeltaTime);
+
+	// 포탈건 휘두르기 범위
+	float SwingRange = 2.2f;
 
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);

@@ -76,6 +76,9 @@ public:
 
 	FVector GetMuzzleLocation() const;
 
+	void Swing();
+	bool IsSwinging() const { return bIsSwinging; }
+
 private:
 	// 포탈건 3D 메시 컴포넌트
 	UStaticMeshComponent* GunMeshComponent = nullptr;
@@ -100,6 +103,9 @@ private:
 	FRotator GunOffsetRotation = FRotator(0.0f, 180.0f, 0.0f);
 	UCameraModifier_Recoil* RecoilModifier = nullptr;
 
+	bool bIsSwinging = false;
+	float SwingTimer = 0.0f;
+	const float SwingDuration = 0.22f;
 	// ===== 홀드 레이저 =====
 	// 총구 → 큐브를 2차 베지어 곡선으로 잇는다.
 	// 곡선을 LaserSegmentCount개 구간으로 나누고, 구간마다 원기둥(코어 + 외곽)을 하나씩 배치

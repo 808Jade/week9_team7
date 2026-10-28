@@ -1,7 +1,9 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/Actor.h"
 #include "UObject/Class.h"
 #include "UObject/Property.h"
@@ -139,6 +141,47 @@ namespace LuaBindings
 			return (Comp && Comp->GetClass()) ? Comp->GetClass()->Name : "";
 		};
 
+		// USceneComponent Transform 제어 바인딩
+		CompType["SetRelativeLocation"] = [](UActorComponent* Comp, const FVector& Loc) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeLocation(Loc);
+			}
+		};
+		CompType["SetRelativeRotation"] = [](UActorComponent* Comp, const FRotator& Rot) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeRotation(Rot);
+			}
+		};
+		CompType["SetRelativeScale3D"] = [](UActorComponent* Comp, const FVector& Scale) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeScale3D(Scale);
+			}
+		};
+		CompType["GetRelativeLocation"] = [](UActorComponent* Comp) -> FVector {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeLocation();
+			}
+			return FVector::ZeroVector;
+		};
+		CompType["GetRelativeRotation"] = [](UActorComponent* Comp) -> FRotator {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeRotation();
+			}
+			return FRotator::ZeroRotator;
+		};
+		CompType["GetRelativeScale3D"] = [](UActorComponent* Comp) -> FVector {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeScale3D();
+			}
+			return FVector(1.0f, 1.0f, 1.0f);
+		};
+
 		// 명시적 프로퍼티 함수
 		CompType["GetProperty"] = [](sol::this_state s, UActorComponent* Comp, const std::string& Key) -> sol::object {
 			return GetPropertyInternal(s, Comp, Key);
@@ -181,5 +224,26 @@ namespace LuaBindings
 			}
 			return List;
 		};
+
+		// AudioComponent 바인딩
+		CompType["Play"] = [](UActorComponent* Comp) {
+			if (UAudioComponent* Audio = Cast<UAudioComponent>(Comp)) Audio->Play();
+		};
+		CompType["Stop"] = [](UActorComponent* Comp) {
+			if (UAudioComponent* Audio = Cast<UAudioComponent>(Comp)) Audio->Stop();
+		};
+
+		sol::usertype<UAudioComponent> AudioCompType = Lua.new_usertype<UAudioComponent>("AudioComponent",
+			sol::base_classes, sol::bases<UActorComponent, USceneComponent>());
+		AudioCompType["Play"] = &UAudioComponent::Play;
+		AudioCompType["Stop"] = &UAudioComponent::Stop;
+		AudioCompType["IsPlaying"] = &UAudioComponent::IsPlaying;
+		AudioCompType["SetPaused"] = &UAudioComponent::SetPaused;
+		AudioCompType["SetVolume"] = &UAudioComponent::SetVolume;
+		AudioCompType["SetPitch"] = &UAudioComponent::SetPitch;
+		AudioCompType["SetSoundPath"] = &UAudioComponent::SetSoundPath;
+		AudioCompType["GetSoundPath"] = &UAudioComponent::GetSoundPath;
+		AudioCompType["SetIs3D"] = &UAudioComponent::SetIs3D;
+		AudioCompType["GetIs3D"] = &UAudioComponent::GetIs3D;
 	}
 }

@@ -289,7 +289,12 @@ void ULuaScriptComponent::OnHit(AActor* OtherActor)
 void ULuaScriptComponent::Serialize(FStructuredArchive::FRecord Record)
 {
 	Super::Serialize(Record);
+	FString SavedPath = ScriptPath;
 	Record << SA_VALUE("ScriptPath", ScriptPath);
+	if (ScriptPath.empty() && !SavedPath.empty())
+	{
+		ScriptPath = SavedPath;
+	}
 }
 
 void ULuaScriptComponent::OnUnregister()
@@ -317,15 +322,6 @@ void ULuaScriptComponent::OnUnregister()
 
 void ULuaScriptComponent::StartWatchingScript()
 {
-	// 독립 실행형 게임(HitoriGame / EWorldType::Game)에서는 핫 리로드를 위한 파일 감시를 수행하지 않는다
-	if (const UWorld* World = GetWorld())
-	{
-		if (World->GetWorldType() == EWorldType::Game)
-		{
-			return;
-		}
-	}
-
 	if (IsWatchingScript() || !HasScriptPath())
 	{
 		return;

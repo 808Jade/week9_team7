@@ -31,6 +31,16 @@ public:
 
 	// 어디서든 한 줄로 UI 매니저에 접근할 수 있는 정적 함수
 	static AUIManagerActor* Get() { return Instance; }
+	static AUIManagerActor* GetOrSpawn(UWorld* InWorld = nullptr);
+
+	static void SetSavedClearTime(float InTime) { SavedClearTime = InTime; }
+	static float GetSavedClearTime() { return SavedClearTime; }
+
+	static void SetReturnScenePath(const FString& InPath) { ReturnScenePath = InPath; }
+	static const FString& GetReturnScenePath() { return ReturnScenePath; }
+
+	static void SetNextSceneInitialUIMode(EUIMode InMode) { NextSceneInitialUIMode = InMode; }
+	static EUIMode GetNextSceneInitialUIMode() { return NextSceneInitialUIMode; }
 
 	// UI 모드 변경 (Title, InGame, Pause, Ending)
 	void SetUIMode(EUIMode NewMode);
@@ -66,6 +76,9 @@ private:
 	void AutoDiscoverCanvases();
 
 	static AUIManagerActor* Instance;
+	static float SavedClearTime;
+	static FString ReturnScenePath;
+	static EUIMode NextSceneInitialUIMode;
 
 	EUIMode CurrentMode = EUIMode::Title; // 기본 시작 모드는 타이틀(시작) 화면
 

@@ -43,6 +43,8 @@
 #include "Lua/Bindings/LuaBindings.h"
 
 #include "Audio/AudioDevice.h"
+#include "Serialization/JsonArchive.h"
+#include "Engine/GameViewportClient.h"
 
 #include "Camera/CameraComponent.h"
 
@@ -148,6 +150,18 @@ void UWorld::Tick(float DeltaTime)
 		Scene.UpdateAllTransforms();
 	}
 
+	if (HitStopTimer > 0.0f)
+	{
+		HitStopTimer -= DeltaTime;
+		if (HitStopTimer <= 0.0f)
+		{
+			HitStopTimer = 0.0f;
+			GlobalTimeDilation = 1.0f;
+		}
+	}
+
+	float EffectiveDeltaTime = DeltaTime * GlobalTimeDilation;
+
 	// 에디터 월드가 아니면 액터 틱을 돌린다
 	if (WorldType != EWorldType::Editor)
 	{
@@ -159,7 +173,7 @@ void UWorld::Tick(float DeltaTime)
 		{
 			FLuaManager::Get().SetActiveWorld(this);
 		}
-		LuaBindings::TickTimers(DeltaTime);
+		LuaBindings::TickTimers(EffectiveDeltaTime);
 
 		while (!BeginPlayList.IsEmpty())
 		{
@@ -172,14 +186,14 @@ void UWorld::Tick(float DeltaTime)
 		{
 			SCOPE_CYCLE_COUNTER(STAT_ActorTick);
 			// 모든 Actor를 도는 대신 등록된 Tick 함수만 실행한다
-			TickTaskManager.RunAllTickGroups(DeltaTime);
+			TickTaskManager.RunAllTickGroups(EffectiveDeltaTime);
 
 			for (ULevel* Level : Levels)
 			{
-				PathTracker.Tick(Level->GetActors(), DeltaTime);
+				PathTracker.Tick(Level->GetActors(), EffectiveDeltaTime);
 			}
 			// Run Coroutines after actor Tick
-			FCoroutineScheduler::Get().Update(DeltaTime);
+			FCoroutineScheduler::Get().Update(EffectiveDeltaTime);
 		}
 	}
 	else
@@ -195,10 +209,11 @@ void UWorld::Tick(float DeltaTime)
 			{
 				Comp->SetParticles(10);
 			}
-			Comp->TickComponent(DeltaTime);
+			Comp->TickComponent(EffectiveDeltaTime);
 		}
 	}
 
+	// Tick Audio listner
 	FVector ListenerPos = FVector::ZeroVector;
 	FVector ListenerForward = FVector(1.0f, 0.0f, 0.0f);
 	FVector ListenerUp = FVector(0.0f, 0.0f, 1.0f);
@@ -285,6 +300,16 @@ void UWorld::ClearWorld()
 	// 그대로 두면 지워진 컴포넌트를 가리키는 프록시가 FScene에 남아 다음 프레임에 터진다.
 	Scene.RemoveAllLights();
 	Scene.RemoveAllPrimitives();
+	if (GEngine)
+	{
+		if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(this))
+		{
+			if (Context->GameViewport)
+			{
+				Context->GameViewport->SetCameraComponent(nullptr);
+			}
+		}
+	}
 	HTR_LOG(Info, "{} : ", PersistentLevel->GetActorNum());
 
 	if(IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
@@ -1037,6 +1062,7 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 void UWorld::BeginPlay()
 {
 	if ((WorldType != EWorldType::PIE && WorldType != EWorldType::Game) || bBegunPlay) return;
+	FLuaManager::Get().SetActiveWorld(this);
 
 	if (!PlayerPawn)
 	{
