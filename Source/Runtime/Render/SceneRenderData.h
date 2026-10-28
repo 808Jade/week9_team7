@@ -78,6 +78,7 @@ struct FSceneRenderData
 	TArray<FPerObjectConstants> ObjectConstants;
 	FSceneLightResources ViewLightResources;
 	TUniquePtr<FConstantBuffer> ToneMapCB;
+	TUniquePtr<FConstantBuffer> PostProcessCB;
 
 	FAmbientLightRenderData AmbientLight{};
 	FSkyLightRenderData SkyLight{};

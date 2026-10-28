@@ -37,6 +37,13 @@ namespace
 	};
 	static_assert(sizeof(FToneMapConstants) == 16);
 
+	struct alignas(16) FPostProcessConstants
+	{
+		FVector2 ViewSize;
+		FVector2 InViewSize;
+	};
+	static_assert(sizeof(FPostProcessConstants) == 16);
+
 	FRenderGraphRasterPassDesc MakeViewportPass(const std::string& Name, FRenderGraphTextureRef Color,
 		FRenderGraphTextureRef DepthTarget = {},
 		ERenderGraphLoadAction DepthLoad = ERenderGraphLoadAction::Load)
@@ -683,6 +690,36 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 			bFXAAPassSucceeded = ApplyFXAA();
 			})) return false;
 	}
+
+	if (!Options.bShowWorldNormal)
+	{
+		if (!RenderData.PostProcessCB)
+			RenderData.PostProcessCB = RenderCommand::CreateConstantBuffer(sizeof(FPostProcessConstants));
+
+		const uint32 Width = Targets.SceneColor->GetWidth();
+		const uint32 Height = Targets.SceneColor->GetHeight();
+
+		if (!Graph.AddRasterPass(MakeViewportPass("PostProcess", FinalColor),
+			[this, Width, Height]
+			{
+				FPipelineState* Pipeline = FRenderResourceManager::GetPSO(EPSOType::PostProcess);
+				if (!Pipeline || !Pipeline->Shader) return;
+				RenderCommand::BindPipelineState(*Pipeline);
+
+				FPostProcessConstants Constants{};
+				Constants.ViewSize.X = static_cast<float>(Width);
+				Constants.ViewSize.Y = static_cast<float>(Height);
+				Constants.InViewSize.X = 1.f / Width;
+				Constants.InViewSize.Y = 1.f / Height;
+				RenderCommand::UpdateBufferData(RenderData.PostProcessCB.get(), &Constants);
+				RenderCommand::BindConstantBuffer(0, RenderData.PostProcessCB.get(), EShaderBindFlagBits::Pixel);
+
+				RenderCommand::BindIndexBuffer(nullptr);
+				RenderCommand::Draw(3);
+			})) return false;
+	}
+
+
 
 	if (Options.bShowLightCulling && Options.bDrawPrimitives && !Options.bShowWorldNormal)
 	{
