@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "GameFramework/Actor.h"
@@ -74,8 +74,13 @@ namespace LuaBindings
 		};
 
 		auto SetVis = [](AActor* Actor, bool bVisible) {
-			if (Actor && Actor->GetRootComponent())
-				Actor->GetRootComponent()->SetVisibility(bVisible);
+			if (!Actor) return;
+			if (Actor->GetRootComponent())
+				Actor->GetRootComponent()->SetVisibility(bVisible, true);
+			for (UActorComponent* Comp : Actor->GetComponents())
+			{
+				if (Comp) Comp->SetVisibility(bVisible);
+			}
 		};
 		auto IsVis = [](AActor* Actor) -> bool {
 			return (Actor && Actor->GetRootComponent()) ? Actor->GetRootComponent()->IsVisible() : false;

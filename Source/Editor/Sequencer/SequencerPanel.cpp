@@ -50,7 +50,7 @@ void FSequencerPanel::Tick(float DeltaTime)
 
 void FSequencerPanel::OnRender()
 {
-    ImGui::SetNextWindowSize(ImVec2(850, 320), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(900, 320), ImGuiCond_FirstUseEver);
 
     if (!ImGui::Begin(GetPanelName(), nullptr, ImGuiWindowFlags_NoScrollbar))
     {
@@ -64,7 +64,7 @@ void FSequencerPanel::OnRender()
     ImGui::Separator();
 
     // 2. 메인 바디: 좌측(트랙 헤더) + 우측(타임라인 캔버스)
-    const float TrackListWidth = 200.0f;
+    const float TrackListWidth = 240.0f;
     const float AvailableWidth = ImGui::GetContentRegionAvail().x;
     const float AvailableHeight = ImGui::GetContentRegionAvail().y;
 
@@ -116,27 +116,21 @@ void FSequencerPanel::DrawToolbar()
     {
         if (DrawIconButton("##PlayBtn", PlayIcon, "Play", IconSize))
         {
-            if (Player) Player->Play();
+            if (Player)
+            {
+                Player->Play();
+            }
         }
     }
 
     ImGui::SameLine();
 
-    // [정지]
+    // [정지] (현재 시간을 0으로 리셋하고 뷰포트 원복)
     if (DrawIconButton("##StopBtn", StopIcon, "Stop", IconSize))
     {
-        if (Player) Player->Stop(World);
-    }
-
-    ImGui::SameLine();
-
-    // [루프 체크박스]
-    if (Player)
-    {
-        bool bLoop = Player->IsLooping();
-        if (ImGui::Checkbox("Loop", &bLoop))
+        if (Player)
         {
-            Player->SetLooping(bLoop);
+            Player->Stop(World);
         }
     }
 
@@ -147,7 +141,7 @@ void FSequencerPanel::DrawToolbar()
     const float MaxTime = Seq ? Seq->Duration : 10.0f;
     ImGui::TextColored(ImVec4(0.3f, 0.8f, 1.0f, 1.0f), "Time: %05.2fs / %05.2fs", CurTime, MaxTime);
 
-    ImGui::SameLine(0, 25);
+    ImGui::SameLine(0, 20);
 
     // [+ Track (아웃라이너에서 선택된 액터 추가)]
     if (ImGui::Button("+ Track"))
@@ -155,12 +149,38 @@ void FSequencerPanel::DrawToolbar()
         AActor* SelectedActor = OutlinerPanel ? OutlinerPanel->GetSelectedActor() : nullptr;
         if (SelectedActor && Seq)
         {
-            Seq->AddTrack(SelectedActor->GetName());
+            Seq->AddTrack(SelectedActor->GetName(), ETrackType::Transform);
         }
     }
     if (ImGui::IsItemHovered())
     {
         ImGui::SetTooltip("Add current selected actor from Outliner as a track");
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("+ Fade"))
+    {
+        if (Seq)
+        {
+            Seq->AddTrack("Fade", ETrackType::Fade);
+        }
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("Add screen Fade In/Out track");
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("+ LetterBox"))
+    {
+        if (Seq)
+        {
+            Seq->AddTrack("LetterBox", ETrackType::LetterBox);
+        }
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("Add cinematic 2.39:1 LetterBox track");
     }
 
     ImGui::SameLine();
@@ -174,7 +194,7 @@ void FSequencerPanel::DrawToolbar()
             FSequencerTrack* Track = Seq->FindTrack(SelectedActor->GetName());
             if (!Track)
             {
-                Track = Seq->AddTrack(SelectedActor->GetName());
+                Track = Seq->AddTrack(SelectedActor->GetName(), ETrackType::Transform);
             }
             if (Track)
             {
@@ -187,19 +207,38 @@ void FSequencerPanel::DrawToolbar()
         ImGui::SetTooltip("Add Keyframe at current time for selected actor");
     }
 
-    ImGui::SameLine(0, 30);
+    ImGui::SameLine(0, 15);
+
+    // CameraCutTarget 입력란
+    if (Seq)
+    {
+        ImGui::Text("CameraCut:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(90.0f);
+        char CamTargetBuf[128] = { 0 };
+        strncpy_s(CamTargetBuf, Seq->CameraCutTarget.c_str(), sizeof(CamTargetBuf) - 1);
+        if (ImGui::InputText("##CameraCutTarget", CamTargetBuf, sizeof(CamTargetBuf)))
+        {
+            Seq->CameraCutTarget = CamTargetBuf;
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Name of the camera actor to cut view to (e.g. EndingCamera)");
+        }
+        ImGui::SameLine(0, 15);
+    }
 
     // 시퀀스 길이 (Duration) 조절
     if (Seq)
     {
-        ImGui::SetNextItemWidth(70.0f);
+        ImGui::SetNextItemWidth(65.0f);
         ImGui::DragFloat("Duration", &Seq->Duration, 0.5f, 1.0f, 300.0f, "%.1fs");
     }
 
-    ImGui::SameLine(0, 25);
+    ImGui::SameLine(0, 20);
 
     // 시퀀스 파일 이름 및 저장/로드
-    ImGui::SetNextItemWidth(110.0f);
+    ImGui::SetNextItemWidth(100.0f);
     ImGui::InputText("##SeqFileName", SequenceFileName, sizeof(SequenceFileName));
 
     ImGui::SameLine();
@@ -290,9 +329,63 @@ void FSequencerPanel::DrawTrackList(float TrackListWidth)
             }
             ImGui::SameLine();
 
-            // 액터 이름 출력
-            const FString& TrackName = Seq->Tracks[i].ActorName;
-            ImGui::TextUnformatted(TrackName.c_str());
+            auto& Track = Seq->Tracks[i];
+            if (Track.Type == ETrackType::Fade)
+            {
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "Fade");
+                ImGui::SameLine();
+                static float FadeInputVal = 1.0f;
+                ImGui::SetNextItemWidth(45.0f);
+                ImGui::DragFloat("##FadeVal", &FadeInputVal, 0.05f, 0.0f, 1.0f, "%.1f");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("+Key"))
+                {
+                    if (Player)
+                    {
+                        Track.AddOrUpdateFloatKey(Player->GetCurrentTime(), FadeInputVal);
+                    }
+                }
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Add Fade Key at current time (0.0=Clear, 1.0=Black)");
+            }
+            else if (Track.Type == ETrackType::LetterBox)
+            {
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "LBox");
+                ImGui::SameLine();
+                static float LBoxInputVal = 1.0f;
+                ImGui::SetNextItemWidth(45.0f);
+                ImGui::DragFloat("##LBoxVal", &LBoxInputVal, 1.0f, 0.0f, 1.0f, "%.0f");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("+Key"))
+                {
+                    if (Player)
+                    {
+                        Track.AddOrUpdateFloatKey(Player->GetCurrentTime(), LBoxInputVal);
+                    }
+                }
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Add LetterBox Key at current time (1.0=On, 0.0=Off)");
+            }
+            else if (Track.Type == ETrackType::CameraShake)
+            {
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Shake");
+                ImGui::SameLine();
+                static float ShakeInputVal = 1.0f;
+                ImGui::SetNextItemWidth(45.0f);
+                ImGui::DragFloat("##ShakeVal", &ShakeInputVal, 0.1f, 0.1f, 5.0f, "%.1f");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("+Key"))
+                {
+                    if (Player)
+                    {
+                        Track.AddOrUpdateFloatKey(Player->GetCurrentTime(), ShakeInputVal);
+                    }
+                }
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Add CameraShake Key at current time");
+            }
+            else
+            {
+                const FString& TrackName = Track.ActorName;
+                ImGui::TextUnformatted(TrackName.c_str());
+            }
 
             ImGui::EndGroup();
 
@@ -318,49 +411,43 @@ void FSequencerPanel::DrawTimelineCanvas(float CanvasWidth, float CanvasHeight)
     auto* Seq = Player ? Player->GetSequence().get() : nullptr;
     if (!Seq) return;
 
-    ImGui::BeginChild("TimelineScrollChild", ImVec2(CanvasWidth, CanvasHeight), true, ImGuiWindowFlags_HorizontalScrollbar);
+    const float TotalTimelineWidth = FMath::Max(Seq->Duration * PixelsPerSecond, CanvasWidth);
+    const float TotalTimelineHeight = RulerHeight + (Seq->Tracks.Num() * TrackRowHeight);
+
+    ImGui::BeginChild("TimelineCanvasChild", ImVec2(CanvasWidth, CanvasHeight), true, ImGuiWindowFlags_HorizontalScrollbar);
 
     ImDrawList* DrawList = ImGui::GetWindowDrawList();
     const ImVec2 CanvasP0 = ImGui::GetCursorScreenPos();
-    const float TotalTimelineWidth = std::max(CanvasWidth, Seq->Duration * PixelsPerSecond + 150.0f);
-    const float TotalTimelineHeight = std::max(CanvasHeight, RulerHeight + (Seq->Tracks.Num() * TrackRowHeight) + 50.0f);
-
-    // 스크롤 및 클릭 감지용 더미 영역 확보
-    ImGui::InvisibleButton("##TimelineCanvasArea", ImVec2(TotalTimelineWidth, TotalTimelineHeight));
-    const bool bCanvasHovered = ImGui::IsItemHovered();
     const ImVec2 MousePos = ImGui::GetIO().MousePos;
+    const bool bCanvasHovered = ImGui::IsWindowHovered();
 
     // -------------------------------------------------------------
-    // 1. 상단 시간 눈금자 (Time Ruler) 렌더링
+    // 1. 상단 시간 눈금자 (Ruler) 드로잉
     // -------------------------------------------------------------
-    const ImVec2 RulerMin = CanvasP0;
-    const ImVec2 RulerMax = ImVec2(CanvasP0.x + TotalTimelineWidth, CanvasP0.y + RulerHeight);
-    DrawList->AddRectFilled(RulerMin, RulerMax, IM_COL32(32, 33, 36, 255));
-    DrawList->AddLine(ImVec2(RulerMin.x, RulerMax.y), RulerMax, IM_COL32(60, 60, 65, 255));
+    DrawList->AddRectFilled(CanvasP0, ImVec2(CanvasP0.x + TotalTimelineWidth, CanvasP0.y + RulerHeight), IM_COL32(32, 33, 36, 255));
+    DrawList->AddLine(ImVec2(CanvasP0.x, CanvasP0.y + RulerHeight), ImVec2(CanvasP0.x + TotalTimelineWidth, CanvasP0.y + RulerHeight), IM_COL32(50, 50, 55, 255));
 
-    // 0.2초 단위 보조 눈금 및 1.0초 단위 주 눈금선/텍스트
-    for (float t = 0.0f; t <= Seq->Duration + 0.05f; t += 0.2f)
+    // 1초 주 눈금 및 0.2초 보조 눈금
+    for (float t = 0.0f; t <= Seq->Duration; t += 0.2f)
     {
-        const float TickX = CanvasP0.x + (t * PixelsPerSecond);
-        const bool bMajorTick = (std::fmod(t + 0.01f, 1.0f) < 0.05f);
+        const float X = CanvasP0.x + (t * PixelsPerSecond);
+        const bool bMajorTick = std::fmod(t + 0.001f, 1.0f) < 0.01f;
 
         if (bMajorTick)
         {
-            // 1초 단위 주 눈금
-            DrawList->AddLine(ImVec2(TickX, RulerMax.y - 12.0f), ImVec2(TickX, RulerMax.y), IM_COL32(200, 200, 200, 255), 1.0f);
+            DrawList->AddLine(ImVec2(X, CanvasP0.y + RulerHeight - 12.0f), ImVec2(X, CanvasP0.y + RulerHeight), IM_COL32(200, 200, 200, 255));
             char TimeStr[16];
             snprintf(TimeStr, sizeof(TimeStr), "%.0fs", t);
-            DrawList->AddText(ImVec2(TickX + 3.0f, RulerMin.y + 2.0f), IM_COL32(190, 190, 190, 255), TimeStr);
+            DrawList->AddText(ImVec2(X + 3.0f, CanvasP0.y + 4.0f), IM_COL32(180, 180, 180, 255), TimeStr);
         }
         else
         {
-            // 0.2초 단위 보조 눈금
-            DrawList->AddLine(ImVec2(TickX, RulerMax.y - 6.0f), ImVec2(TickX, RulerMax.y), IM_COL32(110, 110, 115, 255), 1.0f);
+            DrawList->AddLine(ImVec2(X, CanvasP0.y + RulerHeight - 6.0f), ImVec2(X, CanvasP0.y + RulerHeight), IM_COL32(100, 100, 100, 255));
         }
     }
 
     // -------------------------------------------------------------
-    // 2. 트랙별 레인(Lanes) 및 키프레임 다이아몬드 렌더링
+    // 2. 각 트랙 레인 배경 및 키프레임 다이아몬드 드로잉
     // -------------------------------------------------------------
     int32 KeyToRemoveTrackIdx = -1;
     int32 KeyToRemoveKeyIdx = -1;
@@ -387,6 +474,21 @@ void FSequencerPanel::DrawTimelineCanvas(float CanvasWidth, float CanvasHeight)
             // 마우스 호버 검사 (반경 7픽셀)
             const float DistSq = (MousePos.x - KeyX) * (MousePos.x - KeyX) + (MousePos.y - KeyY) * (MousePos.y - KeyY);
             const bool bKeyHovered = DistSq <= (7.0f * 7.0f);
+
+            // 호버 툴팁 정보 표시
+            if (bKeyHovered)
+            {
+                if (Track.Type == ETrackType::Transform)
+                {
+                    ImGui::SetTooltip("Time: %.2fs\nPos: (%.1f, %.1f, %.1f)\nRot: (%.1f, %.1f, %.1f)", 
+                        Key.Time, Key.Location.X, Key.Location.Y, Key.Location.Z, 
+                        Key.Rotation.Pitch, Key.Rotation.Yaw, Key.Rotation.Roll);
+                }
+                else
+                {
+                    ImGui::SetTooltip("Time: %.2fs\nValue: %.2f", Key.Time, Key.Value);
+                }
+            }
 
             // 키프레임 드래그 시작
             if (bKeyHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
@@ -486,12 +588,10 @@ void FSequencerPanel::DrawDiamond(ImDrawList* DrawList, ImVec2 Center, float Rad
 
 void FSequencerPanel::DrawPlayheadMarker(ImDrawList* DrawList, ImVec2 Center, float Size, ImU32 FillColor)
 {
-    // 눈금자 상단 역삼각형 형태 마커
     const ImVec2 Pts[3] = {
         ImVec2(Center.x - Size, Center.y - Size),
         ImVec2(Center.x + Size, Center.y - Size),
         ImVec2(Center.x, Center.y + Size)
     };
-    DrawList->AddTriangleFilled(Pts[0], Pts[1], Pts[2], FillColor);
-    DrawList->AddTriangle(Pts[0], Pts[1], Pts[2], IM_COL32(255, 255, 255, 255), 1.0f);
+    DrawList->AddConvexPolyFilled(Pts, 3, FillColor);
 }

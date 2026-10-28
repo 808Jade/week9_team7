@@ -6,6 +6,8 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 
 FSequencePlayer::FSequencePlayer()
 {
@@ -27,6 +29,30 @@ void FSequencePlayer::Stop(UWorld* World)
 {
 	bIsPlaying = false;
 	CurrentTime = 0.0f;
+	Evaluate(World);
+
+	if (World)
+	{
+		if (APlayerController* PC = World->GetPlayerController())
+		{
+			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+			{
+				PCM->SetManualFade(0.0f); // 페이드 초기화
+			}
+		}
+	}
+
+	if (GEngine && World)
+	{
+		if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(World))
+		{
+			if (Context->GameViewport)
+			{
+				Context->GameViewport->SetLetterBox(false, 0.5f);
+			}
+		}
+	}
+
 	Evaluate(World);
 }
 
@@ -77,29 +103,89 @@ void FSequencePlayer::Evaluate(UWorld* World)
 	for (int32 i = 0; i < Sequence->Tracks.size(); ++i)
 	{
 		const FSequencerTrack& Track = Sequence->Tracks[i];
-		if (Track.ActorName.empty() || Track.Keys.IsEmpty()) continue;
+		if (Track.Keys.IsEmpty()) continue;
 
-		AActor* TargetActor = nullptr;
-		for (AActor* Actor : Actors)
+		if (Track.Type == ETrackType::Fade)
 		{
-			if (Actor && Actor->GetName() == Track.ActorName)
+			float FadeAlpha = 0.0f;
+			if (Track.EvaluateFloat(CurrentTime, FadeAlpha))
 			{
-				TargetActor = Actor;
-				break;
+				if (APlayerController* PC = World->GetPlayerController())
+				{
+					if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+					{
+						PCM->SetManualFade(FadeAlpha);
+					}
+				}
+			}
+			continue;
+		}
+
+		if (Track.Type == ETrackType::Transform)
+		{
+			if (Track.ActorName.empty()) continue;
+
+			AActor* TargetActor = nullptr;
+			for (AActor* Actor : Actors)
+			{
+				if (Actor && Actor->GetName() == Track.ActorName)
+				{
+					TargetActor = Actor;
+					break;
+				}
+			}
+
+			if (TargetActor)
+			{
+				FVector Location;
+				FRotator Rotation;
+				FVector Scale;
+				if (Track.EvaluateTransform(CurrentTime, Location, Rotation, Scale))
+				{
+					TargetActor->SetActorLocation(Location);
+					TargetActor->SetActorRotation(Rotation);
+					TargetActor->SetActorScale3D(Scale);
+				}
 			}
 		}
 
-		if (TargetActor)
+		if (Track.Type == ETrackType::LetterBox)
 		{
-			FVector Location;
-			FRotator Rotation;
-			FVector Scale;
-			if (Track.EvaluateTransform(CurrentTime, Location, Rotation, Scale))
+			float LetterBoxVal = 0.0f;
+			if (Track.EvaluateFloat(CurrentTime, LetterBoxVal))
 			{
-				TargetActor->SetActorLocation(Location);
-				TargetActor->SetActorRotation(Rotation);
-				TargetActor->SetActorScale3D(Scale);
+				if (GEngine)
+				{
+					if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(World))
+					{
+						if (Context->GameViewport)
+						{
+							bool bEnable = (LetterBoxVal > 0.0f);
+							Context->GameViewport->SetLetterBox(bEnable, 0.5f, 2.39f);
+						}
+					}
+				}
 			}
+			continue;
+		}
+
+		if (Track.Type == ETrackType::CameraShake)
+		{
+			float ShakeIntensity = 0.0f;
+			if (Track.EvaluateFloat(CurrentTime, ShakeIntensity))
+			{
+				if (ShakeIntensity > 0.1f)
+				{
+					if (APlayerController* PC = World->GetPlayerController())
+					{
+						if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+						{
+							PCM->PlayCameraShake();
+						}
+					}
+				}
+			}
+			continue;
 		}
 	}
 }
@@ -154,8 +240,23 @@ void FSequencePlayer::RestoreCameraCut(UWorld* World)
 				{
 					PCM->SetViewTarget(RestoreTarget);
 				}
+
+				PCM->SetManualFade(0.0f); // 페이드 초기화
 			}
 		}
+
+		if (GEngine)
+		{
+			if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(World))
+			{
+				if (Context->GameViewport)
+				{
+					Context->GameViewport->SetLetterBox(false, 0.5f);
+				}
+			}
+		}
+
+
 	}
 
 	OriginalViewTarget = nullptr;

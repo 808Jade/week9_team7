@@ -2,6 +2,7 @@
 #include "LuaBindings.h"
 
 #include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
 #include "GameFramework/Actor.h"
 #include "UObject/Class.h"
 #include "UObject/Property.h"
@@ -137,6 +138,47 @@ namespace LuaBindings
 		CompType["SetVisibility"] = &UActorComponent::SetVisibility;
 		CompType["GetClassName"] = [](UActorComponent* Comp) -> FString {
 			return (Comp && Comp->GetClass()) ? Comp->GetClass()->Name : "";
+		};
+
+		// USceneComponent Transform 제어 바인딩
+		CompType["SetRelativeLocation"] = [](UActorComponent* Comp, const FVector& Loc) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeLocation(Loc);
+			}
+		};
+		CompType["SetRelativeRotation"] = [](UActorComponent* Comp, const FRotator& Rot) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeRotation(Rot);
+			}
+		};
+		CompType["SetRelativeScale3D"] = [](UActorComponent* Comp, const FVector& Scale) {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				SceneComp->SetRelativeScale3D(Scale);
+			}
+		};
+		CompType["GetRelativeLocation"] = [](UActorComponent* Comp) -> FVector {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeLocation();
+			}
+			return FVector::ZeroVector;
+		};
+		CompType["GetRelativeRotation"] = [](UActorComponent* Comp) -> FRotator {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeRotation();
+			}
+			return FRotator::ZeroRotator;
+		};
+		CompType["GetRelativeScale3D"] = [](UActorComponent* Comp) -> FVector {
+			if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+			{
+				return SceneComp->GetRelativeScale3D();
+			}
+			return FVector(1.0f, 1.0f, 1.0f);
 		};
 
 		// 명시적 프로퍼티 함수

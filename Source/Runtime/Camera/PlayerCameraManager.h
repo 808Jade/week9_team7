@@ -58,9 +58,18 @@ public:
 
 	const FViewInfo& GetCameraViewInfo() const { return CameraCachePrivate; }
 
+	void SetManualFade(float InAlpha, const FColor& InColor = FColor::Black)
+	{
+		FadeAlpha = InAlpha;
+		FadeColor = InColor;
+	}
+	float GetFadeAlpha() const { return FadeAlpha; }
 protected:
 	APlayerController* PCOwner = nullptr;
 	FViewTarget ViewTarget;
 	FViewTarget PendingViewTarget;
 	FViewInfo CameraCachePrivate;
+
+	float FadeAlpha = 0.0f;
+	FColor FadeColor = FColor::Black;
 };

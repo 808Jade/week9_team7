@@ -59,4 +59,12 @@ void APlayerCameraManager::UpdateCamera(float DeltaTime)
 
 	// 2. 최종 렌더 캐시에 저장
 	CameraCachePrivate = ViewTarget.ViewInfo;
+
+	// 3. [추가] 시퀀서/외부에서 설정한 페이드 정보 반영
+	CameraCachePrivate.FadeAlpha = FadeAlpha;
+	CameraCachePrivate.FadeColor = FadeColor;
+}
+
+void APlayerCameraManager::PlayCameraShake()
+{
 }
