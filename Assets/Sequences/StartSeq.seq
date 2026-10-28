@@ -6,6 +6,32 @@
     "SequenceName": "StartSeq",
     "Tracks": [
         {
+            "ActorName": "LetterBox",
+            "Keys": [
+                {
+                    "Duration": 0.5,
+                    "Location": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "Scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "Time": 0.0,
+                    "Value": 1.0
+                }
+            ],
+            "TrackType": "LetterBox"
+        },
+        {
             "ActorName": "ACameraActor_2",
             "Keys": [],
             "TrackType": "Transform"
@@ -62,7 +88,7 @@
                     ],
                     "Rotation": [
                         0.0,
-                        180.00003051757813,
+                        180.00003051757812,
                         -0.0
                     ],
                     "Scale": [
@@ -82,7 +108,7 @@
                     ],
                     "Rotation": [
                         0.0,
-                        180.00003051757813,
+                        180.00003051757812,
                         -0.0
                     ],
                     "Scale": [
@@ -102,7 +128,7 @@
                     ],
                     "Rotation": [
                         0.0,
-                        180.00003051757813,
+                        180.00003051757812,
                         -0.0
                     ],
                     "Scale": [
