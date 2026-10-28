@@ -110,4 +110,6 @@ private:
 	FSceneRenderData RenderData;
 
 	float EvaluateLetterBoxAmount() const;
+
+	TArray<const UPrimitiveComponent*> MainHiddenComponents;
 };

@@ -102,6 +102,8 @@ bool FForwardLightTileGrid::PrepareBuild(const FSceneView& View, const FForwardL
 		return false;
 	Constants.GridProjectionParams = FVector4(1.0f / Projection.M[1][0], 1.0f / Projection.M[2][1],
 		Projection.M[0][2], Projection.M[3][2]);
+	// 오블리크 투영(포탈 뷰)은 DeviceZ가 화면 x, y에도 의존한다. 일반 투영이면 둘 다 0이라 기존 식과 같다.
+	Constants.GridObliqueParams = FVector4(Projection.M[1][2], Projection.M[2][2], 0.0f, 0.0f);
 	Constants.GridSliceCount = bClustered ? ClusterDepthSlices : 1;
 
 	// 원근은 log2(depth), 직교는 선형 depth에 scale과 bias를 적용한다.

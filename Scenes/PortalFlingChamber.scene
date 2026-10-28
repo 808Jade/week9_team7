@@ -234071,7 +234071,7 @@
                                     "Location": {
                                         "X": 0.0,
                                         "Y": 0.0,
-                                        "Z": 0.0
+                                        "Z": 1.0
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -234115,6 +234115,38 @@
                                 },
                                 "bAutoActivate": true,
                                 "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "PawnMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "CapsuleComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalChell/Portal_Chell.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": -1.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
                                 "bVisible": true
                             }
                         },
@@ -234173,6 +234205,7 @@
                         "BrakingDeceleration": 35.0,
                         "CollisionRadius": 0.5,
                         "CrouchEyeHeight": 0.550000011920929,
+                        "CrouchHalfHeight": 0.8999999761581421,
                         "CrouchRadius": 0.3499999940395355,
                         "CrouchSpeed": 3.0,
                         "EyeHeight": 1.100000023841858,
@@ -234184,6 +234217,7 @@
                         "MaxStepHeight": 0.30000001192092896,
                         "MoveSpeed": 6.0,
                         "SprintSpeed": 9.0,
+                        "StandHalfHeight": 1.5,
                         "Velocity": {
                             "X": 0.0,
                             "Y": 0.0,
