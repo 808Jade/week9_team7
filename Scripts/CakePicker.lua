@@ -2,45 +2,48 @@
 -- 포탈 1 엔딩 씬: 케이크 촛불 끄는 집게(CakePicker) 연출 스크립트
 -- 1. 시퀀서가 CakePicker를 천장에서 케이크로 하강시킴 (30.53초 부근 도착)
 -- 2. 도착 후 0.5초 대기 (31.03초)
--- 3. 4개의 집게 메쉬가 부드럽게 오므라들며 케이크 촛불(APointLightActor_0)을 끔!
+-- 3. 4개의 집게 관절 메쉬가 자연스럽게 오므라들며 케이크 촛불(APointLightActor_0)을 집어서 끔!
 
-local comp5 = nil -- 좌측 상단 집게 메쉬
-local comp6 = nil -- 좌측 하단 집게 메쉬
-local comp7 = nil -- 우측 상단 집게 메쉬
-local comp8 = nil -- 우측 하단 집게 메쉬
+local comp5 = nil -- 좌측 상단 집게 암 (UStaticMeshComponent_5)
+local comp6 = nil -- 좌측 하단 집게 핑거 (UStaticMeshComponent_6)
+local comp7 = nil -- 우측 상단 집게 암 (UStaticMeshComponent_7)
+local comp8 = nil -- 우측 하단 집게 핑거 (UStaticMeshComponent_8)
 local candleLight = nil
 
 local state = "WAITING" -- "WAITING" -> "CLOSING" -> "CLOSED"
 local elapsedTime = 0.0
 local arrivalTime = nil
 local closeTimer = 0.0
-local closeDuration = 0.45 -- 집게가 닫히는 데 걸리는 시간(초)
+local closeDuration = 0.55 -- 집게가 닫히는 데 걸리는 시간(초)
 
--- 1. 벌려진 초기 상태 (Open)
+-- 1. 벌려진 초기 상태 (Open: 에디터에서 배치한 정밀 원본 트랜스폼)
+-- 좌측: 상단 암은 바깥(-30도), 하단 핑거는 안쪽(+30도)으로 꺾여 벌어진 형태
 local open5_Loc = Vector(0.0, -0.7328, -4.5724)
 local open5_Rot = Rotator(0.0, 0.0, -30.0)
 
 local open6_Loc = Vector(0.0, -0.5442, -5.6543)
 local open6_Rot = Rotator(0.0, 0.0, 30.0)
 
+-- 우측: 상단 암은 바깥(+30도), 하단 핑거는 안쪽(-30도)으로 꺾여 벌어진 형태
 local open7_Loc = Vector(0.0, 1.4117, -4.5687)
 local open7_Rot = Rotator(0.0, 0.0, 30.0)
 
 local open8_Loc = Vector(0.0, 1.2121, -5.6456)
 local open8_Rot = Rotator(0.0, 0.0, -30.0)
 
--- 2. 오므라든 상태 (Closed - 중심 Y=0.35에서 맞닿도록 회전 및 이동)
-local close5_Loc = Vector(0.0, -0.15, -4.5724)
-local close5_Rot = Rotator(0.0, 0.0, 10.0)
+-- 2. 오므라든 집게 상태 (Closed: 기구학적으로 관절이 유지되며 핑거 팁이 촛불 중심 Y=0.355로 맞물림)
+-- 상단 암은 안쪽으로 회전(-16도 / +16도), 하단 핑거는 중심을 향해 더 안쪽으로 오므라듦(+38도 / -38도)
+local close5_Loc = Vector(0.0, -0.5800, -4.6400)
+local close5_Rot = Rotator(0.0, 0.0, -16.0)
 
-local close6_Loc = Vector(0.0, 0.22, -5.6543)
-local close6_Rot = Rotator(0.0, 0.0, 0.0)
+local close6_Loc = Vector(0.0, -0.2000, -5.7900)
+local close6_Rot = Rotator(0.0, 0.0, 38.0)
 
-local close7_Loc = Vector(0.0, 0.85, -4.5687)
-local close7_Rot = Rotator(0.0, 0.0, -10.0)
+local close7_Loc = Vector(0.0, 1.2900, -4.6600)
+local close7_Rot = Rotator(0.0, 0.0, 16.0)
 
-local close8_Loc = Vector(0.0, 0.48, -5.6456)
-local close8_Rot = Rotator(0.0, 0.0, 0.0)
+local close8_Loc = Vector(0.0, 0.9100, -5.8100)
+local close8_Rot = Rotator(0.0, 0.0, -38.0)
 
 local function Lerp(a, b, t)
     return a + (b - a) * t
@@ -138,8 +141,8 @@ function Tick(dt)
         local eased = alpha * alpha * (3.0 - 2.0 * alpha)
         ApplyClaw(eased)
 
-        -- 집게가 거의 맞닿을 때(85%) 촛불 끄기
-        if alpha >= 0.85 then
+        -- 집게가 거의 맞닿을 때(80% 이상) 촛불 끄기
+        if alpha >= 0.80 then
             SetCandleVisible(false)
         end
 

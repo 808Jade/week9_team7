@@ -10,6 +10,13 @@
 #include "Engine/World.h"
 #include "Collision/Ray.h"
 #include "Collision/HitResult.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Camera/CameraModifier_Recoil.h"
+#include "GameFramework/PlayerController.h"
+
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
+#include "Asset/AssetManager.h"
 
 APortalGunActor::APortalGunActor()
 {
@@ -143,15 +150,40 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 	}
 }
 
-void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult)
+void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
 {
+	if (!RecoilModifier && GetWorld())
+	{
+		if (APlayerController* PC = GetWorld()->GetPlayerController())
+		{
+			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+			{
+				RecoilModifier = PCM->AddNewCameraModifier<UCameraModifier_Recoil>();
+			}
+		}
+	}
+
+	if (RecoilModifier)
+	{
+		RecoilModifier->AddRecoil(10.0f, -0.2f, 0);
+	}
+
 	APortalActor* Portal = GetPortal(PortalToFire);
 	if (!Portal || !HitResult.bBlockingHit)
 	{
 		return;
 	}
 
-	Portal->PlaceAt(HitResult.ImpactPoint, HitResult.ImpactNormal);
+	FVector Forward = ViewerForward;
+	if (Forward.SizeSquared() < 1e-4f && OwnerPawn && OwnerPawn->GetCameraComponent())
+	{
+		Forward = OwnerPawn->GetCameraComponent()->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	}
+
+	if(Portal->PlaceAt(HitResult, Forward))
+	{
+		PlayFireSound(PortalToFire);
+	}
 }
 
 void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
@@ -361,6 +393,22 @@ void APortalGunActor::PlaceCylinder(UStaticMeshComponent* Comp, const FVector& S
 		Mid.X,           Mid.Y,           Mid.Z,           1.0f);
 
 	Comp->SetWorldTransform(World, false);
+}
+
+void APortalGunActor::PlayFireSound(EPortalType Type)
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if(!AudioBackend)
+	{
+		return;
+	}
+
+	const FString SoundPath = (Type == EPortalType::Blue) ? "Audio/Portal2_sfx_portal_gun_fire_blue.mp3" : "Audio/Portal2_sfx_portal_gun_fire_orange.mp3";
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>(SoundPath);
+	if(SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{		
+		AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+	}
 }
 
 void APortalGunActor::Swing()

@@ -665,6 +665,62 @@ bool UWorld::SweepSingle(const FRay& WorldRay, float MaxDistance, float Radius, 
 				return true;
 			}
 
+				// [Fling45] 반지름 0 레이(포탈건)는 메시의 로컬 박스(OBB)로 판정한다.
+			// 월드 AABB로 판정하면 회전된 메시(예: 45도 플링 패널)의 법선이 축 정렬 법선으로 뭉개진다.
+			if (Radius <= 0.0f)
+			{
+				const FBox LocalBox = Component->CalcLocalBounds();
+				const FMatrix& W2L = Proxy->GetWorldToLocal();
+				const FVector LO = W2L.TransformPosition(WorldRay.Origin);
+				const FVector LD = W2L.TransformVector(WorldRay.Direction);
+
+				float TEnter = -1e30f;
+				float TExit = 1e30f;
+				int32 HitAxis = -1;
+				float HitSign = 0.0f;
+				for (int32 Axis = 0; Axis < 3; ++Axis)
+				{
+					const float O = LO.V[Axis];
+					const float D = LD.V[Axis];
+					const float Lo = LocalBox.Min.V[Axis];
+					const float Hi = LocalBox.Max.V[Axis];
+					if (std::abs(D) < 1e-8f)
+					{
+						if (O < Lo || O > Hi) return false;
+						continue;
+					}
+					float T1 = (Lo - O) / D;
+					float T2 = (Hi - O) / D;
+					float Sign = -1.0f;                 // Min 면으로 진입 → 로컬 법선 -축
+					if (T1 > T2)
+					{
+						const float Tmp = T1; T1 = T2; T2 = Tmp;
+						Sign = 1.0f;                    // Max 면으로 진입 → 로컬 법선 +축
+					}
+					if (T1 > TEnter) { TEnter = T1; HitAxis = Axis; HitSign = Sign; }
+					if (T2 < TExit) TExit = T2;
+					if (TEnter > TExit) return false;
+				}
+				if (HitAxis < 0 || TEnter < 0.0f || TEnter > InOutNearestT) return false;
+
+				// 면 법선 로컬 → 월드 (역전치). 행 벡터 규약: n_world[i] = Σ_j W2L[i][j] * n_local[j]
+				FVector ObbNormal(W2L.M[0][HitAxis] * HitSign, W2L.M[1][HitAxis] * HitSign, W2L.M[2][HitAxis] * HitSign);
+				ObbNormal = ObbNormal.GetSafeNormal();
+				if (ObbNormal.Dot(WorldRay.Direction) > 0.0f) return false;
+
+				const FVector ObbPoint = WorldRay.Origin + WorldRay.Direction * TEnter;
+				OutHit.bBlockingHit = true;
+				OutHit.HitComponent = Component;
+				OutHit.Distance = TEnter;
+				OutHit.Time = TEnter / MaxDistance;
+				OutHit.ImpactPoint = ObbPoint;
+				OutHit.Location = ObbPoint;
+				OutHit.ImpactNormal = ObbNormal;
+				OutHit.Normal = ObbNormal;
+				InOutNearestT = TEnter;
+				return true;
+			}
+
 			FAABB Bounds = Proxy->GetBounds();
 			Bounds.Extent += Extent;
 			float T = InOutNearestT;

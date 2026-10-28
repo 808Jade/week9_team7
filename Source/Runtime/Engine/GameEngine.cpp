@@ -80,13 +80,21 @@ bool UGameEngine::Init()
     GameViewport->SetGameInstance(GameInstance);
     Context.GameViewport = GameViewport;
 
-    // 4. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
-    FString DefaultScene = "Scenes/LightGameScene.scene";
+    // 4. 기본 씬 로드 (PortalFlingChamber.scene 우선 → LightGameScene.scene → Bocchi.scene, 각각 상대 경로도 탐색)
+    FString DefaultScene = "Scenes/PortalFlingChamber.scene";
     if (!std::filesystem::exists(DefaultScene))
     {
         if (std::filesystem::exists("../../../" + DefaultScene))
         {
             DefaultScene = "../../../" + DefaultScene;
+        }
+        else if (std::filesystem::exists("Scenes/LightGameScene.scene"))
+        {
+            DefaultScene = "Scenes/LightGameScene.scene";
+        }
+        else if (std::filesystem::exists("../../../Scenes/LightGameScene.scene"))
+        {
+            DefaultScene = "../../../Scenes/LightGameScene.scene";
         }
         else if (std::filesystem::exists("Scenes/Bocchi.scene"))
         {
@@ -301,6 +309,8 @@ void UGameEngine::RenderFrame()
     Options.SpotShadowMapSize = 2048; // Very High (2048)
     Options.PcfMode = EPcfMode::Sample32;
     Options.PostProcess = PostProcess;
+    Options.RenderingPath = ERenderingPath::Forward;   // editor.ini와 동일 (기본값 Deferred)
+    Options.LightingModel = ELightingModel::Phong;     // editor.ini와 동일 (기본값 Gouraud)
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),

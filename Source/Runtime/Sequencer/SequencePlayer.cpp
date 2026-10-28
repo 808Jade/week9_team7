@@ -180,7 +180,9 @@ void FSequencePlayer::Evaluate(UWorld* World)
 					{
 						if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 						{
-							PCM->PlayCameraShake();
+							float ShakeScale = FMath::Clamp(ShakeIntensity, 0.0f, 1.0f);
+							float ShakeDuration = 0.5f; // 기본 지속 시간
+							PCM->PlayCameraShake(ShakeScale, ShakeDuration);
 						}
 					}
 				}
