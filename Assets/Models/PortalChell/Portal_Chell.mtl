@@ -1,0 +1,29 @@
+# Chell Portal 2 Material
+
+newmtl chell_torso_diffuse
+Kd 1.0 1.0 1.0
+map_Kd textures/chell_torso_diffuse_color_1.png
+map_bump textures/chell_torso_diffuse_normal_0.png
+
+newmtl chell_legs_diffuse
+Kd 1.0 1.0 1.0
+map_Kd textures/chell_legs_diffuse_color_3.png
+map_bump textures/chell_legs_diffuse_normal_2.png
+
+newmtl chell_head_diffuse
+Kd 1.0 1.0 1.0
+map_Kd textures/chell_head_diffuse_color_5.png
+map_bump textures/chell_head_diffuse_normal_4.png
+
+newmtl chell_hair
+Kd 1.0 1.0 1.0
+d 0.999
+map_Kd textures/chell_hair_color-chell_hair_trans_6.png
+
+newmtl chell_teeth
+Kd 1.0 1.0 1.0
+map_Kd textures/chell_teeth_color_7.png
+
+newmtl eyeball_r
+Kd 1.0 1.0 1.0
+map_Kd textures/gman_eye_color_psd_a416d4da_albedo_8.png

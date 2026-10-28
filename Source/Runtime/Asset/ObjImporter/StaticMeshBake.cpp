@@ -21,13 +21,14 @@ static_assert(std::is_trivially_copyable_v<FLODSourceVertex>);
 namespace
 {
 	// FStaticMeshData, FVertex, FStaticMeshSection, FStaticMaterialSlot 구조가 바뀌면 올린다
-	constexpr uint32 BakeVersion{ 5 };
+	constexpr uint32 BakeVersion{ 6 };
 
 	struct FBakeHeader
 	{
 		// 'S'taic 'M'esh 'B'a'K'e
 		char Magic[4] = { 'S', 'M', 'B', 'K' };
 		uint32 Version = BakeVersion;
+		uint64 SourceSignature = 0;
 	};
 
 	// 숫자 || 숫자만 있는 구조체
@@ -96,7 +97,7 @@ namespace
 	}
 }
 
-TUniquePtr<FStaticMeshData> FStaticMeshBake::ReadBaked(const FString& BinPath)
+TUniquePtr<FStaticMeshData> FStaticMeshBake::ReadBaked(const FString& BinPath, uint64 SourceSignature)
 {
 	std::ifstream In(BinPath, std::ios::binary);
 	if (!In)
@@ -112,9 +113,10 @@ TUniquePtr<FStaticMeshData> FStaticMeshBake::ReadBaked(const FString& BinPath)
 	const FBakeHeader Expected;
 	if (!ReadPod<FBakeHeader>(In, Header) ||
 		std::memcmp(Header.Magic, Expected.Magic, sizeof(Header.Magic)) != 0 ||
-		Header.Version != Expected.Version)
+		Header.Version != Expected.Version ||
+		Header.SourceSignature != SourceSignature)
 	{
-		HTR_LOG(Warning, "[BAKE] {}: invalid header or version, re-cooking", BinPath);
+		HTR_LOG(Info, "[BAKE] {}: source changed or cache format differs, re-cooking", BinPath);
 		return nullptr;
 	}
 
@@ -159,7 +161,7 @@ TUniquePtr<FStaticMeshData> FStaticMeshBake::ReadBaked(const FString& BinPath)
 	return Data;
 }
 
-void FStaticMeshBake::WriteBaked(const FString& BinPath, const FStaticMeshData& Data)
+void FStaticMeshBake::WriteBaked(const FString& BinPath, const FStaticMeshData& Data, uint64 SourceSignature)
 {
 	std::ofstream Out(BinPath, std::ios::binary);
 	if (!Out)
@@ -168,7 +170,9 @@ void FStaticMeshBake::WriteBaked(const FString& BinPath, const FStaticMeshData& 
 		return;
 	}
 
-	WritePod<FBakeHeader>(Out, FBakeHeader());
+	FBakeHeader Header;
+	Header.SourceSignature = SourceSignature;
+	WritePod<FBakeHeader>(Out, Header);
 	WriteArray<FVertex>(Out, Data.Vertices);
 	WriteArray<FLODSourceVertex>(Out, Data.LODSourceVertices);
 	WriteArray<uint32>(Out, Data.Indices);

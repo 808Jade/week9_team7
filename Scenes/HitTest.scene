@@ -156,9 +156,9 @@
                                         "Z": 3.8117337226867676
                                     },
                                     "Rotation": {
-                                        "Pitch": 30.00001335144043,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
+                                        "Pitch": 44.99999237060547,
+                                        "Roll": 180.0000457763672,
+                                        "Yaw": 180.0000457763672
                                     },
                                     "Scale": {
                                         "X": 1.0,
@@ -365,6 +365,18 @@
                                 "bHiddenInGame": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_PortalCrosshair",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/PortalCrosshairController.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/PortalCrosshairController.lua"
                         }
                     ],
                     "Name": "APortalPawn_0",
@@ -396,7 +408,7 @@
                     }
                 },
                 {
-                    "Class": "ATurretActor",
+                    "Class": "APortalTurretActor",
                     "Components": [
                         {
                             "Class": "USceneComponent",
@@ -434,14 +446,14 @@
                                 "Extent": {
                                     "X": 0.44999998807907104,
                                     "Y": 0.3499999940395355,
-                                    "Z": 0.699999988079071
+                                    "Z": 0.8700000047683716
                                 },
                                 "ShapeColor": 4288517599,
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
                                         "Y": 0.0,
-                                        "Z": 0.25011181831359863
+                                        "Z": 0.3952687978744507
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -463,17 +475,17 @@
                         },
                         {
                             "Class": "UStaticMeshComponent",
-                            "Name": "TurretMeshComponent",
+                            "Name": "BodyMesh",
                             "OverrideMaterials": [],
                             "Parent": "CollisionBox",
                             "Properties": {
                                 "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/Turret/turret_bundle.obj",
+                                "StaticMesh": "Models/PortalTurret/portal_turret_body.obj",
                                 "Transform": {
                                     "Location": {
                                         "X": 0.0,
                                         "Y": 0.0,
-                                        "Z": -0.75
+                                        "Z": -0.8700000047683716
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -492,9 +504,285 @@
                                 "bReceiveShadow": true,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "LeftWingMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_left.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.14139999449253082,
+                                        "Y": -0.3594000041484833,
+                                        "Z": 0.9333999752998352
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": -25.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "RightWingMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_right.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.14139999449253082,
+                                        "Y": 0.3594000041484833,
+                                        "Z": 0.9333999752998352
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 25.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "LeftGunsMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.4156000018119812,
+                                        "Y": -0.23600000143051147,
+                                        "Z": 0.9790999889373779
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "RightGunsMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.4156000018119812,
+                                        "Y": 0.23600000143051147,
+                                        "Z": 0.9790999889373779
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "LuaScriptComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/PortalTurret.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/PortalTurret.lua"
                         }
                     ],
-                    "Name": "ATurretActor_1",
+                    "Name": "APortalTurretActor_1",
+                    "Properties": {
+                        "DeploySpeed": 4.0,
+                        "DetectionAngle": 50.0,
+                        "DetectionRadius": 20.0,
+                        "GunsExtendDistance": 0.07999999821186066,
+                        "MaxWingOpenAngle": 25.0,
+                        "bActorEnableCollision": true,
+                        "bAutoDeployOnAlert": true,
+                        "bStartDeployed": true
+                    }
+                },
+                {
+                    "Class": "ASkyLightActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "USkyLightComponent",
+                            "Name": "USkyLightComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "Intensity": 0.10000000149011612,
+                                "LightColor": 4294967295,
+                                "ShadowBias": 0.009999999776482582,
+                                "ShadowResolutionScale": 1.0,
+                                "ShadowSharpen": 0.0,
+                                "ShadowSlopeBias": 0.009999999776482582,
+                                "Transform": {
+                                    "Location": {
+                                        "X": -11.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadows": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBillboardComponent",
+                            "Material": {
+                                "Base": "BillboardMaterial",
+                                "Instance": {
+                                    "BaseColor": {
+                                        "W": 1.0,
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "BlendState": "AlphaBlend",
+                                    "FlipNormalY": false,
+                                    "PSOType": 14,
+                                    "Properties": {},
+                                    "SamplerState": "LinearClamp",
+                                    "Shininess": 32.0,
+                                    "SpecularColor": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    },
+                                    "Textures": [
+                                        "Assets/Icons/Sky.png"
+                                    ],
+                                    "UVScrollSpeed": [
+                                        0.0,
+                                        0.0
+                                    ]
+                                }
+                            },
+                            "Name": "UBillboardComponent",
+                            "Parent": "USkyLightComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": true,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "ASkyLightActor_0",
                     "Properties": {
                         "bActorEnableCollision": true
                     }

@@ -10,7 +10,8 @@
 #include "Engine/Level.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
 #include "GameFramework/Actor/PortalActor.h"
-#include "GameFramework/Actor/TurretActor.h"
+#include "GameFramework/Actor/PortalTurretActor.h"
+#include "GameFramework/CombatConfig.h"
 #include "GameFramework/Actor/UIManagerActor.h"
 #include "Components/LuaScriptComponent.h"
 #include "Collision/Ray.h"
@@ -843,10 +844,10 @@ void APortalPawn::SwingPortalGun()
 			{
 				AActor* HitActor = HitResult.HitComponent->GetOwner();
 				if (HitActor == PortalGun) return;
-				if(HitResult.Distance + 0.5f <= SwingRange)
+				const FCombatConfig& Config = FCombatConfig::Get();
+				if (HitResult.Distance + 0.5f <= Config.MeleeRange)
 				{
-					GetWorld()->SetTimeDilation(0.06f, 0.02f);
-					if (ATurretActor* Turret = Cast<ATurretActor>(HitActor))
+					if (APortalTurretActor* Turret = Cast<APortalTurretActor>(HitActor))
 					{
 						Turret->OnHit(RayDir, HitResult.ImpactPoint);
 					}
@@ -858,9 +859,14 @@ void APortalPawn::SwingPortalGun()
 
 void APortalPawn::Slomo(float Duration, float Dilation)
 {
+	const FCombatConfig& Config = FCombatConfig::Get();
 	if (Duration <= 0.0f)
 	{
-		Duration = 1.0f;
+		Duration = Config.SlomoDuration;
+	}
+	if (Dilation <= 0.0f)
+	{
+		Dilation = Config.SlomoTimeDilation;
 	}
 	if (GetWorld())
 	{

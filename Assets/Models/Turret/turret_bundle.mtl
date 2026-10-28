@@ -1,6 +1,0 @@
-# MTL file for turret_bundle
-newmtl Turret
-Kd 1.0 1.0 1.0
-d 1.0
-map_Kd Turret_BaseColor.png
-map_bump Turret_Normal.png

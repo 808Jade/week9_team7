@@ -123,10 +123,6 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 	if (Forward != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetForwardVector(), Forward);
 	if (Right != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetRightVector(), Right);
 
-	const bool bSwing = bKeyDown[static_cast<int32>(EKeyCode::V)];
-	const bool bSlomo = bKeyDown[static_cast<int32>(EKeyCode::H)];
-	if (bSwing) PortalPawn->SwingPortalGun();
-	if (bSlomo) PortalPawn->Slomo(2.0f, 0.25f);
 
 	// 4. 마우스 시선 회전 (bMouseCaptured 및 포커스 상태일 때만 1인칭 회전 & 화면 중앙 재고정)
 	if (bMouseCaptured && bIsAppFocused)
@@ -233,5 +229,15 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	else if (Key == static_cast<int32>(EKeyCode::Z) || Key == static_cast<int32>(EKeyCode::MButton))
 	{
 		PortalPawn->ToggleZoom();
+	}
+	// 9. V 키: 근접 타격 (Melee Swing)
+	else if (Key == static_cast<int32>(EKeyCode::V))
+	{
+		PortalPawn->SwingPortalGun();
+	}
+	// 10. H 키: 슬로모션 (Slomo)
+	else if (Key == static_cast<int32>(EKeyCode::H))
+	{
+		PortalPawn->Slomo(0.0f, 0.0f);
 	}
 }
