@@ -115,6 +115,9 @@ public:
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 
+	void RequestLoadScene(const FString& InScenePath) { PendingSceneLoadPath = InScenePath; }
+	const FString& GetPendingSceneLoadPath() const { return PendingSceneLoadPath; }
+
 	void SetTimeDilation(float Duration, float Dilation = 0.0f)
 	{
 		HitStopTimer = Duration;
@@ -173,4 +176,5 @@ private:
 	float HitStopDilation = 1.0f;
 	// 전역 시간 지연 배율. 1.0이면 정상 속도, 0.0이면 정지
 	float GlobalTimeDilation = 1.0f;
+	FString PendingSceneLoadPath;
 };

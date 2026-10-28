@@ -43,6 +43,8 @@
 #include "Lua/Bindings/LuaBindings.h"
 
 #include "Audio/AudioDevice.h"
+#include "Serialization/JsonArchive.h"
+#include "Engine/GameViewportClient.h"
 
 #include "Camera/CameraComponent.h"
 
@@ -211,12 +213,8 @@ void UWorld::Tick(float DeltaTime)
 		}
 	}
 
-	FVector ListenerPos = FVector::ZeroVector;
-	FVector ListenerForward = FVector(1.0f, 0.0f, 0.0f);
-	FVector ListenerUp = FVector(0.0f, 0.0f, 1.0f);
-	bool bFoundListener = false;
-
-	if (APlayerController* PC = GetPlayerController())
+	// Tick Audio listner
+	if(MainCamera)
 	{
 		if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 		{
@@ -297,6 +295,16 @@ void UWorld::ClearWorld()
 	// 그대로 두면 지워진 컴포넌트를 가리키는 프록시가 FScene에 남아 다음 프레임에 터진다.
 	Scene.RemoveAllLights();
 	Scene.RemoveAllPrimitives();
+	if (GEngine)
+	{
+		if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(this))
+		{
+			if (Context->GameViewport)
+			{
+				Context->GameViewport->SetCameraComponent(nullptr);
+			}
+		}
+	}
 	HTR_LOG(Info, "{} : ", PersistentLevel->GetActorNum());
 
 	if(IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
@@ -1049,6 +1057,7 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 void UWorld::BeginPlay()
 {
 	if ((WorldType != EWorldType::PIE && WorldType != EWorldType::Game) || bBegunPlay) return;
+	FLuaManager::Get().SetActiveWorld(this);
 
 	if (!PlayerPawn)
 	{

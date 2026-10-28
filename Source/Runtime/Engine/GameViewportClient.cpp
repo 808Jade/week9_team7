@@ -260,7 +260,8 @@ FSceneView FGameViewportClient::CalcSceneView(const FRect& InViewRect)
 			if(APawn* Pawn = PC->GetPawn())
 			{
 				// Pawn에 부착된 1인칭 전신 StaticMeshComponent 숨김 등록
-				if(UStaticMeshComponent* MeshComp = Cast<APortalPawn>(Pawn)->GetMeshComponent())
+				APortalPawn* PortalPawn = Cast<APortalPawn>(Pawn);
+				if(UStaticMeshComponent* MeshComp = PortalPawn ? PortalPawn->GetMeshComponent() : nullptr)
 				{
 					MainHiddenComponents.Add(MeshComp);
 				}

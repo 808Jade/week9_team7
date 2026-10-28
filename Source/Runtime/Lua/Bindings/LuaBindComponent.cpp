@@ -1,8 +1,9 @@
-#include "EnginePCH.h"
+﻿#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/Actor.h"
 #include "UObject/Class.h"
 #include "UObject/Property.h"
@@ -223,5 +224,26 @@ namespace LuaBindings
 			}
 			return List;
 		};
+
+		// AudioComponent 바인딩
+		CompType["Play"] = [](UActorComponent* Comp) {
+			if (UAudioComponent* Audio = Cast<UAudioComponent>(Comp)) Audio->Play();
+		};
+		CompType["Stop"] = [](UActorComponent* Comp) {
+			if (UAudioComponent* Audio = Cast<UAudioComponent>(Comp)) Audio->Stop();
+		};
+
+		sol::usertype<UAudioComponent> AudioCompType = Lua.new_usertype<UAudioComponent>("AudioComponent",
+			sol::base_classes, sol::bases<UActorComponent, USceneComponent>());
+		AudioCompType["Play"] = &UAudioComponent::Play;
+		AudioCompType["Stop"] = &UAudioComponent::Stop;
+		AudioCompType["IsPlaying"] = &UAudioComponent::IsPlaying;
+		AudioCompType["SetPaused"] = &UAudioComponent::SetPaused;
+		AudioCompType["SetVolume"] = &UAudioComponent::SetVolume;
+		AudioCompType["SetPitch"] = &UAudioComponent::SetPitch;
+		AudioCompType["SetSoundPath"] = &UAudioComponent::SetSoundPath;
+		AudioCompType["GetSoundPath"] = &UAudioComponent::GetSoundPath;
+		AudioCompType["SetIs3D"] = &UAudioComponent::SetIs3D;
+		AudioCompType["GetIs3D"] = &UAudioComponent::GetIs3D;
 	}
 }

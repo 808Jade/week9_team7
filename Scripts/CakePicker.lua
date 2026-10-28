@@ -1,8 +1,23 @@
+-- ========================================================
 -- Scripts/CakePicker.lua
--- 포탈 1 엔딩 씬: 케이크 촛불 끄는 집게(CakePicker) 연출 스크립트
--- 1. 시퀀서가 CakePicker를 천장에서 케이크로 하강시킴 (30.53초 부근 도착)
--- 2. 도착 후 0.5초 대기 (31.03초)
--- 3. 4개의 집게 관절 메쉬가 자연스럽게 오므라들며 케이크 촛불(APointLightActor_0)을 집어서 끔!
+-- 포탈 엔딩 씬(EndingScene.scene):
+-- 1. 엔딩 씬 진입 시 엔딩 BGM 자동 재생
+-- 2. 시퀀서(EndingCake.seq, 33.0초)가 CakePicker를 천장에서 케이크로 하강시킴 (30.53초 부근 도착)
+-- 3. 도착 후 0.5초 대기(31.03초) 후 4개의 집게 관절 메쉬가 오므라들며 케이크 촛불(APointLightActor_0)을 집어서 끔
+-- 4. 시퀀스 연출이 모두 끝나면(33.0초) 검은 페이드(Fade 1.0)를 해제하고 원래 뜨던 엔딩 UI(TEST COMPLETE / 탈출 시간 / 시작 화면으로)를 표시
+-- ========================================================
+
+-- ========================================================
+-- [엔딩 BGM 설정]
+-- 엔딩 브금 파일 경로를 아래 EndingBGMPath에 넣어주시면
+-- 엔딩 씬 시작과 동시에 자동으로 브금이 재생됩니다!
+-- ========================================================
+local EndingBGMPath = "Assets/Audio/StillAlive.wav"
+local EndingBGMVolume = 1.0
+local EndingBGMLoop = false
+
+-- 엔딩 컷씬 시퀀스 총 길이 (33.0초 시점에 엔딩 UI 출력)
+local sequenceDuration = 33.0
 
 local comp5 = nil -- 좌측 상단 집게 암 (UStaticMeshComponent_5)
 local comp6 = nil -- 좌측 하단 집게 핑거 (UStaticMeshComponent_6)
@@ -10,11 +25,13 @@ local comp7 = nil -- 우측 상단 집게 암 (UStaticMeshComponent_7)
 local comp8 = nil -- 우측 하단 집게 핑거 (UStaticMeshComponent_8)
 local candleLight = nil
 
-local state = "WAITING" -- "WAITING" -> "CLOSING" -> "CLOSED"
+local state = "WAITING" -- "WAITING" -> "CLOSING" -> "CLOSED" -> "ENDING_UI"
 local elapsedTime = 0.0
 local arrivalTime = nil
 local closeTimer = 0.0
 local closeDuration = 0.55 -- 집게가 닫히는 데 걸리는 시간(초)
+local bEndingUIShown = false
+local bgmVoiceID = -1
 
 -- 1. 벌려진 초기 상태 (Open: 에디터에서 배치한 정밀 원본 트랜스폼)
 -- 좌측: 상단 암은 바깥(-30도), 하단 핑거는 안쪽(+30도)으로 꺾여 벌어진 형태
@@ -77,7 +94,7 @@ local function ApplyClaw(t)
 end
 
 local function SetCandleVisible(bVisible)
-    if not candleLight then
+    if not candleLight and obj then
         candleLight = obj:FindActorByName("APointLightActor_0")
     end
     if candleLight then
@@ -85,12 +102,39 @@ local function SetCandleVisible(bVisible)
         local comps = candleLight:GetComponents()
         if comps then
             for i = 1, #comps do
-                if comps[i] and comps[i].SetVisibility then
+                if comps[i] then
                     comps[i]:SetVisibility(bVisible)
                 end
             end
         end
     end
+end
+
+local function ShowEndingScreen()
+    if bEndingUIShown then
+        return
+    end
+    bEndingUIShown = true
+    state = "ENDING_UI"
+
+    -- 컷씬 시퀀스 정지 및 검은 페이드(Fade 1.0) / 레터박스 해제
+    if obj then
+        local seqActor = obj:FindActorByName("ASequenceTriggerActor_0")
+        if seqActor then
+            seqActor:StopSequence()
+        end
+        obj:SetManualFade(0.0)
+        local endCam = obj:FindActorByName("EndingCamera")
+        if endCam then
+            obj:SetViewTarget(endCam)
+        end
+    end
+
+    -- 원래 뜨던 성공 엔딩 UI (TEST COMPLETE + 탈출 시간 + [Enter] 시작 화면으로) 표시
+    if UIManager then
+        UIManager.SetUIMode("Ending")
+    end
+    print("[CakePicker] Ending cutscene finished -> Showing Ending UI!")
 end
 
 function BeginPlay()
@@ -107,13 +151,50 @@ function BeginPlay()
     elapsedTime = 0.0
     arrivalTime = nil
     closeTimer = 0.0
+    bEndingUIShown = false
 
     -- 시작 시 집게를 확실히 벌려진 상태로 유지
     ApplyClaw(0.0)
+
+    -- 1. 엔딩 BGM 즉시 재생 (파일이 존재하면 자동 로드 및 재생)
+    if EndingBGMPath and EndingBGMPath ~= "" and Audio then
+        bgmVoiceID = Audio.Play2D(EndingBGMPath, EndingBGMVolume, 1.0, EndingBGMLoop)
+        if bgmVoiceID ~= -1 then
+            print("[CakePicker] Playing Ending BGM: " .. EndingBGMPath)
+        end
+    end
+
+    -- 2. 컷씬 재생 중에는 모든 UI 숨김 (None 모드)
+    if UIManager then
+        UIManager.SetUIMode("None")
+    end
+
+    -- 3. 기본 스폰된 DefaultPawn 숨김 및 조작 해제 (컷씬 카메라 방해 방지)
+    if obj then
+        local pawn = obj:GetPlayerPawn()
+        if pawn then
+            pawn:SetVisibility(false)
+            pawn:SetActorEnableCollision(false)
+        end
+        obj:UnPossess()
+        obj:SetMouseCapture(false)
+    end
 end
 
 function Tick(dt)
+    if bEndingUIShown then
+        return
+    end
+
     elapsedTime = elapsedTime + dt
+
+    -- 편의를 위해 Space 키로 엔딩 컷씬 스킵 가능 (진입 후 1초 이후부터)
+    if elapsedTime > 1.0 and Input and Input.IsKeyPressed("Space") then
+        ApplyClaw(1.0)
+        SetCandleVisible(false)
+        ShowEndingScreen()
+        return
+    end
 
     if state == "WAITING" then
         -- 1. Z축 위치 기반으로 케이크 도착 감지 (케이크 위치 Z <= 1.35)
@@ -152,9 +233,18 @@ function Tick(dt)
             print("[CakePicker] Claw fully closed, candle extinguished!")
         end
     end
+
+    -- 3. 시퀀스 전체 재생 시간(33.0초) 완료 시 엔딩 UI 출력
+    if elapsedTime >= sequenceDuration then
+        ShowEndingScreen()
+    end
 end
 
 function EndPlay()
+    if bgmVoiceID ~= -1 and Audio then
+        Audio.Stop(bgmVoiceID)
+        bgmVoiceID = -1
+    end
     print("[CakePicker] EndPlay")
 end
 

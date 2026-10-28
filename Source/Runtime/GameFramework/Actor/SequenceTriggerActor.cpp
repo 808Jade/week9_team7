@@ -21,6 +21,11 @@ void ASequenceTriggerActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!TriggerBox)
+	{
+		TriggerBox = Cast<UBoxComponent>(FindComponentByName(FName("SequenceTriggerBox")));
+	}
+
 	if (TriggerBox)
 	{
 		TriggerBox->SetBoxExtent(TriggerExtent);
@@ -90,6 +95,11 @@ void ASequenceTriggerActor::Play()
 {
 	if (bTriggered && bTriggerOnce) return;
 	bTriggered = true;
+
+	if (bTriggerOnce && TriggerBox)
+	{
+		TriggerBox->SetCurrentCollisionResponse(ECollisionResponse::NoCollision);
+	}
 
 	if (!SequencePlayer)
 	{

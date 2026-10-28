@@ -15,7 +15,7 @@ class UAudioComponent : public USceneComponent
 		PROPERTY(bIs3D)
 		PROPERTY(MinDistance)
 		PROPERTY(MaxDistance)
-		REFLECT_END()
+	REFLECT_END()
 
 public:
 	UAudioComponent();
@@ -33,6 +33,15 @@ public:
 
 	void SetVolume(float InVolume);
 	void SetPitch(float InPitch);
+
+	void SetSoundPath(const FString& InPath) { SoundPath = InPath; }
+	const FString& GetSoundPath() const { return SoundPath; }
+
+	void SetIs3D(bool bIn3D) { bIs3D = bIn3D; }
+	bool GetIs3D() const { return bIs3D; }
+
+	void SetLoop(bool bInLoop) { bLoop = bInLoop; }
+	bool IsLoop() const { return bLoop; }
 
 private:
 	int32 CurrentVoiceID = INVALID_VOICE_ID;

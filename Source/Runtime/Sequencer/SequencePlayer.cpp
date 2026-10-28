@@ -29,7 +29,6 @@ void FSequencePlayer::Stop(UWorld* World)
 {
 	bIsPlaying = false;
 	CurrentTime = 0.0f;
-	Evaluate(World);
 
 	if (World)
 	{
@@ -37,7 +36,7 @@ void FSequencePlayer::Stop(UWorld* World)
 		{
 			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 			{
-				PCM->SetManualFade(0.0f); // 페이드 초기화
+				PCM->SetManualFade(0.0f); // ?섏씠??珥덇린??
 			}
 		}
 	}
@@ -48,12 +47,10 @@ void FSequencePlayer::Stop(UWorld* World)
 		{
 			if (Context->GameViewport)
 			{
-				Context->GameViewport->SetLetterBox(false, 0.5f);
+				Context->GameViewport->SetLetterBox(false, 0.0f);
 			}
 		}
 	}
-
-	Evaluate(World);
 }
 
 void FSequencePlayer::ScrubTo(float InTime, UWorld* World)
@@ -85,7 +82,9 @@ void FSequencePlayer::Tick(float DeltaTime, UWorld* World)
 		{
 			CurrentTime = Sequence->Duration;
 			bIsPlaying = false;
+			Evaluate(World);
 			RestoreCameraCut(World);
+			return;
 		}
 	}
 	Evaluate(World);
@@ -181,7 +180,7 @@ void FSequencePlayer::Evaluate(UWorld* World)
 						if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 						{
 							float ShakeScale = FMath::Clamp(ShakeIntensity, 0.0f, 1.0f);
-							float ShakeDuration = 0.5f; // 기본 지속 시간
+							float ShakeDuration = 0.5f; // 湲곕낯 吏???쒓컙
 							PCM->PlayCameraShake(ShakeScale, ShakeDuration);
 						}
 					}
@@ -236,14 +235,14 @@ void FSequencePlayer::RestoreCameraCut(UWorld* World)
 		{
 			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 			{
-				// 백업해둔 원래 플레이어로 복구
-				AActor* RestoreTarget = OriginalViewTarget ? OriginalViewTarget : Cast<AActor>(World->GetPlayerPawn());
+				// 諛깆뾽?대몦 ?먮옒 ?뚮젅?댁뼱濡?蹂듦뎄
+				AActor* RestoreTarget = PC->GetPawn() ? (OriginalViewTarget ? OriginalViewTarget : Cast<AActor>(PC->GetPawn())) : nullptr;
 				if (RestoreTarget)
 				{
 					PCM->SetViewTarget(RestoreTarget);
 				}
 
-				PCM->SetManualFade(0.0f); // 페이드 초기화
+				PCM->SetManualFade(0.0f); // ?섏씠??珥덇린??
 			}
 		}
 

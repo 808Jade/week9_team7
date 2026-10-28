@@ -1,10 +1,12 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "ElevatorTriggerActor.h"
 #include "GameFramework/Actor/UIManagerActor.h"
 #include "GameFramework/Actor/EndingCanvasActor.h"
 #include "GameFramework/PortalPawn.h"
 #include "Engine/World.h"
+#include "Serialization/JsonArchive.h"
 #include <cmath>
+#include <filesystem>
 
 AElevatorTriggerActor::AElevatorTriggerActor()
 {
@@ -90,6 +92,25 @@ void AElevatorTriggerActor::TriggerEnding()
 	if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() == EUIMode::InGame)
 	{
 		bTriggered = true;
+		AUIManagerActor::Get()->StopTimer();
+		AUIManagerActor::SetSavedClearTime(AUIManagerActor::Get()->GetElapsedTime());
+
+		FString CurrentScene = FJsonArchive::GetLastLoadedScenePath();
+		if (CurrentScene.empty())
+		{
+			CurrentScene = "Scenes/PortalFlingChamber.scene";
+		}
+		AUIManagerActor::SetReturnScenePath(CurrentScene);
+
+		const FString EndingScenePath = "Scenes/EndingScene.scene";
+		if (GetWorld() && std::filesystem::exists(EndingScenePath))
+		{
+			HTR_LOG(Info, "[AElevatorTriggerActor] Player entered elevator! Transitioning to {}", EndingScenePath);
+			AUIManagerActor::SetNextSceneInitialUIMode(EUIMode::None);
+			GetWorld()->RequestLoadScene(EndingScenePath);
+			return;
+		}
+
 		HTR_LOG(Info, "[AElevatorTriggerActor] Player entered elevator! Triggering Ending UI.");
 		if (AEndingCanvasActor* EndingCanvas = AUIManagerActor::Get()->GetEndingCanvas())
 		{

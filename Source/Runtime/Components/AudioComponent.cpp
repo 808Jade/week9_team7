@@ -79,6 +79,19 @@ void UAudioComponent::Play()
 	}
 
 	USoundWave* Wave = UAssetManager::GetAssetByPath<USoundWave>(SoundPath);
+	if (!Wave && !SoundPath.empty())
+	{
+		Wave = UAssetManager::Get().LoadSoundWave(SoundPath);
+		if (!Wave && SoundPath.rfind("Assets/", 0) != 0)
+		{
+			Wave = UAssetManager::Get().LoadSoundWave("Assets/" + SoundPath);
+		}
+		if (Wave)
+		{
+			UAssetManager::Get().RegisterAsset(SoundPath, Wave);
+		}
+	}
+
 	if(Wave && Wave->GetSoundID() != INVALID_SOUND_ID)
 	{
 		CurrentVoiceID = Backend->Play(Wave->GetSoundID(), bLoop, Volume, Pitch, bIs3D, GetWorldLocation(), MinDistance, MaxDistance);
