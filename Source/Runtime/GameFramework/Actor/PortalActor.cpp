@@ -149,6 +149,7 @@ bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& O
 	// 투영(FOV/Aspect/Near/Far/ProjectionMatrix), ViewRect, bGameView는 메인 뷰와 동일
 	OutView = MainView;
 	OutView.ViewIndex = PortalViewIndex;
+	OutView.bRenderUI = false;
 
 	// 카메라 자세만 가상 카메라로 교체
 	OutView.ViewLocation = Pose.Location;
@@ -195,8 +196,8 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 	const bool bPrevOcclusion = Occlusion.bEnabled;
 	Occlusion.bEnabled = false;
 
-	const uint32 Width = static_cast<uint32>(MainView.ViewRect.Width);
-	const uint32 Height = static_cast<uint32>(MainView.ViewRect.Height);
+	const uint32 Width = FMath::Max(1u, static_cast<uint32>(MainView.ViewRect.Width * PortalResolutionScale));
+	const uint32 Height = FMath::Max(1u, static_cast<uint32>(MainView.ViewRect.Height * PortalResolutionScale));
 
 	// 포탈 뷰에서는 포탈 면을 모두 제외
 	TArray<const UPrimitiveComponent*> HiddenPortalMeshes;
@@ -227,6 +228,8 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 
 		FSceneView PortalView;
 		if (!Portal->CalcPortalSceneView(MainView, PortalView)) continue;
+		PortalView.ViewRect = FRect(0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height));
+		PortalView.bRenderUI = false;
 		PortalView.HiddenComponents = &HiddenPortalMeshes;
 
 		FSceneRenderer SceneRenderer(World, PortalView, Portal->GetRenderData());
@@ -257,7 +260,8 @@ void APortalActor::DrawPortalSurfaces(UWorld* World, const FSceneView& MainView)
 			Portal->GetSurfaceMatrix(),
 			MainView.ViewProjectionMatrix,
 			Texture,
-			Portal->PortalColor);
+			Portal->PortalColor,
+			PortalResolutionScale);
 	}
 }
 

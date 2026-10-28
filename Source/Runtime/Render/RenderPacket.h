@@ -40,6 +40,7 @@ struct FViewContext
 	float NearZ = 0.0f;
 	bool bOrthographic = false;
 	bool bGameView = false;
+	bool bRenderUI = true;
 	float CameraDepth = 0.0f;
 	FMatrix ViewProjection = FMatrix::Identity;
 	const TArray<const UPrimitiveComponent*>* HiddenComponents = nullptr;
