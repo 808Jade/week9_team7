@@ -5,11 +5,13 @@
 #include "GameFramework/PlayerStart.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "PlayerController.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
+#include "Asset/AssetManager.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "GameFramework/Actor/PortalTurretActor.h"
@@ -37,6 +39,16 @@ APortalPawn::APortalPawn()
 	CameraComponent->SetRelativeRotation({ 0.0f, 0.0f, 0.0f });
 
 	CameraComponent->SetExternalInputManaged(true);
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("PawnMesh");
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
+
+	UStaticMesh* PawnMesh = UAssetManager::GetAssetByPath<UStaticMesh>("Models/PortalChell/Portal_Chell.obj");
+	if(PawnMesh)
+	{
+		StaticMeshComponent->SetStaticMesh(PawnMesh);
+	}
+
 }
 
 void APortalPawn::BeginPlay()

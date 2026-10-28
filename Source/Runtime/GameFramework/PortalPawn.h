@@ -7,6 +7,7 @@ class USphereComponent;
 class UBoxComponent;
 class UCapsuleComponent;
 class UCameraComponent;
+class UStaticMeshComponent;
 class APortalGunActor;
 class APlayerStart;
 class APortalActor;
@@ -101,6 +102,8 @@ public:
 	float GetLookSensitivity() const { return LookSensitivity; }
 	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
+	UStaticMeshComponent* GetMeshComponent() const { return StaticMeshComponent; }
+
 	void SwingPortalGun(); // V 키: 팔 휘두르기
 	void Slomo(float Duration, float Dilation = 0.0f); // H 키: 슬로모션 토글
 
@@ -113,6 +116,7 @@ private:
 	UBoxComponent* BoxComponent = nullptr;
 	UCapsuleComponent* CapsuleComponent = nullptr;
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
+	UStaticMeshComponent* StaticMeshComponent = nullptr;
 
 	// 이동 파라미터
 	float MoveSpeed = 6.0f;

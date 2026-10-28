@@ -39,8 +39,9 @@ private:
 		uint32 GridPointCount = 0, GridSpotCount = 0, GridPointIndexCapacity = 0, GridSpotIndexCapacity = 0;
 		uint32 GridLightOffsets[4]{};
 		FVector4 GridDepthParams; // Near, Far, SliceScale, SliceBias
+		FVector4 GridObliqueParams; // x: Proj.M[1][2], y: Proj.M[2][2] (포탈 오블리크 근평면용, 일반 투영이면 0)
 	};
-	static_assert(sizeof(FGridConstants) == 160);
+	static_assert(sizeof(FGridConstants) == 176);
 
 	struct FTileBuffer
 	{

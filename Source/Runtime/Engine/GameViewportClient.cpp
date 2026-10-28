@@ -15,6 +15,8 @@
 #include "Math/Frustum.h"
 #include "Render/RenderCommand.h"
 #include "Core/Windows/WindowsPlatformTime.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/PortalPawn.h"
 
 FGameViewportClient::FGameViewportClient()
 {
@@ -249,6 +251,23 @@ FSceneView FGameViewportClient::CalcSceneView(const FRect& InViewRect)
 		OutView.FadeAlpha = CamView.FadeAlpha;
 		OutView.FadeColor = FVector(Fade.X, Fade.Y, Fade.Z);
 	}
+
+	MainHiddenComponents.Empty();
+	if(World)
+	{
+		if(APlayerController* PC = World->GetPlayerController())
+		{
+			if(APawn* Pawn = PC->GetPawn())
+			{
+				// Pawn에 부착된 1인칭 전신 StaticMeshComponent 숨김 등록
+				if(UStaticMeshComponent* MeshComp = Cast<APortalPawn>(Pawn)->GetMeshComponent())
+				{
+					MainHiddenComponents.Add(MeshComp);
+				}
+			}
+		}
+	}
+	OutView.HiddenComponents = &MainHiddenComponents;
 
 	return OutView;
 }
