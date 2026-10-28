@@ -39,6 +39,7 @@ class APortalPawn : public APawn
 		PROPERTY(KillZ)
 		PROPERTY(bEnableHeadBob)
 		PROPERTY(Velocity)
+		PROPERTY(CameraFarZ)
 		REFLECT_END()
 
 public:
@@ -103,6 +104,8 @@ public:
 	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
 	UStaticMeshComponent* GetMeshComponent() const { return StaticMeshComponent; }
+	float GetCameraFarZ() const { return CameraFarZ; }
+	void SetCameraFarZ(float InFarZ);
 
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
@@ -120,6 +123,7 @@ private:
 	float SprintSpeed = 9.0f;
 	float CrouchSpeed = 3.0f;
 	float LookSensitivity = 1.0f;
+	float CameraFarZ = 100.0f;
 
 	// 물리 마찰력, 제동 및 계단 파라미터
 	float AirAcceleration = 2.0f;          // 공중 조향 가속도 (공중에서 최고 속도 제한 적용)

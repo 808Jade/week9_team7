@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
@@ -156,10 +156,7 @@ bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& O
 	OutView.ViewForward = Pose.Forward;
 	OutView.ViewMatrix = Pose.ViewMatrix;
 
-	// 파생 값 재계산
 	OutView.ViewProjectionMatrix = OutView.ViewMatrix * OutView.ProjectionMatrix;
-	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
-	OutView.FrustumCorners = GenerateFrustumCorners(OutView.ViewProjectionMatrix.Inverse());
 
 	// 짝 포탈 B가 있는 벽면 평면을 근평면으로
 	const FVector N = LinkedPortal->GetPortalNormal();
@@ -174,6 +171,9 @@ bool APortalActor::CalcPortalSceneView(const FSceneView& MainView, FSceneView& O
 		OutView.ProjectionMatrix = MakeObliqueProjection(OutView.ProjectionMatrix, ClipPlane);
 		OutView.ViewProjectionMatrix = OutView.ViewMatrix * OutView.ProjectionMatrix;
 	}
+
+	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
+	OutView.FrustumCorners = GenerateFrustumCorners(OutView.ViewProjectionMatrix.Inverse());
 
 	return true;
 }
@@ -208,6 +208,21 @@ void APortalActor::RenderPortalViews(UWorld* World, FRenderer* Renderer, FSkybox
 	{
 		APortalActor* Portal = Cast<APortalActor>(Actor);
 		if (!Portal || !Portal->IsActive()) continue;
+
+		if (Portal->GetDistanceToPlane(MainView.ViewLocation) < -0.05f)
+		{
+			continue;
+		}
+
+		const float HalfWidth = Portal->GetPortalWidth() * 0.5f;
+		const float HalfHeight = Portal->GetPortalHeight() * 0.5f;
+		const float Radius = sqrtf(HalfWidth * HalfWidth + HalfHeight * HalfHeight) + 0.1f;
+		const FAABB PortalBounds{ Portal->GetActorLocation(), FVector(Radius, Radius, Radius) };
+		if (!IsAABBInFrustum(PortalBounds, MainView.Frustum))
+		{
+			continue;
+		}
+
 		if (!Portal->EnsureRenderTarget(Width, Height)) continue;
 
 		FSceneView PortalView;

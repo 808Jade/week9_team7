@@ -67,7 +67,7 @@ protected:
 	float FieldOfView = 60.0f;
 	float AspectRatio = 16.0f / 9.0f;
 	float NearClipPlane = 0.1f;
-	float FarClipPlane = 10000.0f;
+	float FarClipPlane = 100.0f;
 
 	bool bIsOrthogonal = false;
 	float OrthoWidth = 16.0f;
