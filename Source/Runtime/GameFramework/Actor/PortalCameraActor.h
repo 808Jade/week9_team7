@@ -68,7 +68,7 @@ protected:
     float CurrentYaw = 0.0f;
     float CurrentPitch = 0.0f;
     float TargetYaw = 0.0f;
-    float TargetPitch = -10.0f;        // 기본으로 살짝 아래를 응시
+    float TargetPitch = 10.0f;         // 기본으로 살짝 아래를 응시 (Pitch(+) = 하향)
 
     static const FVector ArmRelativeOffset;
     static const FVector HeadRelativeOffset;
