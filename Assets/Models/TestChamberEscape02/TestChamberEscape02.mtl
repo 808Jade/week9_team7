@@ -1,0 +1,528 @@
+# MTL File for TestChamberEscape02 (Aperture Parking Lot)
+# Generated and optimized for HitoriEngine
+
+newmtl BUILDING_TEMPLATE/BUILDING_TRAINSTATION_WINDOW001B
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/Building_Trainstation_Window001b.png
+
+newmtl CONCRETE/CONCRETEFLOOR015A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor015a.png
+map_bump textures/concretefloor015a_normal.png
+
+newmtl CONCRETE/CONCRETEFLOOR039A_CHEAP
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor039a.png
+
+newmtl CONCRETE/CONCRETEWALL041D
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretewall041d.png
+
+newmtl CONCRETE/CONCRETEWALL064C
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretewall064c.png
+
+newmtl CONCRETE/CONCRETE_BTS_CEILING002A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_bts_ceiling002a.png
+
+newmtl CONCRETE/CONCRETE_BTS_FLOOR002A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_bts_floor002a.png
+
+newmtl CONCRETE/CONCRETE_BTS_MODULAR_WALL001A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_bts_modular_wall001a.png
+
+newmtl CONCRETE/CONCRETE_BTS_MODULAR_WALL001B
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_bts_modular_wall001b.png
+
+newmtl CONCRETE/CONCRETE_BTS_MODULAR_WALL001C
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_bts_modular_wall001c.png
+
+newmtl CONCRETE/CONCRETE_MODULAR_WALL001B
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concrete_modular_wall001b.png
+
+newmtl CONCRETE/OBSERVATIONWALL_001A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observationwall_001a.png
+
+newmtl DEV/DEV_HAZZARDSTRIPE01A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/dev_hazzardstripe01a.png
+
+newmtl DEV/DEV_LOWERMETALDOOR02A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/dev_lowermetaldoor02a.png
+
+newmtl LIGHTS/LIGHT_ORANGE001
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/light_orange001.png
+
+newmtl LIGHTS/WHITE005
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/White005.png
+
+newmtl LIGHTS/WHITE008
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/White005.png
+
+newmtl LIGHTS/WHITE009
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/White005.png
+
+newmtl METAL/CITADEL_METALWALL074A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall074a.png
+
+newmtl METAL/METALBEAM_BTS_001A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalbeam_bts_001a.png
+
+newmtl METAL/METALDUCT_BTS_001
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalduct004a.png
+
+newmtl METAL/METALGRATE013A2
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalgrate013a.png
+
+newmtl METAL/METALGRATE018
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalgrate018.png
+
+newmtl METAL/METALHULL002A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalhull002a.png
+
+newmtl METAL/METALHULL003A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalhull003a.png
+
+newmtl METAL/METALHULL011F
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalhull011f.png
+
+newmtl METAL/METALSTAIR004A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalstair004a.png
+
+newmtl METAL/METALTRUSS017A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metaltruss017a.png
+
+newmtl METAL/METALVENT001A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalvent001a.png
+
+newmtl METAL/METALWALL006B
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall006b.png
+
+newmtl METAL/METALWALL061F
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall061f.png
+
+newmtl METAL/METALWALL_BTS_005A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_005a.png
+
+newmtl METAL/METALWALL_BTS_006A_GRADIENT
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_006a_gradient.png
+
+newmtl METAL/METALWALL_BTS_006B_GRADIENT
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_006b_gradient.png
+
+newmtl NATURE/ESCAPE_VISTA_01
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/escape_vista_01.png
+
+newmtl NATURE/ESCAPE_VISTA_02
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/escape_vista_02.png
+
+newmtl NATURE/GRASSFLOOR002A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/grassfloor002a.png
+
+newmtl PLASTER/PLASTERCEILING003A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasterceiling003a.png
+
+newmtl PLASTER/PLASTERWALL005A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasterwall005a.png
+
+newmtl PROPS/SIGNSTREET001A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/signstreet001a.png
+
+newmtl PROPS/SIGNSTREET004A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/signstreet004a.png
+
+newmtl SLIDES/SLIDE1
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/slide1.png
+
+newmtl TOOLS/TOOLSBLACK
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/toolsblack.png
+
+newmtl TOOLS/TOOLSSKYBOX
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/toolsskybox.png
+
+newmtl WOOD/WOODDOOR019A
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/wooddoor019a.png
+
+newmtl maps/escape_02/concrete/concretefloor033b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor033b.png
+map_bump textures/concretefloor033b_normal.png
+
+newmtl maps/escape_02/concrete/concretefloor033c
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor033c.png
+map_bump textures/concretefloor033c_normal.png
+
+newmtl maps/escape_02/concrete/concretefloor033o
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor033o.png
+map_bump textures/concretefloor033o_normal.png
+
+newmtl maps/escape_02/concrete/concretefloor033y
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/concretefloor033y.png
+map_bump textures/concretefloor033y_normal.png
+
+newmtl maps/escape_02/concrete/observationwall_001b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observationwall_001b.png
+
+newmtl maps/escape_02/glass/glasswindow_frosted
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/glasswindow_frosted_003.png
+
+newmtl maps/escape_02/glass/glasswindow_frosted_break001a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/glasswindow_frosted_break001a.png
+
+newmtl maps/escape_02/metal/metaldoor_white01
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metaldoor_white01.png
+
+newmtl maps/escape_02/metal/metalfloor_bts_001b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalfloor_bts_001b.png
+
+newmtl maps/escape_02/metal/metalwall048b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall048b.png
+
+newmtl maps/escape_02/metal/metalwall048e
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall048e.png
+
+newmtl maps/escape_02/metal/metalwall_bts_006a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_006a.png
+map_bump textures/metalwall_bts_006a_normal.png
+
+newmtl maps/escape_02/metal/metalwall_bts_006b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_006b.png
+
+newmtl maps/escape_02/metal/metalwall_bts_006c_gradient
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/metalwall_bts_006c_gradient.png
+
+newmtl maps/escape_02/nature/hazard_liquid
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/hazard_liquid.png
+
+newmtl maps/escape_02/nature/mudfloor004bs
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/mudfloor004b.png
+map_bump textures/mudfloor004b_normal.png
+
+newmtl maps/escape_02/nature/red_grass_wvt_patch
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/grassfloor002a.png
+
+newmtl maps/escape_02/plastic/plastic_light002a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plastic_light002a.png
+
+newmtl maps/escape_02/plastic/plastic_light002b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plastic_light002b.png
+
+newmtl maps/escape_02/plastic/plastic_light002c
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plastic_light002c.png
+
+newmtl maps/escape_02/plastic/plasticwall001a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasticwall001a.png
+
+newmtl maps/escape_02/plastic/plasticwall001b
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasticwall001b.png
+
+newmtl maps/escape_02/plastic/plasticwall002a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasticwall002a.png
+
+newmtl maps/escape_02/plastic/plasticwall004a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/plasticwall004a.png
+
+newmtl maps/escape_02/tile/observation_tilefloor001a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observation_tilefloor001a.png
+
+newmtl maps/escape_02/tile/observation_tilefloor002a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observation_tilefloor002a.png
+
+newmtl maps/escape_02/tile/observation_tilefloor003a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observation_tilefloor003a.png
+
+newmtl maps/escape_02/tile/observation_tilefloor004a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observation_tilefloor004a.png
+
+newmtl maps/escape_02/tile/observation_tilestair001a
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/observation_tilestair001a.png
+

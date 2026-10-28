@@ -1,0 +1,30 @@
+# MTL File for StorageRoom (Portal 1 Ending Cake Room)
+# Generated and optimized for HitoriEngine
+
+newmtl cake
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/cake.png
+
+newmtl metal_box
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/Metal_box.png
+
+newmtl sphere
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/sphere.png
+
+newmtl sphere_shelf
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+d 1.0
+illum 2
+map_Kd textures/sphere_shelf.png
