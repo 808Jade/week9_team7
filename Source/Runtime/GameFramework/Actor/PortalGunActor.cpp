@@ -10,6 +10,9 @@
 #include "Engine/World.h"
 #include "Collision/Ray.h"
 #include "Collision/HitResult.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Camera/CameraModifier_Recoil.h"
+#include "GameFramework/PlayerController.h"
 
 #include "Audio/AudioDevice.h"
 #include "Audio/Sound/SoundWave.h"
@@ -149,6 +152,22 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 
 void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
 {
+	if (!RecoilModifier && GetWorld())
+	{
+		if (APlayerController* PC = GetWorld()->GetPlayerController())
+		{
+			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+			{
+				RecoilModifier = PCM->AddNewCameraModifier<UCameraModifier_Recoil>();
+			}
+		}
+	}
+
+	if (RecoilModifier)
+	{
+		RecoilModifier->AddRecoil(10.0f, -0.2f, 0);
+	}
+
 	APortalActor* Portal = GetPortal(PortalToFire);
 	if (!Portal || !HitResult.bBlockingHit)
 	{

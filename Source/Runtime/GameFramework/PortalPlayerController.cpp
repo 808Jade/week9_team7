@@ -1,10 +1,12 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "GameFramework/PortalPlayerController.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/UIManagerActor.h"
 #include "GameFramework/Actor/HUDCanvasActor.h"
 #include "Input/InputSystem.h"
 #include "Engine/World.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Camera/CameraModifier_Zoom.h"
 
 APortalPlayerController::APortalPlayerController()
 {
@@ -227,6 +229,12 @@ void APortalPlayerController::InputKey(int32 Key, bool bDown)
 	// 8. Z 키 또는 마우스 휠 클릭(MButton): 줌(Zoom) 기능 토글
 	else if (Key == static_cast<int32>(EKeyCode::Z) || Key == static_cast<int32>(EKeyCode::MButton))
 	{
-		PortalPawn->ToggleZoom();
+		if (APlayerCameraManager* PCM = GetPlayerCameraManager())
+		{
+			if (auto* ZoomMod = PCM->AddNewCameraModifier<UCameraModifier_Zoom>())
+			{
+				ZoomMod->ToggleZoom();
+			}
+		}
 	}
 }
