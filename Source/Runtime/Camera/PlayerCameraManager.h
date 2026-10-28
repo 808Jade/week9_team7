@@ -46,7 +46,7 @@ public:
 	void AddCameraModifier(UCameraModifier* NewModifier);
 	void RemoveCameraModifier(UCameraModifier* ModifierToRemove);
 
-	void PlayCameraShake();
+	void PlayCameraShake(float ShakePower, float Duration);
 
 	void SetOwnerController(APlayerController* InController) { PCOwner = InController; }
 	APlayerController* GetOwnerController() const { return PCOwner; }

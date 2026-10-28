@@ -6,6 +6,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+#include "PlayerController.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
@@ -50,6 +52,7 @@ void APortalPawn::BeginPlay()
 	bIsZooming = false;
 	CurrentEyeHeight = EyeHeight;
 	CurrentLandingDip = 0.0f;
+	LandingRecoveryScale = 1.0f;
 	CurrentBobX = 0.0f;
 	CurrentBobZ = 0.0f;
 	BobTimer = 0.0f;
@@ -190,11 +193,13 @@ void APortalPawn::Tick(float DeltaTime)
 	// 3. 착지 충격 반동 (Landing Dip) 복구
 	if (CurrentLandingDip > 0.001f)
 	{
-		CurrentLandingDip += (0.0f - CurrentLandingDip) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
+		const float RecoverySpeed = 12.0f / LandingRecoveryScale;
+		CurrentLandingDip += (0.0f - CurrentLandingDip) * FMath::Clamp(DeltaTime * RecoverySpeed, 0.0f, 1.0f);
 	}
 	else
 	{
 		CurrentLandingDip = 0.0f;
+		LandingRecoveryScale = 1.0f;
 	}
 
 	// 4. 헤드 밥빙 (Head Bobbing) 계산
@@ -437,15 +442,29 @@ void APortalPawn::Tick(float DeltaTime)
 			{
 				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
 				{
-					// 착지 충격 반동 (Landing Dip): 낙하 속도에 비례해 카메라를 아래로 살짝 쿵 내려앉힘
+					// 착지 충격 반동
 					const float ImpactSpeed = -Velocity.Z;
-					if (ImpactSpeed > 2.0f)
+					if (ImpactSpeed > 3.0f)
 					{
-						const float TargetDip = FMath::Clamp((ImpactSpeed - 2.0f) * 0.025f, 0.04f, 0.2f);
+						const float ExtraImpactSpeed = FMath::Max(ImpactSpeed - JumpVelocity, 0.0f);
+						float ImpactScale = 1.0f + ExtraImpactSpeed * 0.05f;
+						if (ImpactScale > 1.9f)
+							ImpactScale = 1.9f;
+						const float TargetDip = FMath::Max((ImpactSpeed - 2.0f) * 0.06f, 0.015f) * ImpactScale;
 						CurrentLandingDip = FMath::Max(CurrentLandingDip, TargetDip);
+						LandingRecoveryScale = FMath::Max(LandingRecoveryScale, ImpactScale);
+
+						if (APlayerController* PC = GetController())
+						{
+							if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+							{
+								const float ShakePower = FMath::Max(ImpactSpeed * 1.2f, 1.0f) * ImpactScale;
+								const float ShakeDuration = 0.3f + ExtraImpactSpeed * 0.035f;
+								PCM->PlayCameraShake(ShakePower, ShakeDuration);
+							}
+						}
 					}
 
-					// 바닥 착지 성공!
 					bIsGrounded = true;
 					Velocity.Z = 0.0f;
 				}
@@ -564,6 +583,7 @@ void APortalPawn::Respawn()
 	PendingInputVector = FVector::ZeroVector;
 	bIsGrounded = false;
 	CurrentLandingDip = 0.0f;
+	LandingRecoveryScale = 1.0f;
 	CurrentBobX = 0.0f;
 	CurrentBobZ = 0.0f;
 	BobTimer = 0.0f;

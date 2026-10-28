@@ -22,11 +22,15 @@ void UCameraModifier_CameraShake::ModifyCamera(float DeltaTime, FViewInfo& InOut
 		return;
 	}
 
-	float Damping = 1.0f - (ElapsedTime / Duration);
+	const float NormalizedTime = ElapsedTime / Duration;
+	const float Fade = 1.0f - NormalizedTime;
+	const float Damping = Fade * Fade;
+	const float Strength = FMath::Max(Intensity / 5.0f, 0.0f);
+	const float Oscillation = sinf(ElapsedTime * Frequency);
 
-	float WavePitch = sinf(ElapsedTime * Frequency) * Intensity * Damping;
-	float WaveYaw = cosf(ElapsedTime * Frequency * 0.9f) * (Intensity * 0.8f) * Damping;
-	float WaveZ = sinf(ElapsedTime * Frequency * 1.2f) * (Intensity * 5.0f) * Damping;
+	const float WavePitch = -Oscillation * 1.4f * Strength * Damping;
+	const float WaveYaw = sinf(ElapsedTime * Frequency * 0.85f) * 0.35f * Strength * Damping;
+	const float WaveZ = -sinf(ElapsedTime * Frequency * 1.2f) * 0.015f * Strength * Damping;
 
 	InOutPOV.Rotation.Pitch += WavePitch;
 	InOutPOV.Rotation.Yaw += WaveYaw;

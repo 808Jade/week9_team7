@@ -3,6 +3,7 @@
 #include "CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "CameraModifier.h"
+#include "CameraModifier_CameraShake.h"
 
 APlayerCameraManager::APlayerCameraManager()
 {
@@ -104,4 +105,14 @@ void APlayerCameraManager::RemoveCameraModifier(UCameraModifier* ModifierToRemov
 {
 	if (!ModifierToRemove) return;
 	ModifierList.Remove(ModifierToRemove);
+}
+
+void APlayerCameraManager::PlayCameraShake(float ShakePower, float Duration)
+{
+	UCameraModifier_CameraShake* ShakeMod = AddNewCameraModifier<UCameraModifier_CameraShake>();
+
+	if (ShakeMod)
+	{
+		ShakeMod->StartShake(ShakePower, 5.0f, Duration);
+	}
 }
