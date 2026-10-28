@@ -26,6 +26,7 @@
 #include "GameFramework/Actor/CubeDropActor.h"
 #include "GameFramework/Actor/PortalCameraActor.h"
 #include "GameFramework/Actor/PortalTurretActor.h"
+#include "GameFramework/Actor/SequenceTriggerActor.h"
 
 class FViewportsPanel;
 
@@ -82,6 +83,7 @@ public:
 		ACubeDropActor::StaticClass(),
 		APortalCameraActor::StaticClass(),
 		APortalTurretActor::StaticClass(),
+		ASequenceTriggerActor::StaticClass(),
 	};
 
 private:
