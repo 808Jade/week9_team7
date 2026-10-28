@@ -137,6 +137,7 @@ void APortalGunActor::BeginPlay()
 void APortalGunActor::EndPlay()
 {
 	Super::EndPlay();
+	StopHoldSound();
 	if (HeldCube)
 	{
 		HeldCube = nullptr;
@@ -170,10 +171,12 @@ void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
 
 	HeldCube = CubeToGrab;
 	HeldCube->OnGrabbed();
+	StartHoldSound();
 }
 
 void APortalGunActor::Unhold()
 {
+	StopHoldSound();
 	if(HeldCube)
 	{
 		HTR_LOG(Warning, "Unhold");
@@ -357,6 +360,7 @@ bool APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResul
 	APortalActor* Portal = GetPortal(PortalToFire);
 	if (!Portal || !HitResult.bBlockingHit)
 	{
+		PlayFailSound();
 		return false;
 	}
 
@@ -371,6 +375,8 @@ bool APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResul
 		PlayFireSound(PortalToFire);
 		return true;
 	}
+
+	PlayFailSound();
 	return false;
 }
 
@@ -430,4 +436,51 @@ void APortalGunActor::UpdateShotBeam(float DeltaTime)
 
 	PlaceCylinder(ShotGlow, CurrentShot.Start, CurrentShot.End, ShotGlowRadius);
 	PlaceCylinder(ShotCore, CurrentShot.Start, CurrentShot.End, ShotCoreRadius);
+}
+
+void APortalGunActor::PlayFailSound()
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/Portal_Fail.mp3");
+	if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{
+		AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+	}
+}
+
+void APortalGunActor::StartHoldSound()
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	if (HoldVoiceID != -1 && AudioBackend->IsPlaying(HoldVoiceID))
+	{
+		return;
+	}
+
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/hold.mp3");
+	if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{
+		HoldVoiceID = AudioBackend->Play(SoundWave->GetSoundID(), true, 0.8f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+	}
+}
+
+void APortalGunActor::StopHoldSound()
+{
+	if (HoldVoiceID != -1)
+	{
+		if (IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+		{
+			AudioBackend->Stop(HoldVoiceID);
+		}
+		HoldVoiceID = -1;
+	}
 }

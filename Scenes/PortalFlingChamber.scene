@@ -241528,7 +241528,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": -0.3594000041484833,
+                                        "Y": -0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -241560,7 +241560,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": 0.3594000041484833,
+                                        "Y": 0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -241591,8 +241591,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": -0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": -0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -241623,8 +241623,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": 0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": 0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -241691,7 +241691,7 @@
                         "MaxWingOpenAngle": 25.0,
                         "bActorEnableCollision": true,
                         "bAutoDeployOnAlert": true,
-                        "bStartDeployed": true
+                        "bStartDeployed": false
                     }
                 },
                 {
@@ -242471,7 +242471,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": -0.3594000041484833,
+                                        "Y": -0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -242503,7 +242503,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": 0.3594000041484833,
+                                        "Y": 0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -242534,8 +242534,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": -0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": -0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -242566,8 +242566,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": 0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": 0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -242634,7 +242634,7 @@
                         "MaxWingOpenAngle": 25.0,
                         "bActorEnableCollision": true,
                         "bAutoDeployOnAlert": true,
-                        "bStartDeployed": true
+                        "bStartDeployed": false
                     }
                 },
                 {
@@ -242710,7 +242710,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": -0.3594000041484833,
+                                        "Y": -0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -242742,7 +242742,7 @@
                                 "Transform": {
                                     "Location": {
                                         "X": 0.14139999449253082,
-                                        "Y": 0.3594000041484833,
+                                        "Y": 0.19300000369548798,
                                         "Z": 0.9333999752998352
                                     },
                                     "Rotation": {
@@ -242773,8 +242773,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": -0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": -0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -242805,8 +242805,8 @@
                                 "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
                                 "Transform": {
                                     "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": 0.22100000083446503,
+                                        "X": 0.18000000715255737,
+                                        "Y": 0.10000000149011612,
                                         "Z": 0.9790999889373779
                                     },
                                     "Rotation": {
@@ -242873,7 +242873,7 @@
                         "MaxWingOpenAngle": 25.0,
                         "bActorEnableCollision": true,
                         "bAutoDeployOnAlert": true,
-                        "bStartDeployed": true
+                        "bStartDeployed": false
                     }
                 }
             ],

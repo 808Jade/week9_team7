@@ -49,6 +49,10 @@ private:
 	APortalActor* CurrentOverlappingPortal = nullptr;
 	FVector PreviousLocation = FVector::ZeroVector;
 	float TeleportCooldownTimer = 0.0f;
+	float ImpactCooldownTimer = 0.0f;
+
+	void PlayImpactSound(float Speed);
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult);
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp);
 

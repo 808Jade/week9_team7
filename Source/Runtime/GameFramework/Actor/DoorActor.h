@@ -27,6 +27,8 @@ public:
     void SetOpen(bool bOpen);
     bool IsOpen() const { return bIsOpen; }
 
+    void PlayDoorOpenSound();
+
     void SetAutoOpenOnOverlap(bool bAuto) { bAutoOpenOnOverlap = bAuto; }
     bool IsAutoOpenOnOverlap() const { return bAutoOpenOnOverlap; }
 

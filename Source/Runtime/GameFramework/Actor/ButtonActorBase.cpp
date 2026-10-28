@@ -1,5 +1,8 @@
 #include "EnginePCH.h"
 #include "ButtonActorBase.h"
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
+#include "Asset/AssetManager.h"
 
 AButtonActorBase::AButtonActorBase()
 { 
@@ -71,7 +74,23 @@ void AButtonActorBase::PressButton()
     if (!bIsPressed)
     {
         bIsPressed = true;
+        PlayButtonPressedSound();
         OnButtonPressed.Broadcast(true);
+    }
+}
+
+void AButtonActorBase::PlayButtonPressedSound()
+{
+    IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+    if (!AudioBackend)
+    {
+        return;
+    }
+
+    USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/button_pressed.mp3");
+    if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+    {
+        AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, true, GetActorLocation(), 3.0f, 60.0f);
     }
 }
 
