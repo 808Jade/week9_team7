@@ -13,7 +13,7 @@
 #define LIGHT_GRID_MODE_TILED 1u
 #define LIGHT_GRID_MODE_CLUSTERED 2u
 
-// CPU의 FGridConstants와 동일한 160바이트 배치다.
+// CPU의 FGridConstants와 동일한 176바이트 배치다.
 cbuffer LightGridConstants : register(LIGHT_GRID_CONSTANT_REGISTER)
 {
     float4x4 GridView;
@@ -36,7 +36,26 @@ cbuffer LightGridConstants : register(LIGHT_GRID_CONSTANT_REGISTER)
 
     uint4 GridLightOffsets;
     float4 GridDepthParams; // Near, Far, SliceScale, SliceBias
+    float4 GridObliqueParams; // x: Proj.M[1][2], y: Proj.M[2][2] (오블리크 근평면, 일반 투영이면 0)
 };
+
+float2 GridPixelToNDC(float2 PixelPosition)
+{
+    return PixelPosition / float2(GridViewWidth, GridViewHeight) * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f);
+}
+
+// 화면 위치를 고려한 깊이 복원. 포탈의 오블리크 투영은 clip.z에 view y·z 항이 섞이므로
+// d = M32 / (DeviceZ - (M02 + ndcX * M12 / M10 + ndcY * M22 / M21)) 로 픽셀마다 계산해야 한다.
+float GridDeviceZToViewDepthAt(float2 NDC, float DeviceZ)
+{
+    if (GridIsPerspective == 0)
+        return (DeviceZ - GridProjectionParams.w) / GridProjectionParams.z;
+
+    float A = GridProjectionParams.z
+            + NDC.x * GridProjectionParams.x * GridObliqueParams.x
+            + NDC.y * GridProjectionParams.y * GridObliqueParams.y;
+    return GridProjectionParams.w / (DeviceZ - A);
+}
 
 float GridDeviceZToViewDepth(float DeviceZ)
 {
@@ -80,7 +99,9 @@ uint GetLightGridCellIndex(uint2 Pixel, float DeviceZ)
 {
     // Tiled는 깊이 구간 0 하나만 사용한다.
     uint2 Tile = Pixel / LIGHT_GRID_TILE_SIZE;
-    uint Slice = GridMode == LIGHT_GRID_MODE_CLUSTERED ? GetLightGridSliceIndex(GridDeviceZToViewDepth(DeviceZ)) : 0u;
+    // 픽셀 중심의 NDC로 복원해야 오블리크 투영에서도 올바른 깊이 구간을 고른다.
+    float2 NDC = GridPixelToNDC(float2(Pixel) + 0.5f);
+    uint Slice = GridMode == LIGHT_GRID_MODE_CLUSTERED ? GetLightGridSliceIndex(GridDeviceZToViewDepthAt(NDC, DeviceZ)) : 0u;
 
     return GetLightGridCellIndexFromSlice(Tile, Slice);
 }

@@ -35,8 +35,9 @@ void InitializeCellState(uint ThreadIndex)
     // 그룹 전체가 초기화 완료를 기다린다.
     if (ThreadIndex == 0)
     {
-        MinDepthBits = asuint(1.0f);
-        MaxDepthBits = asuint(0.0f);
+        // 양수 float는 asuint 순서가 크기 순서와 같으므로 뷰 깊이를 그대로 Interlocked로 비교한다.
+        MinDepthBits = 0x7f7fffffu; // FLT_MAX: 비어 있음
+        MaxDepthBits = 0u;
         VisiblePointCount = 0;
         VisibleSpotCount = 0;
         PointWriteCount = 0;
@@ -198,14 +199,20 @@ void mainCS(uint3 GroupID : SV_GroupID, uint3 GroupThreadID : SV_GroupThreadID, 
         float DeviceZ = SceneDepth.Load(int3(Pixel, 0));
         if (DeviceZ < 1.0f)
         {
-            InterlockedMin(MinDepthBits, asuint(DeviceZ));
-            InterlockedMax(MaxDepthBits, asuint(DeviceZ));
+            // 오블리크 투영(포탈)에서는 타일 안 DeviceZ의 min/max가 뷰 깊이의 min/max와 일치하지 않으므로
+            // 픽셀마다 뷰 깊이로 복원한 뒤 비교한다. D24 양자화 오차만큼 앞뒤로 넓힌다.
+            const float DepthQuantum = 1.0f / 16777215.0f;
+            float2 NDC = GridPixelToNDC(float2(Pixel) + 0.5f);
+            float NearDepth = max(GridDeviceZToViewDepthAt(NDC, max(DeviceZ - DepthQuantum, 0.0f)), 0.0f);
+            float FarDepth = max(GridDeviceZToViewDepthAt(NDC, min(DeviceZ + DepthQuantum, 1.0f)), 0.0f);
+            InterlockedMin(MinDepthBits, asuint(min(NearDepth, FarDepth)));
+            InterlockedMax(MaxDepthBits, asuint(max(NearDepth, FarDepth)));
         }
     }
     GroupMemoryBarrierWithGroupSync();
 
     // 공유된 값으로 판단하므로 그룹 전체가 함께 반환한다.
-    if (MinDepthBits == asuint(1.0f))
+    if (MinDepthBits == 0x7f7fffffu)
     {
         if (ThreadIndex == 0)
             TileLightRanges[CellIndex] = uint4(0, 0, 0, 0);
@@ -214,11 +221,8 @@ void mainCS(uint3 GroupID : SV_GroupID, uint3 GroupThreadID : SV_GroupThreadID, 
 
     if (ThreadIndex == 0)
     {
-        // 기존 D24 깊이의 양자화 오차까지 타일 경계에 포함한다.
-        const float DepthQuantum = 1.0f / 16777215.0f;
-        float MinDepth = GridDeviceZToViewDepth(max(asfloat(MinDepthBits) - DepthQuantum, 0.0f));
-        float MaxDepth = GridDeviceZToViewDepth(min(asfloat(MaxDepthBits) + DepthQuantum, 1.0f));
-        BuildCellBounds(GroupID.xy, MinDepth, MaxDepth);
+        // 이미 픽셀별 뷰 깊이(양자화 오차 포함)로 모았으므로 그대로 셀 경계로 쓴다.
+        BuildCellBounds(GroupID.xy, asfloat(MinDepthBits), asfloat(MaxDepthBits));
     }
     GroupMemoryBarrierWithGroupSync();
 
