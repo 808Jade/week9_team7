@@ -38,7 +38,10 @@ FVector FRotator::ToVector() const
 	return FVector(Pitch, Yaw, Roll);
 }
 
+FRotator FRotator::Identity = FRotator(0, 0, 0);
 FRotator FRotator::Identitiy = FRotator(0, 0, 0);
+
+FRotator FRotator::ZeroRotator = FRotator(0, 0, 0);
 
 FRotator operator+(FRotator Rot, const FVector& Vec)
 {

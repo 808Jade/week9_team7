@@ -298,8 +298,8 @@ void UGameEngine::RenderFrame()
     FSceneRenderOptions Options;
     Options.DirectionalShadowMapSize = 2048;
     Options.PointShadowMapSize = 512;
-    Options.SpotShadowMapSize = 512;
-    Options.PcfMode = EPcfMode::Sample8;
+    Options.SpotShadowMapSize = 2048; // Very High (2048)
+    Options.PcfMode = EPcfMode::Sample32;
     Options.PostProcess = PostProcess;
 
     // 2.5 포탈 뷰 먼저 렌더링

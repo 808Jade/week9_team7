@@ -58,7 +58,7 @@ struct FEditorSettings
 
 	int32 DirectionalShadowMapSizeLevel = 2;
 	int32 PointShadowMapSizeLevel = 2;
-	int32 SpotShadowMapSizeLevel = 2;
+	int32 SpotShadowMapSizeLevel = 4;
 
 	inline uint32 GetDirectionalShadowMapSize() const { return DirectionalShadowMapSizePerLevels[DirectionalShadowMapSizeLevel]; }
 	inline uint32 GetPointShadowMapSize() const { return PointShadowMapSizePerLevels[PointShadowMapSizeLevel]; }
