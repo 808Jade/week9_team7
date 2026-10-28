@@ -25,6 +25,8 @@ class APortalPawn : public APawn
 		PROPERTY(CrouchRadius)
 		PROPERTY(EyeHeight)
 		PROPERTY(CrouchEyeHeight)
+		PROPERTY(StandHalfHeight)
+		PROPERTY(CrouchHalfHeight)
 		PROPERTY(bEnableGravity)
 		PROPERTY(Gravity)
 		PROPERTY(JumpVelocity)
@@ -151,6 +153,11 @@ private:
 	float EyeHeight = 1.0f;
 	float CrouchEyeHeight = 0.5f;
 	float CurrentEyeHeight = 1.0f;
+
+	// 캡슐 반높이 (반지름 포함). 서 있을 때 1.5 → 키 3m, 눈높이 = 1.5 + EyeHeight
+	float StandHalfHeight = 1.5f;
+	float CrouchHalfHeight = 0.9f;
+	float CurrentHalfHeight = 1.5f;
 
 	// 중력, 점프, 3D 속도
 	bool bEnableGravity = true;

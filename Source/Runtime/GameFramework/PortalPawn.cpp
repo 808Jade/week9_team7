@@ -28,7 +28,7 @@ APortalPawn::APortalPawn()
 	// 1. 루트 콜라이더	
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
 	SetRootComponent(CapsuleComponent);
-	CapsuleComponent->SetCapsuleSize(0.5f, 1.0f);
+	CapsuleComponent->SetCapsuleSize(CollisionRadius, StandHalfHeight);
 
 	// 2. 1인칭 카메라 컴포넌트
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
@@ -51,6 +51,19 @@ void APortalPawn::BeginPlay()
 		CapsuleComponent->DetachFromParent(EAttachmentRule::KeepWorld);
 		SetRootComponent(CapsuleComponent);
 	}
+	// 캡슐 크기 초기화: 씬에 저장된 반높이와 다르면 발 위치가 유지되도록 중심을 올리거나 내린다
+	if (CapsuleComponent)
+	{
+		const float LoadedHalfHeight = CapsuleComponent->GetCapsuleHalfHeight();
+		CapsuleComponent->SetCapsuleSize(CollisionRadius, StandHalfHeight);
+		const float Grow = StandHalfHeight - LoadedHalfHeight;
+		if (std::abs(Grow) > 1e-4f)
+		{
+			SetActorLocation(GetActorLocation() + FVector(0.0f, 0.0f, Grow));
+		}
+	}
+	CurrentHalfHeight = StandHalfHeight;
+
 	if (CameraComponent && CapsuleComponent && CameraComponent->GetAttachParent() != CapsuleComponent)
 	{
 		CameraComponent->SetupAttachment(CapsuleComponent, EAttachmentRule::KeepRelative);
@@ -196,13 +209,47 @@ void APortalPawn::Tick(float DeltaTime)
 	}
 
 	// 2. 웅크리기(Crouch) 높이 및 콜라이더 반경 보간
+	// 일어서려는데 머리 위가 막혀 있으면 계속 웅크린 상태 유지 (천장에 캡슐이 박히는 것 방지)
+	if (!bIsCrouched && CurrentHalfHeight < StandHalfHeight - 1e-3f && GetWorld())
+	{
+		const float Needed = (StandHalfHeight - CurrentHalfHeight) * 2.0f;   // 발 고정 → 머리는 2배 올라감
+		const FRay UpRay{ GetActorLocation() + FVector(0.0f, 0.0f, CurrentHalfHeight - CrouchRadius), FVector(0.0f, 0.0f, 1.0f) };
+		FHitResult UpHit;
+		if (GetWorld()->SweepSingle(UpRay, Needed + CrouchRadius, CrouchRadius * 0.9f, UpHit, this))
+		{
+			AActor* HitOwner = UpHit.HitComponent ? UpHit.HitComponent->GetOwner() : nullptr;
+			if (HitOwner && !Cast<APortalActor>(HitOwner))
+			{
+				bIsCrouched = true;
+			}
+		}
+	}
+
 	const float TargetEyeHeight = bIsCrouched ? CrouchEyeHeight : EyeHeight;
 	const float TargetRadius = bIsCrouched ? CrouchRadius : CollisionRadius;
+	const float TargetHalfHeight = bIsCrouched ? CrouchHalfHeight : StandHalfHeight;
 	CurrentEyeHeight += (TargetEyeHeight - CurrentEyeHeight) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
 
 	if (CapsuleComponent)
 	{
-		CapsuleComponent->SetCapsuleHalfHeight(TargetRadius);
+		// 반높이를 부드럽게 보간하고, 땅에 서 있으면 변화량만큼 중심을 옮겨 발 위치를 고정한다
+		float NewHalfHeight = CurrentHalfHeight + (TargetHalfHeight - CurrentHalfHeight) * FMath::Clamp(DeltaTime * 12.0f, 0.0f, 1.0f);
+		if (std::abs(NewHalfHeight - TargetHalfHeight) < 1e-3f)
+		{
+			NewHalfHeight = TargetHalfHeight;
+		}
+		const float Delta = NewHalfHeight - CurrentHalfHeight;
+		if (std::abs(Delta) > 1e-5f)
+		{
+			if (bIsGrounded && GetRootComponent())
+			{
+				GetRootComponent()->SetWorldLocation(GetActorLocation() + FVector(0.0f, 0.0f, Delta), false);
+			}
+			CurrentHalfHeight = NewHalfHeight;
+		}
+
+		CapsuleComponent->SetCapsuleRadius(TargetRadius);
+		CapsuleComponent->SetCapsuleHalfHeight(CurrentHalfHeight);
 	}
 
 	// 3. 착지 충격 반동 (Landing Dip) 복구
@@ -696,7 +743,8 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 
 	if (CapsuleComponent)
 	{
-		CapsuleComponent->SetCapsuleRadius(CollisionRadius);
+		CapsuleComponent->SetCapsuleSize(CollisionRadius, StandHalfHeight);
+		CurrentHalfHeight = StandHalfHeight;
 	}
 	if (CameraComponent)
 	{
