@@ -5,6 +5,8 @@
 #include <sstream>
 #include <charconv>
 #include <filesystem>
+#include <cctype>
+#include <cstdlib>
 
 #include "Core/EngineLog.h"
 #include "Render/StaticMeshData.h"
@@ -111,6 +113,137 @@ namespace
 		return true;
 	}
 
+	bool IsNumericToken(const FString& Token)
+	{
+		char* End = nullptr;
+		std::strtof(Token.c_str(), &End);
+		return End != Token.c_str() && *End == '\0';
+	}
+
+	bool ReadMapPath(std::istringstream& Stream, FString& OutPath)
+	{
+		TArray<FString> Tokens;
+		FString Token;
+		while (Stream >> Token)
+		{
+			Tokens.Add(std::move(Token));
+		}
+
+		for (int32 Index = 0; Index < Tokens.Num(); ++Index)
+		{
+			const FString& Current = Tokens[Index];
+			if (Current.empty() || Current[0] != '-')
+			{
+				for (int32 PathIndex = Index; PathIndex < Tokens.Num(); ++PathIndex)
+				{
+					if (!OutPath.empty()) OutPath += ' ';
+					OutPath += Tokens[PathIndex];
+				}
+				if (OutPath.size() >= 2 && OutPath.front() == '"' && OutPath.back() == '"')
+				{
+					OutPath = OutPath.substr(1, OutPath.size() - 2);
+				}
+				return !OutPath.empty();
+			}
+
+			int32 ValuesToSkip = 0;
+			if (Current == "-bm" || Current == "-boost" || Current == "-texres" ||
+				Current == "-blendu" || Current == "-blendv" || Current == "-cc" ||
+				Current == "-clamp" || Current == "-imfchan" || Current == "-type" ||
+				Current == "-colorspace")
+			{
+				ValuesToSkip = 1;
+			}
+			else if (Current == "-mm")
+			{
+				ValuesToSkip = 2;
+			}
+			else if (Current == "-o" || Current == "-s" || Current == "-t")
+			{
+				while (Index + 1 < Tokens.Num() && Index < Tokens.Num() - 1 &&
+					Index < Tokens.Num() && IsNumericToken(Tokens[Index + 1]) && ValuesToSkip < 3)
+				{
+					++Index;
+					++ValuesToSkip;
+				}
+				continue;
+			}
+			else
+			{
+				return false;
+			}
+
+			if (Index + ValuesToSkip >= Tokens.Num())
+			{
+				return false;
+			}
+			Index += ValuesToSkip;
+		}
+
+		return false;
+	}
+
+	void HashBytes(uint64& Signature, const void* Data, size_t Size)
+	{
+		const auto* Bytes = static_cast<const uint8*>(Data);
+		for (size_t Index = 0; Index < Size; ++Index)
+		{
+			Signature ^= Bytes[Index];
+			Signature *= 1099511628211ull;
+		}
+	}
+
+	void HashString(uint64& Signature, const FString& Value)
+	{
+		HashBytes(Signature, Value.data(), Value.size());
+		const uint8 Separator = 0;
+		HashBytes(Signature, &Separator, sizeof(Separator));
+	}
+
+	void HashFile(uint64& Signature, const std::filesystem::path& Path)
+	{
+		HashString(Signature, Path.generic_string());
+		std::ifstream File(Path, std::ios::binary);
+		if (!File.is_open())
+		{
+			const uint8 MissingFileMarker = 0xFF;
+			HashBytes(Signature, &MissingFileMarker, sizeof(MissingFileMarker));
+			return;
+		}
+
+		char Buffer[16384];
+		while (File.read(Buffer, sizeof(Buffer)) || File.gcount() > 0)
+		{
+			HashBytes(Signature, Buffer, static_cast<size_t>(File.gcount()));
+		}
+	}
+
+	uint64 GetObjSourceSignature(const FString& Path)
+	{
+		constexpr uint64 OffsetBasis = 14695981039346656037ull;
+		uint64 Signature = OffsetBasis;
+		const std::filesystem::path ObjPath(Path);
+		HashFile(Signature, ObjPath);
+
+		std::ifstream ObjFile(Path);
+		FString Line;
+		while (std::getline(ObjFile, Line))
+		{
+			std::istringstream Stream(Line);
+			FString Keyword;
+			Stream >> Keyword;
+			if (Keyword != "mtllib") continue;
+
+			FString MtlFile;
+			while (Stream >> MtlFile)
+			{
+				const std::filesystem::path MtlPath = std::filesystem::path(ObjPath).parent_path() / MtlFile;
+				HashFile(Signature, MtlPath.lexically_normal());
+			}
+		}
+		return Signature;
+	}
+
 	bool ParseMaterial(const FString& Path, TArray<FObjMaterialInfo>& Out)
 	{
 		std::ifstream File(Path);
@@ -141,6 +274,9 @@ namespace
 				continue; // 빈 줄 || 주석
 			}
 
+			std::transform(Keyword.begin(), Keyword.end(), Keyword.begin(),
+				[](unsigned char Character) { return static_cast<char>(std::tolower(Character)); });
+
 			if (Keyword == "newmtl")
 			{
 				if (!MtlInfo.Name.empty())
@@ -155,7 +291,7 @@ namespace
 					return false;
 				}
 			}
-			else if (Keyword == "Kd")
+			else if (Keyword == "kd")
 			{
 				if (!(Stream >> MtlInfo.Kd.X >> MtlInfo.Kd.Y >> MtlInfo.Kd.Z))
 				{
@@ -163,10 +299,10 @@ namespace
 					return false;
 				}
 			}
-			else if (Keyword == "map_Kd")
+			else if (Keyword == "map_kd")
 			{
 				FString MapKd;
-				if (!(Stream >> MapKd) || !TransformPath(Path, MapKd, MtlInfo.MapKd))
+				if (!ReadMapPath(Stream, MapKd) || !TransformPath(Path, MapKd, MtlInfo.MapKd))
 				{
 					HTR_LOG(Warning, "[MTL] {}:{}: invalid map_Kd '{}'", Path, LineNumber, Line);
 					return false;
@@ -180,11 +316,11 @@ namespace
 					return false;
 				}
 			}
-			else if (Keyword == "map_bump") {
+			else if (Keyword == "map_bump" || Keyword == "bump" || Keyword == "map_kn") {
 				FString MapBump;
-				if (!(Stream >> MapBump) || !TransformPath(Path, MapBump, MtlInfo.MapBump))
+				if (!ReadMapPath(Stream, MapBump) || !TransformPath(Path, MapBump, MtlInfo.MapBump))
 				{
-					HTR_LOG(Warning, "[MTL] {}:{}: invalid map_bump '{}'", Path, LineNumber, Line);
+					HTR_LOG(Warning, "[MTL] {}:{}: invalid normal map '{}'", Path, LineNumber, Line);
 					return false;
 				}
 			}
@@ -450,6 +586,7 @@ bool FObjImporter::Cook(const FObjInfo& Raw, FStaticMeshData& Out)
 				if (RawIndex.UVIndex >= 0)
 				{
 					Vertex.UV = Raw.UVs[RawIndex.UVIndex];
+					// OBJ coordinates start at the lower-left; Direct3D image sampling starts at the upper-left.
 					Vertex.UV.Y = 1.0f - Vertex.UV.Y;
 				}
 				Cooked.Vertices.Add(std::move(Vertex));
@@ -504,9 +641,10 @@ bool FObjImporter::Cook(const FObjInfo& Raw, FStaticMeshData& Out)
 TUniquePtr<FStaticMeshData> FObjImporter::LoadStaticMeshData(const FString& Path)
 {
 	const FString BinPath = Path + ".bin";
+	const uint64 SourceSignature = GetObjSourceSignature(Path);
 
 	// .bin 파일 읽기
-	if (TUniquePtr<FStaticMeshData> Baked = FStaticMeshBake::ReadBaked(BinPath))
+	if (TUniquePtr<FStaticMeshData> Baked = FStaticMeshBake::ReadBaked(BinPath, SourceSignature))
 	{
 		return Baked;
 	}
@@ -519,7 +657,7 @@ TUniquePtr<FStaticMeshData> FObjImporter::LoadStaticMeshData(const FString& Path
 		return nullptr;
 	}
 
-	FStaticMeshBake::WriteBaked(BinPath, *Data);
+	FStaticMeshBake::WriteBaked(BinPath, *Data, SourceSignature);
 	return Data;
 }
 

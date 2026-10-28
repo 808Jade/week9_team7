@@ -23,6 +23,9 @@
 #include "GameFramework/Actor/StandButtonActor.h"
 #include "GameFramework/Actor/WeightedButtonActor.h"
 #include "GameFramework/Actor/DoorActor.h"
+#include "GameFramework/Actor/CubeDropActor.h"
+#include "GameFramework/Actor/PortalCameraActor.h"
+#include "GameFramework/Actor/PortalTurretActor.h"
 
 class FViewportsPanel;
 
@@ -47,7 +50,7 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[15] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun", "Portal", "MapCube", "StandButton", "WeightedButton", "Door" };
+	const char* Items[18] = {"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", "Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun", "Portal", "MapCube", "StandButton", "WeightedButton", "Door", "CubeDrop", "PortalCamera", "PortalTurret" };
 
 	FGizmo* Gizmo = nullptr;
 	int32 GizmoSelectedIndex = 0;
@@ -76,6 +79,9 @@ public:
 		AStandButtonActor::StaticClass(),
 		AWeightedButtonActor::StaticClass(),
 		ADoorActor::StaticClass(),
+		ACubeDropActor::StaticClass(),
+		APortalCameraActor::StaticClass(),
+		APortalTurretActor::StaticClass(),
 	};
 
 private:
