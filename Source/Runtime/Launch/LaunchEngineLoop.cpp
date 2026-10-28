@@ -20,6 +20,7 @@
 #include "Scripting/ScriptWatcher.h"
 #include "Scripting/CoroutineScheduler.h"
 #include "Lua/LuaManager.h"
+#include "Audio/AudioDevice.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -93,6 +94,7 @@ bool FEngineLoop::PreInit(HINSTANCE hInstance, UClass* EngineClass)
 
 	FSplashScreen::SetText(L"Loading Assets...");
 	FRenderResourceManager::Init();
+	FAudioDevice::GetInstance().Init(EAudioBackendType::FMOD);
 
 	constexpr float AssetStart = 0.1f;
 	constexpr float AssetEnd = 0.8f;
@@ -171,6 +173,7 @@ bool FEngineLoop::Tick()
 	{
 		SCOPE_CYCLE_COUNTER(STAT_EngineTick);
 		GEngine->Tick(EngineTimer::GetDeltaTime());
+		FAudioDevice::GetInstance().Update();
 	}
 	{
 		SCOPE_CYCLE_COUNTER(STAT_Present);
@@ -202,6 +205,7 @@ void FEngineLoop::Exit()
 
 	// UAssetManager도 UObject이므로 일괄 삭제 전에 종료한다.
 	UAssetManager::Shutdown();
+	FAudioDevice::GetInstance().Shutdown();
 	FRenderResourceManager::Shutdown();
 
 	DestroyAllObjectsExceptEngine();

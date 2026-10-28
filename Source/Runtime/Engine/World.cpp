@@ -41,6 +41,9 @@
 #include "Lua/LuaManager.h"
 #include "Lua/Bindings/LuaBindings.h"
 
+#include "Audio/AudioDevice.h"
+
+#include "Camera/CameraComponent.h"
 
 namespace
 {
@@ -194,6 +197,22 @@ void UWorld::Tick(float DeltaTime)
 			Comp->TickComponent(DeltaTime);
 		}
 	}
+
+	// Tick Audio listner
+	if(MainCamera)
+	{
+		if(UCameraComponent* CamComp = MainCamera->GetCameraComponent())
+		{
+			FVector CamPos = CamComp->GetWorldLocation();
+			FVector CamForward = CamComp->GetWorldRotation().Quaternion().GetForwardVector();
+			FVector CamUp = CamComp->GetWorldRotation().Quaternion().GetUpVector();
+
+			if(IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+			{
+				AudioBackend->SetListner(CamPos, CamForward, CamUp);
+			}
+		}
+	}
 }
 
 void UWorld::ClearWorld()
@@ -232,6 +251,11 @@ void UWorld::ClearWorld()
 	Scene.RemoveAllLights();
 	Scene.RemoveAllPrimitives();
 	HTR_LOG(Info, "{} : ", PersistentLevel->GetActorNum());
+
+	if(IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+	{
+		AudioBackend->StopAll();
+	}
 }
 
 void UWorld::GatherRenderPackets(FRenderQueue& RenderQueue, const FViewContext* LODView, const FFrustumPlanes* Frustum, FRenderer* Renderer)

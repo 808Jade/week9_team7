@@ -29,7 +29,7 @@ public:
 	virtual void SetPaused(int32 VoiceID, bool bPaused) = 0;
 	virtual bool IsPlaying(int32 VoiceID) = 0;
 
-	virtual void SetVolume(int32 VoiceId, float Volume) = 0;
+	virtual void SetVolume(int32 VoiceID, float Volume) = 0;
 	virtual void SetPitch(int32 VoiceID, float Pitch) = 0;
 	virtual void Set3DPosition(int32 VoiceID, const FVector& Position) = 0;
 	virtual void SetMinMaxDistance(int32 VoiceID, float MinDistance, float MaxDistance) = 0;
