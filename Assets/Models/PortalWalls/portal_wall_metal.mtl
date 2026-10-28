@@ -1,0 +1,6 @@
+# Non-portalable wall (NP_)
+newmtl black_wall_metal_002c
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd black_wall_metal_002c.png
+map_Bump black_wall_metal_002c_normal.png

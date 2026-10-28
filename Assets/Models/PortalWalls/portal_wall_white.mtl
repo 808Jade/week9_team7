@@ -1,0 +1,6 @@
+# Portalable wall (Tile_P)
+newmtl white_wall_tile001a
+Kd 1.0 1.0 1.0
+d 1.0
+map_Kd white_wall_tile001a.png
+map_Bump white_wall_tile001a_normal.png
