@@ -42,6 +42,8 @@ public:
 	UStaticMeshComponent* GetPortalMesh() const { return PortalMesh; }
 	FVector GetPortalNormal() const { return GetActorQuat().GetForwardVector(); }
 
+	static constexpr float PortalResolutionScale = 0.5f;
+
 	// 렌더링 직전에 매 프레임 호출. 크기가 같으면 아무 일도 안 한다.
 	bool EnsureRenderTarget(uint32 Width, uint32 Height) { return ViewTargets.Resize(Width, Height); }
 

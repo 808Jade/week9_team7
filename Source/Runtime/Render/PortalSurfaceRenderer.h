@@ -25,7 +25,7 @@ public:
 
 	// PortalTexture가 nullptr이면 PortalColor 단색으로 그린다.
 	void Draw(UStaticMesh* Mesh, const FMatrix& World, const FMatrix& ViewProjection,
-		FTexture2D* PortalTexture, const FVector4& PortalColor);
+		FTexture2D* PortalTexture, const FVector4& PortalColor, float ResolutionScale = 0.5f);
 
 private:
 	bool EnsureInit();
