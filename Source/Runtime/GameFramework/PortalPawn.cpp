@@ -24,6 +24,7 @@
 #include "Audio/AudioDevice.h"
 #include "Audio/Sound/SoundWave.h"
 #include "Asset/AssetManager.h"
+#include "Serialization/JsonArchive.h"
 
 APortalPawn::APortalPawn()
 {
@@ -1026,6 +1027,20 @@ void APortalPawn::UpdateWalkSound(float DeltaTime)
 	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
 	if (!AudioBackend)
 	{
+		return;
+	}
+
+	// 엔딩 씬(EndingScene.scene) 또는 엔딩 UI 상태에서는 발걸음 소리를 내지 않는다.
+	const bool bInEndingScene = FJsonArchive::GetLastLoadedScenePath().find("EndingScene") != std::string::npos;
+	const bool bInEndingUI = AUIManagerActor::Get() && AUIManagerActor::Get()->GetCurrentUIMode() == EUIMode::Ending;
+	if (bInEndingScene || bInEndingUI)
+	{
+		if (WalkVoiceID != -1)
+		{
+			AudioBackend->Stop(WalkVoiceID);
+			WalkVoiceID = -1;
+		}
+		WalkStopDelayTimer = 0.0f;
 		return;
 	}
 
