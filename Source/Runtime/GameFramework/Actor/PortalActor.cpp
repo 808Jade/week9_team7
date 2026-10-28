@@ -368,18 +368,18 @@ bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerF
 
 bool APortalActor::IsPortableSurface(UPrimitiveComponent* HitComponent) const
 {
-	// [Fling45] 이름이 "NP_"로 시작하는 액터(회색 금속 타일)에는 포탈을 붙일 수 없다
+	// 이름이 "Tile_P_"로 시작하는 액터에만 포탈을 붙일 수 있다
 	if (HitComponent)
 	{
 		if (AActor* HitOwner = HitComponent->GetOwner())
 		{
-			if (HitOwner->GetName().rfind("NP_", 0) == 0)
+			if (HitOwner->GetName().rfind("Tile_P_", 0) == 0)
 			{
-				return false;
+				return true;
 			}
 		}
 	}
-	return true;
+	return false;
 }
 
 bool APortalActor::CalculatePortalRotation(const FVector& SurfaceNormal, const FVector& ViewerForward, FRotator& OutRotation) const
