@@ -66,6 +66,21 @@ public:
 	}
 	bool IsCenterOnViewport() const { return bCenterOnViewport; }
 
+	// 뷰포트 비율 기반 배치 (0.0 ~ 1.0). InRelW / InRelH 가 0 이하면 픽셀 Width/Height 를 그대로 사용
+	void SetRelativeRect(float InRelX, float InRelY, float InRelW = -1.0f, float InRelH = -1.0f,
+		float InOffsetX = 0.0f, float InOffsetY = 0.0f)
+	{
+		bUseRelativeRect = true;
+		RelativeX = InRelX; RelativeY = InRelY;
+		RelativeW = InRelW; RelativeH = InRelH;
+		OffsetX = InOffsetX; OffsetY = InOffsetY;
+	}
+	void SetRelativeOffset(float InOffsetX, float InOffsetY) { OffsetX = InOffsetX; OffsetY = InOffsetY; }
+	void SetRelativeY(float InRelY) { RelativeY = InRelY; }
+
+	// 마지막으로 그려진 화면 픽셀 사각형 (X, Y, W, H)
+	const FVector4& GetScreenRect() const { return UIConstants.Rect; }
+
 private:
 	float PosX = 100.0f;   // 화면 좌상단 X (픽셀)
 	float PosY = 100.0f;   // 화면 좌상단 Y (픽셀)
@@ -79,6 +94,12 @@ private:
 	bool bCenterOnViewport = false;
 	float OffsetX = 0.0f;
 	float OffsetY = 0.0f;
+
+	bool bUseRelativeRect = false;
+	float RelativeX = 0.0f;
+	float RelativeY = 0.0f;
+	float RelativeW = -1.0f;
+	float RelativeH = -1.0f;
 
 	UStaticMesh* Mesh = nullptr;
 	UMaterial* Material = nullptr;

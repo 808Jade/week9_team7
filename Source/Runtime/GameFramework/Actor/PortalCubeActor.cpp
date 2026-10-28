@@ -110,14 +110,14 @@ void APortalCubeActor::Tick(float DeltaTime)
 
 				// 출구 포탈의 안전 경계 내로 로컬 좌표 클램핑 (출구 모서리 벽/바닥 끼임 방지)
 				FVector ExitLocal = ExitPortal->GetPortalMatrix().Inverse().TransformPosition(NewLoc);
-				const float SafeHalfWidth = (ExitPortal->GetPortalWidth() * 0.5f) - 0.40f;
-				const float SafeHalfHeight = (ExitPortal->GetPortalHeight() * 0.5f) - 0.40f;
+				const float SafeHalfWidth = (ExitPortal->GetPortalWidth() * 0.5f) - 0.55f;
+				const float SafeHalfHeight = (ExitPortal->GetPortalHeight() * 0.5f) - 0.55f;
 				ExitLocal.Y = FMath::Clamp(ExitLocal.Y, -SafeHalfWidth, SafeHalfWidth);
 				ExitLocal.Z = FMath::Clamp(ExitLocal.Z, -SafeHalfHeight, SafeHalfHeight);
 				NewLoc = ExitPortal->GetPortalMatrix().TransformPosition(ExitLocal);
 
-				// 큐브 반경(0.5m)을 고려하여 출구 벽 밖으로 0.65m 확실하게 배치
-				NewLoc += ExitPortal->GetPortalNormal() * 0.65f;
+				// 큐브 대각선 반경(0.87m)을 고려하여 출구 벽 밖으로 0.9m 확실하게 배치
+				NewLoc += ExitPortal->GetPortalNormal() * 0.9f;
 
 				// 2. 회전 변환
 				FMatrix RotMat = GetActorRotation().Quaternion().ToFMatrix() * TeleportMatrix;
@@ -207,6 +207,7 @@ void APortalCubeActor::UpdateHoldPhysics(const FVector& TargetLocation, const FR
 
 	ProjectileMovementComponent->MaxSpeed = 7.0f;
 	ProjectileMovementComponent->AddForce(SpringForce + DampingForce);
+	ProjectileMovementComponent->bSimulationEnabled = true;
 }
 
 void APortalCubeActor::TeleportThroughPortal(const FVector& NewLoc, const FRotator& NewRot, const FVector& NewVel)
@@ -217,6 +218,7 @@ void APortalCubeActor::TeleportThroughPortal(const FVector& NewLoc, const FRotat
 	if(ProjectileMovementComponent)
 	{
 		ProjectileMovementComponent->Velocity = NewVel;
+		ProjectileMovementComponent->bSimulationEnabled = true;
 	}
 }
 

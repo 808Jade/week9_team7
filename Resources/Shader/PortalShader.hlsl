@@ -5,7 +5,7 @@ cbuffer PortalConstants : register(b0)
     matrix World;
     matrix ViewProjection;
     float4 PortalColor;
-    float4 Params; // x = 포탈 텍스처 사용, y = 시간(초)
+    float4 Params; // x = 포탈 텍스처 사용, y = 시간(초), z = NDC 깊이 바이어스
 };
 
 Texture2D<float4> PortalTexture : register(t0);
@@ -29,6 +29,9 @@ PS_INPUT mainVS(VS_INPUT input)
 {
     PS_INPUT output;
     output.position = mul(mul(float4(input.position, 1.0f), World), ViewProjection);
+
+    // 벽과의 Z-fighting 방지: 클립 z를 w에 비례해 당겨 NDC 깊이를 Params.z만큼 앞으로.
+    output.position.z -= Params.z * output.position.w;
     output.uv = input.uv;
     return output;
 }

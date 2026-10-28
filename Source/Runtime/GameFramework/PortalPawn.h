@@ -7,6 +7,7 @@ class USphereComponent;
 class UBoxComponent;
 class UCapsuleComponent;
 class UCameraComponent;
+class UStaticMeshComponent;
 class APortalGunActor;
 class APlayerStart;
 class APortalActor;
@@ -101,6 +102,8 @@ public:
 	float GetLookSensitivity() const { return LookSensitivity; }
 	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
+	UStaticMeshComponent* GetMeshComponent() const { return StaticMeshComponent; }
+
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
 	void FirePortal(EPortalType Type);
@@ -110,6 +113,7 @@ private:
 	UBoxComponent* BoxComponent = nullptr;
 	UCapsuleComponent* CapsuleComponent = nullptr;
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
+	UStaticMeshComponent* StaticMeshComponent = nullptr;
 
 	// 이동 파라미터
 	float MoveSpeed = 6.0f;

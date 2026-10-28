@@ -5,11 +5,13 @@
 #include "GameFramework/PlayerStart.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "PlayerController.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
+#include "Asset/AssetManager.h"
 #include "GameFramework/Actor/PortalCubeActor.h"
 #include "GameFramework/Actor/PortalActor.h"
 #include "GameFramework/Actor/UIManagerActor.h"
@@ -38,6 +40,16 @@ APortalPawn::APortalPawn()
 	CameraComponent->SetRelativeRotation({ 0.0f, 0.0f, 0.0f });
 
 	CameraComponent->SetExternalInputManaged(true);
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("PawnMesh");
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
+
+	UStaticMesh* PawnMesh = UAssetManager::GetAssetByPath<UStaticMesh>("Models/PortalChell/Portal_Chell.obj");
+	if(PawnMesh)
+	{
+		StaticMeshComponent->SetStaticMesh(PawnMesh);
+	}
+
 }
 
 void APortalPawn::BeginPlay()
@@ -72,6 +84,7 @@ void APortalPawn::BeginPlay()
 	if (CameraComponent)
 	{
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+		CameraComponent->SetNearZ(0.01f);
 	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
@@ -565,7 +578,13 @@ void APortalPawn::Tick(float DeltaTime)
 		{
 			const FVector PostMoveLocation = GetActorLocation();
 
-			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f))
+			const FVector PreCamLocation = PreMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+			const FVector PostCamLocation = PostMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+
+			const bool bPawnCrossed = TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f);
+			const bool bCamCrossed = TargetPortal->Checkcrossing(PreCamLocation, PostCamLocation, 0.05f);
+
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f) && (bPawnCrossed || bCamCrossed))
 			{
 				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
@@ -750,6 +769,14 @@ void APortalPawn::TeleportThroughPortal(const FVector& NewLocation, const FRotat
 	}
 	Velocity = NewVelocity;
 
+	if(APlayerController* PC = GetController())
+	{
+		if(APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			PCM->UpdateCamera(0.0f);
+		}
+	}
+
 	// 포탈 플링으로 획득한 고속 관성을 공중에서 보존할 수 있도록 한도 갱신
 	const float FlingHorizSpeed = sqrtf(NewVelocity.X * NewVelocity.X + NewVelocity.Y * NewVelocity.Y);
 	MaxPreservedFlingSpeed = FMath::Max(SprintSpeed, FlingHorizSpeed);
@@ -805,28 +832,44 @@ void APortalPawn::FirePortal(EPortalType Type)
 		return;
 	}
 
+	constexpr float MaxFireRange = 1000.0f;
+	const FVector RayStart = CameraComponent->GetWorldLocation();
 	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	const FRay WorldRay{ CameraComponent->GetWorldLocation(), RayDir };
+	const FRay WorldRay{ RayStart, RayDir };
+
+	FPortalShotInfo Shot;
+	Shot.Type = Type;
 
 	// LineTraceSingle은 ImpactNormal을 채우지 않으므로 반지름 0 SweepSingle 사용
 	FHitResult Hit;
-	if (!GetWorld()->SweepSingle(WorldRay, 1000.0f, 0.0f, Hit, this))
+	Shot.bHit = GetWorld()->SweepSingle(WorldRay, MaxFireRange, 0.0f, Hit, this);
+
+	if (Shot.bHit)
 	{
+		Shot.End = Hit.ImpactPoint;
+		Shot.ImpactNormal = Hit.ImpactNormal;
 		PortalGun->PlayFailSound();
 		return;
 	}
 
-	// 움직이는 큐브에는 포탈을 붙이지 않는다
-	if (Hit.HitComponent)
-	{
-		if(Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()) || Cast<APortalActor>(Hit.HitComponent->GetOwner()))
+		// 큐브/포탈에는 포탈을 붙이지 않는다 (빔은 나감)
+		AActor* HitOwner = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+		const bool bBlocked = Cast<APortalCubeActor>(HitOwner) || Cast<APortalActor>(HitOwner);
+		if (!bBlocked)
 		{
+			Shot.bPortalPlaced = PortalGun->FirePortal(Type, Hit, RayDir);
+		}
+	}
+	else
+	{
+		Shot.End = RayStart + RayDir * MaxFireRange;
+		Shot.ImpactNormal = RayDir * -1.0f;
 			PortalGun->PlayFailSound();
 			return;
 		}
 	}
 
-	PortalGun->FirePortal(Type, Hit, RayDir);
+	PortalGun->PlayFireEffect(Shot);
 }
 
 void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
