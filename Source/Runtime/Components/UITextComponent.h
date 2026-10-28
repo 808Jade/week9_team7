@@ -86,6 +86,10 @@ public:
 	}
 	float GetRelativeX() const { return RelativeX; }
 
+	// 마지막으로 그려진 화면 픽셀 사각형 (X, Y, W, H) / 뷰포트 크기 (W, H, ...)
+	const FVector4& GetScreenRect() const { return UIConstants.Rect; }
+	const FVector4& GetScreenViewportSize() const { return UIConstants.ViewportSize; }
+
 private:
 	void RebuildTextMesh();
 
