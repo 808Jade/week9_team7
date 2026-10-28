@@ -241,6 +241,15 @@ FSceneView FGameViewportClient::CalcSceneView(const FRect& InViewRect)
 	OutView.LetterBoxAmount = EvaluateLetterBoxAmount();
 	OutView.LetterBoxAspect = LetterBoxAspect;
 
+	if (CameraManager)
+	{
+		const FViewInfo& CamView = CameraManager->GetCameraViewInfo();
+		const FVector4 Fade = CamView.FadeColor.ToVector4();
+
+		OutView.FadeAlpha = CamView.FadeAlpha;
+		OutView.FadeColor = FVector(Fade.X, Fade.Y, Fade.Z);
+	}
+
 	return OutView;
 }
 

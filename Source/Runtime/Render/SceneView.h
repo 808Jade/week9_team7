@@ -32,6 +32,8 @@ struct FSceneView
 	bool bGameView = false;
 	float LetterBoxAmount = 0.0f;   // 0 = 없음, 1 = 띠가 완전히 내려온 상태
 	float LetterBoxAspect = 2.39f;  // 띠를 제외하고 남는 영역의 목표 화면비
+	float FadeAlpha = 0.0f; // 0 = 안 덮음, 1 = 완전 암전
+	FVector FadeColor{ 0.f, 0.f, 0.f };  // 기본 검정
 	const TArray<const UPrimitiveComponent*>* HiddenComponents = nullptr;
 
 	FViewContext ToViewContext() const

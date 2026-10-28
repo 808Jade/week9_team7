@@ -10,6 +10,9 @@ cbuffer PostProcessConstants : register(b0)
     float VignetteSmothness;
     uint bEnableVignette;
     float LetterBoxSize;
+    
+    float3 FadeColor;
+    float FadeAlpha;
 }
 
 struct FPSInput
@@ -65,6 +68,11 @@ float4 mainPS(FPSInput Input) : SV_Target
     if (LetterBoxSize > 0.f)
     {
         ApplyLayer(OverlayColor, OverlayAlpha, float3(0.f, 0.f, 0.f), LetterBoxMask(Input.UV));
+    }
+    
+    if (FadeAlpha > 0.f)
+    {
+        ApplyLayer(OverlayColor, OverlayAlpha, FadeColor, FadeAlpha);
     }
 
     return float4(OverlayColor, OverlayAlpha);

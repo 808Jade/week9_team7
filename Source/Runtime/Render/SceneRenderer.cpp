@@ -47,8 +47,11 @@ namespace
 		float VignetteSmoothness = 0.f;
 		uint32 bEnableVignette = 0;
 		float LetterBoxSize = 0.f;
+
+		FVector FadeColor{ 0.f, 0.f, 0.f };
+		float FadeAlpha = 0.f;
 	};
-	static_assert(sizeof(FPostProcessConstants) == 48);
+	static_assert(sizeof(FPostProcessConstants) == 64);
 
 	FRenderGraphRasterPassDesc MakeViewportPass(const std::string& Name, FRenderGraphTextureRef Color,
 		FRenderGraphTextureRef DepthTarget = {},
@@ -709,8 +712,11 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 		const float FullBar = std::max(0.f, 0.5f * (1.f - ViewAspect / View.LetterBoxAspect));
 		const float LetterBoxSize = FullBar * std::clamp(View.LetterBoxAmount, 0.f, 1.f);
 
+		const float FadeAlpha = std::clamp(View.FadeAlpha, 0.f, 1.f);
+		const FVector FadeColor = View.FadeColor;
+
 		if (!Graph.AddRasterPass(MakeViewportPass("PostProcess", FinalColor),
-			[this, Width, Height, LetterBoxSize, PostProcess = Options.PostProcess]
+			[this, Width, Height, LetterBoxSize, FadeAlpha, FadeColor, PostProcess = Options.PostProcess]
 			{
 				FPipelineState* Pipeline = FRenderResourceManager::GetPSO(EPSOType::PostProcess);
 				if (!Pipeline || !Pipeline->Shader) return;
@@ -726,6 +732,9 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 				Constants.VignetteSmoothness = PostProcess.VignetteSmoothness;
 				Constants.VignetteColor = PostProcess.VignetteColor;
 				Constants.LetterBoxSize = LetterBoxSize;
+
+				Constants.FadeAlpha = FadeAlpha;
+				Constants.FadeColor = FadeColor;
 
 				RenderCommand::UpdateBufferData(RenderData.PostProcessCB.get(), &Constants);
 				RenderCommand::BindConstantBuffer(0, RenderData.PostProcessCB.get(), EShaderBindFlagBits::Pixel);
