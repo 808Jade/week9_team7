@@ -713,7 +713,7 @@ void APortalPawn::FirePortal(EPortalType Type)
 		}
 	}
 
-	PortalGun->FirePortal(Type, Hit);
+	PortalGun->FirePortal(Type, Hit, RayDir);
 }
 
 void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)

@@ -143,7 +143,7 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 	}
 }
 
-void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult)
+void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
 {
 	APortalActor* Portal = GetPortal(PortalToFire);
 	if (!Portal || !HitResult.bBlockingHit)
@@ -151,7 +151,13 @@ void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResul
 		return;
 	}
 
-	Portal->PlaceAt(HitResult.ImpactPoint, HitResult.ImpactNormal);
+	FVector Forward = ViewerForward;
+	if (Forward.SizeSquared() < 1e-4f && OwnerPawn && OwnerPawn->GetCameraComponent())
+	{
+		Forward = OwnerPawn->GetCameraComponent()->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	}
+
+	Portal->PlaceAt(HitResult, Forward);
 }
 
 void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
