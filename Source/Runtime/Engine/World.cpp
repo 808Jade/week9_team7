@@ -9,6 +9,7 @@
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/DefaultPawn.h"
 #include "GameFramework/PlayerController.h"
@@ -210,19 +211,53 @@ void UWorld::Tick(float DeltaTime)
 		}
 	}
 
-	// Tick Audio listner
-	if(MainCamera)
-	{
-		if(UCameraComponent* CamComp = MainCamera->GetCameraComponent())
-		{
-			FVector CamPos = CamComp->GetWorldLocation();
-			FVector CamForward = CamComp->GetWorldRotation().Quaternion().GetForwardVector();
-			FVector CamUp = CamComp->GetWorldRotation().Quaternion().GetUpVector();
+	FVector ListenerPos = FVector::ZeroVector;
+	FVector ListenerForward = FVector(1.0f, 0.0f, 0.0f);
+	FVector ListenerUp = FVector(0.0f, 0.0f, 1.0f);
+	bool bFoundListener = false;
 
-			if(IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+	if (APlayerController* PC = GetPlayerController())
+	{
+		if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			const FViewInfo& ViewInfo = PCM->GetCameraViewInfo();
+			ListenerPos = ViewInfo.Location;
+			ListenerForward = ViewInfo.Rotation.Quaternion().GetForwardVector();
+			ListenerUp = ViewInfo.Rotation.Quaternion().GetUpVector();
+			bFoundListener = true;
+		}
+	}
+
+	if (!bFoundListener)
+	{
+		if (APawn* Pawn = GetPlayerPawn())
+		{
+			if (UCameraComponent* CamComp = Pawn->FindComponentByClass<UCameraComponent>())
 			{
-				AudioBackend->SetListner(CamPos, CamForward, CamUp);
+				ListenerPos = CamComp->GetWorldLocation();
+				ListenerForward = CamComp->GetWorldRotation().Quaternion().GetForwardVector();
+				ListenerUp = CamComp->GetWorldRotation().Quaternion().GetUpVector();
+				bFoundListener = true;
 			}
+		}
+	}
+
+	if (!bFoundListener && MainCamera)
+	{
+		if (UCameraComponent* CamComp = MainCamera->GetCameraComponent())
+		{
+			ListenerPos = CamComp->GetWorldLocation();
+			ListenerForward = CamComp->GetWorldRotation().Quaternion().GetForwardVector();
+			ListenerUp = CamComp->GetWorldRotation().Quaternion().GetUpVector();
+			bFoundListener = true;
+		}
+	}
+
+	if (bFoundListener)
+	{
+		if (IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+		{
+			AudioBackend->SetListner(ListenerPos, ListenerForward, ListenerUp);
 		}
 	}
 }

@@ -1,6 +1,8 @@
 #include "EnginePCH.h"
 #include "DoorActor.h"
 #include "Asset/AssetManager.h"
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
 #include <algorithm>
 #include <cmath>
 
@@ -154,7 +156,26 @@ void ADoorActor::Tick(float DeltaTime)
 
 void ADoorActor::OpenDoor()
 {
+    if (!bIsOpen)
+    {
+        PlayDoorOpenSound();
+    }
     bIsOpen = true;
+}
+
+void ADoorActor::PlayDoorOpenSound()
+{
+    IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+    if (!AudioBackend)
+    {
+        return;
+    }
+
+    USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/Door_Open.mp3");
+    if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+    {
+        AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, true, GetActorLocation(), 5.0f, 100.0f);
+    }
 }
 
 void ADoorActor::CloseDoor()
@@ -164,11 +185,15 @@ void ADoorActor::CloseDoor()
 
 void ADoorActor::ToggleDoor()
 {
-    bIsOpen = !bIsOpen;
+    SetOpen(!bIsOpen);
 }
 
 void ADoorActor::SetOpen(bool bOpen)
 {
+    if (bOpen && !bIsOpen)
+    {
+        PlayDoorOpenSound();
+    }
     bIsOpen = bOpen;
 }
 

@@ -4,6 +4,7 @@
 
 class UStaticMeshComponent;
 class UPointLightComponent;
+class UMaterial;
 class APortalCubeActor;
 class APortalPawn;
 class APortalActor;
@@ -14,6 +15,17 @@ enum class EPortalType : int32
 {
 	Blue = 0,
 	Orange = 1
+};
+
+// 발사 한 번에 대한 이펙트 정보
+struct FPortalShotInfo
+{
+	EPortalType Type = EPortalType::Blue;
+	FVector Start;                  // 총구 위치 (월드). PlayFireEffect에서 건이 채움
+	FVector End;                    // 착탄 지점 또는 최대 사거리 지점
+	FVector ImpactNormal;           // 착탄 면 법선 (빗나가면 -RayDir)
+	bool bHit = false;              // 무언가에 맞았는가
+	bool bPortalPlaced = false;     // 포탈이 실제로 열렸는가 
 };
 
 class APortalGunActor : public AActor
@@ -29,6 +41,9 @@ class APortalGunActor : public AActor
 		PROPERTY(LaserGlowRadius)
 		PROPERTY(LaserBendRatio)
 		PROPERTY(LaserLightIntensity)
+		PROPERTY(ShotCoreRadius)
+		PROPERTY(ShotGlowRadius)
+		PROPERTY(ShotDuration)
 		REFLECT_END()
 
 public:
@@ -42,10 +57,12 @@ public:
 	void AttachToPawn(APortalPawn* InOwnerPawn);
 
 	// 세부 동작
-	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
+	bool FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
+	void PlayFireEffect(const FPortalShotInfo& InShot);
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
 	void ResetPortals();
+	void PlayFailSound();
 
 	UStaticMeshComponent* GetGunMeshComponent() const { return GunMeshComponent; }
 	const bool IsHoldingCube() { return HeldCube != nullptr; }
@@ -56,6 +73,8 @@ public:
 	{
 		return Type == EPortalType::Blue ? BluePortal : OrangePortal;
 	}
+
+	FVector GetMuzzleLocation() const;
 
 	void Swing();
 	bool IsSwinging() const { return bIsSwinging; }
@@ -120,4 +139,30 @@ private:
 	static void PlaceCylinder(UStaticMeshComponent* Comp, const FVector& Start, const FVector& End, float Radius);
 
 	void PlayFireSound(EPortalType Type);
+	void StartHoldSound();
+	void StopHoldSound();
+
+	int32 HoldVoiceID = -1;
+
+	FPortalShotInfo CurrentShot;
+	bool  bShotActive = false;
+	float ShotElapsed = 0.0f;
+
+	// ===== 발사 빔 =====
+	// 직선이라 원기둥 1개씩(코어 + 외곽). 1세트를 재사용하고 발사 시 색만 교체
+	UStaticMeshComponent* ShotCore = nullptr;
+	UStaticMeshComponent* ShotGlow = nullptr;
+	float ShotCoreRadius = 0.006f;   // 홀드 레이저(0.004)보다 약간 굵게
+	float ShotGlowRadius = 0.025f;
+	float ShotDuration   = 0.15f;    // 빔이 보이는 시간 (초)
+
+	void UpdateShotBeam(float DeltaTime);
+	void SetShotBeamVisibility(bool bVisible);
+
+	// [0] = Blue, [1] = Orange
+	UMaterial* ShotCoreMaterials[2] = { nullptr, nullptr };
+	UMaterial* ShotGlowMaterials[2] = { nullptr, nullptr };
+
+	UMaterial* GetShotCoreMaterial(EPortalType Type) const { return ShotCoreMaterials[(int32)Type]; }
+	UMaterial* GetShotGlowMaterial(EPortalType Type) const { return ShotGlowMaterials[(int32)Type]; }
 };

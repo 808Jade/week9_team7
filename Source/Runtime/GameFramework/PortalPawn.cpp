@@ -21,6 +21,9 @@
 #include "Collision/Ray.h"
 #include "Collision/HitResult.h"
 #include "UObject/Casts.h"
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
+#include "Asset/AssetManager.h"
 
 APortalPawn::APortalPawn()
 {
@@ -83,6 +86,7 @@ void APortalPawn::BeginPlay()
 	if (CameraComponent)
 	{
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+		CameraComponent->SetNearZ(0.01f);
 	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
@@ -173,6 +177,15 @@ void APortalPawn::BeginPlay()
 void APortalPawn::EndPlay()
 {
 	Super::EndPlay();
+	if (WalkVoiceID != -1)
+	{
+		if (IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+		{
+			AudioBackend->Stop(WalkVoiceID);
+		}
+		WalkVoiceID = -1;
+	}
+	WalkStopDelayTimer = 0.0f;
 	if (PortalGun)
 	{
 		PortalGun->Destroy();
@@ -505,6 +518,7 @@ void APortalPawn::Tick(float DeltaTime)
 		}
 
 		// 7-B. 수직 이동 및 바닥/천장 충돌 (착지 충격 반동 감지)
+		const bool bPrevGrounded = bIsGrounded;
 		const FVector VerticalDelta(0.0f, 0.0f, Velocity.Z * DeltaTime);
 		if (VerticalDelta.SizeSquared() > 1e-8f)
 		{
@@ -516,8 +530,11 @@ void APortalPawn::Tick(float DeltaTime)
 			{
 				if (Velocity.Z <= 0.0f && Hit.ImpactNormal.Z > 0.5f)
 				{
-					// 착지 충격 반동
 					const float ImpactSpeed = -Velocity.Z;
+					if (!bPrevGrounded && ImpactSpeed > 1.0f)
+					{
+						PlayLandSound(ImpactSpeed);
+					}
 					if (ImpactSpeed > 3.0f)
 					{
 						const float ExtraImpactSpeed = FMath::Max(ImpactSpeed - JumpVelocity, 0.0f);
@@ -563,7 +580,13 @@ void APortalPawn::Tick(float DeltaTime)
 		{
 			const FVector PostMoveLocation = GetActorLocation();
 
-			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f))
+			const FVector PreCamLocation = PreMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+			const FVector PostCamLocation = PostMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+
+			const bool bPawnCrossed = TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f);
+			const bool bCamCrossed = TargetPortal->Checkcrossing(PreCamLocation, PostCamLocation, 0.05f);
+
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f) && (bPawnCrossed || bCamCrossed))
 			{
 				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
@@ -614,6 +637,8 @@ void APortalPawn::Tick(float DeltaTime)
 			}
 		}
 	}
+
+	UpdateWalkSound(DeltaTime);
 }
 
 void APortalPawn::Respawn()
@@ -646,6 +671,15 @@ void APortalPawn::Respawn()
 	}
 
 	// 리스폰 시 포탈 설치 상태 초기화 및 크로스헤어 리셋
+	if (WalkVoiceID != -1)
+	{
+		if (IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend())
+		{
+			AudioBackend->Stop(WalkVoiceID);
+		}
+		WalkVoiceID = -1;
+	}
+	WalkStopDelayTimer = 0.0f;
 	ResetPortals();
 	if (AUIManagerActor::Get())
 	{
@@ -726,6 +760,7 @@ void APortalPawn::Jump()
 
 void APortalPawn::TeleportThroughPortal(const FVector& NewLocation, const FRotator& NewRotation, const FVector& NewVelocity)
 {
+	PlayWarpSound();
 	if (GetRootComponent())
 	{
 		GetRootComponent()->SetWorldLocationAndRotation(NewLocation, FRotator(0.0f, NewRotation.Yaw, 0.0f), false);
@@ -735,6 +770,14 @@ void APortalPawn::TeleportThroughPortal(const FVector& NewLocation, const FRotat
 		CameraComponent->SetRelativeRotation(FRotator(NewRotation.Pitch, 0.0f, NewRotation.Roll));
 	}
 	Velocity = NewVelocity;
+
+	if(APlayerController* PC = GetController())
+	{
+		if(APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			PCM->UpdateCamera(0.0f);
+		}
+	}
 
 	// 포탈 플링으로 획득한 고속 관성을 공중에서 보존할 수 있도록 한도 갱신
 	const float FlingHorizSpeed = sqrtf(NewVelocity.X * NewVelocity.X + NewVelocity.Y * NewVelocity.Y);
@@ -791,26 +834,43 @@ void APortalPawn::FirePortal(EPortalType Type)
 		return;
 	}
 
+	constexpr float MaxFireRange = 1000.0f;
+	const FVector RayStart = CameraComponent->GetWorldLocation();
 	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	const FRay WorldRay{ CameraComponent->GetWorldLocation(), RayDir };
+	const FRay WorldRay{ RayStart, RayDir };
+
+	FPortalShotInfo Shot;
+	Shot.Type = Type;
 
 	// LineTraceSingle은 ImpactNormal을 채우지 않으므로 반지름 0 SweepSingle 사용
 	FHitResult Hit;
-	if (!GetWorld()->SweepSingle(WorldRay, 1000.0f, 0.0f, Hit, this))
-	{
-		return;
-	}
+	Shot.bHit = GetWorld()->SweepSingle(WorldRay, MaxFireRange, 0.0f, Hit, this);
 
-	// 움직이는 큐브에는 포탈을 붙이지 않는다
-	if (Hit.HitComponent)
+	if (Shot.bHit)
 	{
-		if(Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()) || Cast<APortalActor>(Hit.HitComponent->GetOwner()))
+		Shot.End = Hit.ImpactPoint;
+		Shot.ImpactNormal = Hit.ImpactNormal;
+
+		// 큐브/포탈에는 포탈을 붙이지 않는다 (빔은 나감)
+		AActor* HitOwner = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+		const bool bBlocked = Cast<APortalCubeActor>(HitOwner) || Cast<APortalActor>(HitOwner);
+		if (!bBlocked)
 		{
-			return;
+			Shot.bPortalPlaced = PortalGun->FirePortal(Type, Hit, RayDir);
+		}
+		else
+		{
+			PortalGun->PlayFailSound();
 		}
 	}
+	else
+	{
+		Shot.End = RayStart + RayDir * MaxFireRange;
+		Shot.ImpactNormal = RayDir * -1.0f;
+		PortalGun->PlayFailSound();
+	}
 
-	PortalGun->FirePortal(Type, Hit, RayDir);
+	PortalGun->PlayFireEffect(Shot);
 }
 
 void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
@@ -927,6 +987,83 @@ void APortalPawn::ResetPortals()
 	if (PortalGun)
 	{
 		PortalGun->ResetPortals();
+	}
+}
+
+void APortalPawn::PlayLandSound(float ImpactSpeed)
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/Player_Land.mp3");
+	if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{
+		const float Volume = FMath::Clamp(ImpactSpeed / 8.0f, 0.4f, 1.0f);
+		AudioBackend->Play(SoundWave->GetSoundID(), false, Volume, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+	}
+}
+
+void APortalPawn::PlayWarpSound()
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/Portal_Warp.mp3");
+	if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+	{
+		AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+	}
+}
+
+void APortalPawn::UpdateWalkSound(float DeltaTime)
+{
+	IAudioBackend* AudioBackend = FAudioDevice::GetInstance().GetBackend();
+	if (!AudioBackend)
+	{
+		return;
+	}
+
+	const float HorizSpeedSq = Velocity.X * Velocity.X + Velocity.Y * Velocity.Y;
+	const bool bShouldPlayWalk = bIsGrounded && (HorizSpeedSq > 0.5f);
+
+	if (bShouldPlayWalk)
+	{
+		WalkStopDelayTimer = 0.5f;
+		if (WalkVoiceID == -1 || !AudioBackend->IsPlaying(WalkVoiceID))
+		{
+			USoundWave* SoundWave = UAssetManager::GetAssetByPath<USoundWave>("Audio/Player_Walk.wav");
+			if (SoundWave && SoundWave->GetSoundID() != INVALID_SOUND_ID)
+			{
+				WalkVoiceID = AudioBackend->Play(SoundWave->GetSoundID(), true, 0.6f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
+			}
+		}
+		else
+		{
+			AudioBackend->SetVolume(WalkVoiceID, 0.6f);
+		}
+	}
+	else
+	{
+		if (WalkVoiceID != -1)
+		{
+			if (WalkStopDelayTimer > 0.0f)
+			{
+				WalkStopDelayTimer -= DeltaTime;
+				const float FadeAlpha = FMath::Clamp(WalkStopDelayTimer / 0.5f, 0.0f, 1.0f);
+				AudioBackend->SetVolume(WalkVoiceID, 0.6f * FadeAlpha);
+			}
+			else
+			{
+				AudioBackend->Stop(WalkVoiceID);
+				WalkVoiceID = -1;
+			}
+		}
 	}
 }
 

@@ -18,6 +18,9 @@ namespace
 {
 	constexpr int32 PortalViewIndex = 100;// 에디터 뷰포트 슬롯(0~3)과 겹치지 않게
 
+	// 벽면에서 포탈 면을 법선 방향으로 띄우는 거리 (m).
+	constexpr float PortalSurfaceOffset = 0.01f;
+
 	// 행 벡터 곱: V * M
 	FVector4 MulRow(const FVector4& V, const FMatrix& M)
 	{
@@ -89,7 +92,7 @@ void APortalActor::PlaceAt(const FVector& Location, const FVector& Normal)
 	const float Yaw = atan2f(Normal.Y, Normal.X) * (180.0f / PI);
 	const float Pitch = -asinf(FMath::Clamp(Normal.Z, -1.0f, 1.0f)) * (180.0f / PI);
 
-	SetActorLocation(Location + Normal * 0.01f);   // 벽과 Z-fighting 방지
+	SetActorLocation(Location + Normal * PortalSurfaceOffset);   // 벽과 Z-fighting 방지
 	SetActorRotation(FRotator(Pitch, Yaw, 0.0f));
 	bPlaced = true;
 }
@@ -336,7 +339,7 @@ bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerF
 		return false;
 	}
 
-	SetActorLocation(TargetLocation + SurfaceNormal * 0.01f);
+	SetActorLocation(TargetLocation + SurfaceNormal * PortalSurfaceOffset);   // 벽과 Z-fighting 방지
 	SetActorRotation(TargetRotation);
 	bPlaced = true;
 	HTR_LOG(Warning, "PlaceAt Success!");

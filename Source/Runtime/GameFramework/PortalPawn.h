@@ -182,6 +182,13 @@ private:
 	APortalGunActor* PortalGun = nullptr;
 	APortalActor* CurrentOverlappingPortal = nullptr;
 
+	int32 WalkVoiceID = -1;
+	float WalkStopDelayTimer = 0.0f;
+
+	void PlayLandSound(float ImpactSpeed);
+	void PlayWarpSound();
+	void UpdateWalkSound(float DeltaTime);
+
 	// 포탈건 휘두르기 범위
 	float SwingRange = 2.2f;
 

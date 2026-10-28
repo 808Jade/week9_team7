@@ -138,6 +138,7 @@ bool UGameEngine::Init()
     TextRenderer = MakeUnique<FTextRenderer>();
     TextRenderer->Init();
 
+    Renderer = GetEngineLoop().GetRenderer();
     FXAARenderer = MakeUnique<FFXAARenderer>();
     FXAARenderer->Init(Renderer);
 
@@ -233,6 +234,9 @@ void UGameEngine::TickInput(float DeltaTime)
         PostProcess.bEnableGammaCorrection = !PostProcess.bEnableGammaCorrection;
 
     // Show Flag 토글: F6 = Vignetting (F10은 Windows 시스템 키라 WM_KEYDOWN으로 오지 않음)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F8))
+        bEnableFXAA = !bEnableFXAA;
+
     if (FInputSystem::IsKeyPressed(EKeyCode::F6))
         PostProcess.bEnableVignette = !PostProcess.bEnableVignette;
 
@@ -311,6 +315,7 @@ void UGameEngine::RenderFrame()
     Options.PostProcess = PostProcess;
     Options.RenderingPath = ERenderingPath::Forward;   // editor.ini와 동일 (기본값 Deferred)
     Options.LightingModel = ELightingModel::Phong;     // editor.ini와 동일 (기본값 Gouraud)
+    Options.bEnableFXAA = bEnableFXAA;
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),
@@ -339,15 +344,30 @@ void UGameEngine::RenderFrame()
             }
         };
 
+    FTexture2D* ColorTarget = GameViewport->GetColorTarget();
+    const bool bUseFXAA = Options.bEnableFXAA && !Options.bShowSceneDepth &&
+        !Options.bShowWorldNormal && FXAARenderer && FXAARenderer->PrepareOutput(ColorTarget);
+    if (bUseFXAA)
+    {
+        Callbacks.FXAAOutput = FXAARenderer->GetOutputTarget().get();
+        Callbacks.FXAA = [this, ColorTarget] { return FXAARenderer->OnRender(ColorTarget); };
+    }
+
     if (SceneRenderer.AddViewportPasses(Graph, GetEngineLoop().GetRenderer(),
         GameViewport->GetViewTargets(), Options, SkyboxRenderer.get(), Callbacks))
     {
-        Graph.Execute();
+        if (Graph.Execute() && SceneRenderer.DidCorePassSucceed() && SceneRenderer.DidFXAAPassSucceed())
+        {
+            if (bUseFXAA)
+            {
+                GameViewport->SwapSceneColorAndBind(FXAARenderer->GetOutputTarget());
+            }
+        }
         RenderCommand::EndRenderPass();
 
         // 백버퍼로 블릿
         FTexture2D* Backbuffer = GetEngineLoop().GetSwapchain()->GetBackbuffer();
-        FTexture2D* ColorTarget = GameViewport->GetColorTarget();
+        ColorTarget = GameViewport->GetColorTarget();
         if (Backbuffer && ColorTarget &&
             Backbuffer->GetWidth() == ColorTarget->GetWidth() &&
             Backbuffer->GetHeight() == ColorTarget->GetHeight())

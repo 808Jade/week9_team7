@@ -86,18 +86,20 @@ protected:
     ULuaScriptComponent* LuaScriptComponent = nullptr;
 
     // [전개 및 애니메이션 파라미터]
-    bool bStartDeployed = true;        // 스폰 시 처음부터 날개가 열려있는지 여부
-    bool bAutoDeployOnAlert = true;    // 플레이어 감지 시 자동 전개 여부
-    float DeploySpeed = 4.0f;          // 날개 전개/수납 속도
-    float MaxWingOpenAngle = 25.0f;    // 날개 최대 전개 각도 (도)
-    float GunsExtendDistance = 0.08f;  // 총기 전방 돌출 거리 (미터)
+    bool bStartDeployed = false;
+    bool bAutoDeployOnAlert = true;
+    float DeploySpeed = 12.0f;
+    float RetractSpeed = 4.0f;
+    float HoldOpenDuration = 2.0f;
+    float MaxWingOpenAngle = 30.0f;
+    float GunsExtendDistance = 0.10f;
 
-    float DetectionRadius = 20.0f;     // 플레이어 감지 반경 (미터)
-    float DetectionAngle = 50.0f;      // 플레이어 감지 반각 (도)
+    float DetectionRadius = 20.0f;
+    float DetectionAngle = 50.0f;
 
-    float WingOpenAlpha = 0.0f;        // 0.0 = 완전 접힘, 1.0 = 완전 전개
+    float WingOpenAlpha = 0.0f;
     float TargetAlpha = 0.0f;
-    float AlertTimer = 0.0f;           // 플레이어를 놓친 후 날개 닫을 때까지의 지연 시간
+    float AlertTimer = 0.0f;
 
     ETurretState State = ETurretState::Searching;
 
