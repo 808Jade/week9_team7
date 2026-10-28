@@ -62,6 +62,8 @@ namespace
 #include "Components/TextRenderComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/CameraActor.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/DefaultPawn.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Level.h"
@@ -401,7 +403,7 @@ namespace LuaBindings
 			if (Actor && Actor->GetWorld() && Actor->GetWorld()->GetPlayerController())
 				Actor->GetWorld()->GetPlayerController()->UnPossess();
 		};
-		ActorType["GetPlayerPawn"] = [](AActor* Actor) -> APawn* {
+		ActorType["GetPlayerPawn"] = [](AActor* Actor) -> AActor* {
 			return (Actor && Actor->GetWorld()) ? Actor->GetWorld()->GetPlayerPawn() : nullptr;
 		};
 		ActorType["GetPlayerController"] = [](AActor* Actor) -> APlayerController* {
@@ -411,6 +413,20 @@ namespace LuaBindings
 			if (Actor && Actor->GetWorld()) {
 				if (APortalPlayerController* PC = Cast<APortalPlayerController>(Actor->GetWorld()->GetPlayerController()))
 					PC->SetMouseCapture(bCapture);
+			}
+		};
+		ActorType["SetViewTarget"] = [](AActor* Actor, AActor* TargetActor) {
+			if (!Actor || !TargetActor || !Actor->GetWorld()) return;
+			if (APlayerController* PC = Actor->GetWorld()->GetPlayerController()) {
+				if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+					PCM->SetViewTarget(TargetActor);
+			}
+		};
+		ActorType["SetManualFade"] = [](AActor* Actor, float FadeAlpha) {
+			if (!Actor || !Actor->GetWorld()) return;
+			if (APlayerController* PC = Actor->GetWorld()->GetPlayerController()) {
+				if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+					PCM->SetManualFade(FadeAlpha);
 			}
 		};
 		// Sequence Control
@@ -821,7 +837,9 @@ namespace LuaBindings
 			sol::base_classes, sol::bases<AActor>());
 		PCType["Possess"] = &APlayerController::Possess;
 		PCType["UnPossess"] = &APlayerController::UnPossess;
-		PCType["GetPawn"] = &APlayerController::GetPawn;
+		PCType["GetPawn"] = [](APlayerController* PC) -> AActor* { return PC ? PC->GetPawn() : nullptr; };
+		sol::usertype<APawn> PawnType = Lua.new_usertype<APawn>("Pawn", sol::base_classes, sol::bases<AActor>());
+		sol::usertype<ADefaultPawn> DefaultPawnType = Lua.new_usertype<ADefaultPawn>("DefaultPawn", sol::base_classes, sol::bases<APawn, AActor>());
 
 
 		sol::usertype<AEndingCanvasActor> EndingType = Lua.new_usertype<AEndingCanvasActor>("EndingCanvasActor",

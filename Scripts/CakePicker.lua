@@ -4,20 +4,19 @@
 -- 1. 엔딩 씬 진입 시 엔딩 BGM 자동 재생
 -- 2. 시퀀서(EndingCake.seq, 33.0초)가 CakePicker를 천장에서 케이크로 하강시킴 (30.53초 부근 도착)
 -- 3. 도착 후 0.5초 대기(31.03초) 후 4개의 집게 관절 메쉬가 오므라들며 케이크 촛불(APointLightActor_0)을 집어서 끔
--- 4. 시퀀스 연출이 모두 끝나면(33.0초) 원래 뜨던 엔딩 UI(TEST COMPLETE / 탈출 시간 / 시작 화면으로)를 표시
+-- 4. 시퀀스 연출이 모두 끝나면(33.0초) 검은 페이드(Fade 1.0)를 해제하고 원래 뜨던 엔딩 UI(TEST COMPLETE / 탈출 시간 / 시작 화면으로)를 표시
 -- ========================================================
 
 -- ========================================================
 -- [엔딩 BGM 설정]
--- 나중에 다운로드 받은 엔딩 브금 파일 경로를 아래 EndingBGMPath에 넣어주시면
+-- 엔딩 브금 파일 경로를 아래 EndingBGMPath에 넣어주시면
 -- 엔딩 씬 시작과 동시에 자동으로 브금이 재생됩니다!
--- (예: "Assets/Audio/StillAlive.mp3" 또는 "Assets/Audio/EndingBGM.wav")
 -- ========================================================
 local EndingBGMPath = "Assets/Audio/StillAlive.wav"
 local EndingBGMVolume = 1.0
 local EndingBGMLoop = false
 
--- 엔딩 컷씬 시퀀스 총 길이 (EndingCake.seq: 33.0초)
+-- 엔딩 컷씬 시퀀스 총 길이 (33.0초 시점에 엔딩 UI 출력)
 local sequenceDuration = 33.0
 
 local comp5 = nil -- 좌측 상단 집게 암 (UStaticMeshComponent_5)
@@ -103,7 +102,7 @@ local function SetCandleVisible(bVisible)
         local comps = candleLight:GetComponents()
         if comps then
             for i = 1, #comps do
-                if comps[i] and comps[i].SetVisibility then
+                if comps[i] then
                     comps[i]:SetVisibility(bVisible)
                 end
             end
@@ -118,20 +117,21 @@ local function ShowEndingScreen()
     bEndingUIShown = true
     state = "ENDING_UI"
 
-    -- 컷씬 레터박스 및 페이드 해제 (시퀀스 정지)
+    -- 컷씬 시퀀스 정지 및 검은 페이드(Fade 1.0) / 레터박스 해제
     if obj then
         local seqActor = obj:FindActorByName("ASequenceTriggerActor_0")
-        if seqActor and seqActor.StopSequence then
+        if seqActor then
             seqActor:StopSequence()
         end
+        obj:SetManualFade(0.0)
         local endCam = obj:FindActorByName("EndingCamera")
-        if endCam and obj.SetViewTarget then
+        if endCam then
             obj:SetViewTarget(endCam)
         end
     end
 
     -- 원래 뜨던 성공 엔딩 UI (TEST COMPLETE + 탈출 시간 + [Enter] 시작 화면으로) 표시
-    if UIManager and UIManager.SetUIMode then
+    if UIManager then
         UIManager.SetUIMode("Ending")
     end
     print("[CakePicker] Ending cutscene finished -> Showing Ending UI!")
@@ -156,32 +156,28 @@ function BeginPlay()
     -- 시작 시 집게를 확실히 벌려진 상태로 유지
     ApplyClaw(0.0)
 
-    -- 1. 기본 스폰된 DefaultPawn 숨김 및 조작 해제 (컷씬 카메라 방해 방지)
-    if obj then
-        local pawn = obj:GetPlayerPawn()
-        if pawn then
-            pawn:SetActorHiddenInGame(true)
-            pawn:SetActorEnableCollision(false)
-        end
-        if obj.UnPossess then
-            obj:UnPossess()
-        end
-        if obj.SetMouseCapture then
-            obj:SetMouseCapture(false)
-        end
-    end
-
-    -- 2. 컷씬 재생 중에는 모든 UI 숨김 (None 모드)
-    if UIManager and UIManager.SetUIMode then
-        UIManager.SetUIMode("None")
-    end
-
-    -- 3. 엔딩 BGM 재생 (파일이 존재하면 자동 로드 및 재생)
-    if EndingBGMPath and EndingBGMPath ~= "" and Audio and Audio.Play2D then
+    -- 1. 엔딩 BGM 즉시 재생 (파일이 존재하면 자동 로드 및 재생)
+    if EndingBGMPath and EndingBGMPath ~= "" and Audio then
         bgmVoiceID = Audio.Play2D(EndingBGMPath, EndingBGMVolume, 1.0, EndingBGMLoop)
         if bgmVoiceID ~= -1 then
             print("[CakePicker] Playing Ending BGM: " .. EndingBGMPath)
         end
+    end
+
+    -- 2. 컷씬 재생 중에는 모든 UI 숨김 (None 모드)
+    if UIManager then
+        UIManager.SetUIMode("None")
+    end
+
+    -- 3. 기본 스폰된 DefaultPawn 숨김 및 조작 해제 (컷씬 카메라 방해 방지)
+    if obj then
+        local pawn = obj:GetPlayerPawn()
+        if pawn then
+            pawn:SetVisibility(false)
+            pawn:SetActorEnableCollision(false)
+        end
+        obj:UnPossess()
+        obj:SetMouseCapture(false)
     end
 end
 
@@ -193,7 +189,7 @@ function Tick(dt)
     elapsedTime = elapsedTime + dt
 
     -- 편의를 위해 Space 키로 엔딩 컷씬 스킵 가능 (진입 후 1초 이후부터)
-    if elapsedTime > 1.0 and Input and Input.IsKeyPressed and Input.IsKeyPressed("Space") then
+    if elapsedTime > 1.0 and Input and Input.IsKeyPressed("Space") then
         ApplyClaw(1.0)
         SetCandleVisible(false)
         ShowEndingScreen()
@@ -245,7 +241,7 @@ function Tick(dt)
 end
 
 function EndPlay()
-    if bgmVoiceID ~= -1 and Audio and Audio.Stop then
+    if bgmVoiceID ~= -1 and Audio then
         Audio.Stop(bgmVoiceID)
         bgmVoiceID = -1
     end

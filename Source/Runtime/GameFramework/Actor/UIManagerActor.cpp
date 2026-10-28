@@ -11,6 +11,9 @@
 #include "UObject/Casts.h"
 
 #include "Lua/LuaManager.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 
 AUIManagerActor* AUIManagerActor::Instance = nullptr;
 float AUIManagerActor::SavedClearTime = 0.0f;
@@ -26,7 +29,14 @@ AUIManagerActor* AUIManagerActor::GetOrSpawn(UWorld* InWorld)
 		Instance = TargetWorld->SpawnActor<AUIManagerActor>();
 		if (Instance)
 		{
-			Instance->AutoDiscoverCanvases();
+			if (TargetWorld->HasBegunPlay())
+			{
+				Instance->BeginPlay();
+			}
+			else
+			{
+				Instance->AutoDiscoverCanvases();
+			}
 		}
 	}
 	return Instance;
@@ -150,19 +160,19 @@ void AUIManagerActor::AutoDiscoverCanvases()
 	// 만약 레벨에 배치되지 않았다면 자동으로 생성(Spawn)
 	if (!HUDCanvas)
 	{
-		HUDCanvas = GetWorld()->SpawnActor<AHUDCanvasActor>();
+		HUDCanvas = GetWorld()->SpawnActor<AHUDCanvasActor>(); if (HUDCanvas && GetWorld()->HasBegunPlay()) HUDCanvas->BeginPlay();
 	}
 	if (!TitleCanvas)
 	{
-		TitleCanvas = GetWorld()->SpawnActor<ATitleCanvasActor>();
+		TitleCanvas = GetWorld()->SpawnActor<ATitleCanvasActor>(); if (TitleCanvas && GetWorld()->HasBegunPlay()) TitleCanvas->BeginPlay();
 	}
 	if (!PauseCanvas)
 	{
-		PauseCanvas = GetWorld()->SpawnActor<APauseCanvasActor>();
+		PauseCanvas = GetWorld()->SpawnActor<APauseCanvasActor>(); if (PauseCanvas && GetWorld()->HasBegunPlay()) PauseCanvas->BeginPlay();
 	}
 	if (!EndingCanvas)
 	{
-		EndingCanvas = GetWorld()->SpawnActor<AEndingCanvasActor>();
+		EndingCanvas = GetWorld()->SpawnActor<AEndingCanvasActor>(); if (EndingCanvas && GetWorld()->HasBegunPlay()) EndingCanvas->BeginPlay();
 	}
 
 	// 엘리베이터 트리거가 없고 엘리베이터 액터가 있다면 자동 생성
@@ -257,6 +267,26 @@ void AUIManagerActor::SetUIMode(EUIMode NewMode)
 			if (APortalPlayerController* PPC = Cast<APortalPlayerController>(PC))
 			{
 				PPC->SetMouseCapture(CurrentMode == EUIMode::InGame);
+			}
+			if (CurrentMode == EUIMode::Ending || CurrentMode == EUIMode::Title)
+			{
+				if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+				{
+					PCM->SetManualFade(0.0f);
+				}
+			}
+		}
+		if (CurrentMode == EUIMode::Ending || CurrentMode == EUIMode::Title)
+		{
+			if (GEngine)
+			{
+				if (FWorldContext* Context = GEngine->GetWorldContextFromWorld(GetWorld()))
+				{
+					if (Context->GameViewport)
+					{
+						Context->GameViewport->SetLetterBox(false, 0.0f);
+					}
+				}
 			}
 		}
 	}

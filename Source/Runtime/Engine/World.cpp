@@ -1050,6 +1050,7 @@ bool UWorld::OverlapMulti(TArray<struct FOverlapResult>& OutOverlaps, const FVec
 void UWorld::BeginPlay()
 {
 	if ((WorldType != EWorldType::PIE && WorldType != EWorldType::Game) || bBegunPlay) return;
+	FLuaManager::Get().SetActiveWorld(this);
 
 	if (!PlayerPawn)
 	{
