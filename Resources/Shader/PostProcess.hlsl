@@ -9,7 +9,7 @@ cbuffer PostProcessConstants : register(b0)
     float VignetteRadius;
     float VignetteSmothness;
     uint bEnableVignette;
-    float PostProcessPadding0;
+    float LetterBoxSize;
 }
 
 struct FPSInput
@@ -32,7 +32,7 @@ void ApplyLayer (inout float3 C, inout float A, float3 LayerColor, float LayerAl
 {
     LayerAlpha = saturate(LayerAlpha);
     const float NewA = A + LayerAlpha * (1.f - A);
-    C = (C * A * (1 - LayerAlpha) + LayerColor * LayerAlpha) / LayerAlpha;
+    C = (C * A * (1 - LayerAlpha) + LayerColor * LayerAlpha) / max(NewA, 1e-5f);;
     A = NewA;
 }
 
@@ -41,6 +41,12 @@ float VignetteMask(float2 UV)
 {
     const float Dist = length(UV - 0.5f) * 1.41421356f;
     return smoothstep(VignetteRadius, VignetteRadius + VignetteSmothness, Dist) * VignetteIntensity;
+}
+
+// Letter Box
+float LetterBoxMask(float2 UV)
+{
+    return (UV.y < LetterBoxSize || UV.y > 1.f - LetterBoxSize) ? 1.f : 0.f;
 }
 
 float4 mainPS(FPSInput Input) : SV_Target
@@ -53,6 +59,12 @@ float4 mainPS(FPSInput Input) : SV_Target
     if (bEnableVignette != 0)
     {
         ApplyLayer(OverlayColor, OverlayAlpha, VignetteColor, VignetteMask(Input.UV));
+    }
+    
+    // Letter Box
+    if (LetterBoxSize > 0.f)
+    {
+        ApplyLayer(OverlayColor, OverlayAlpha, float3(0.f, 0.f, 0.f), LetterBoxMask(Input.UV));
     }
 
     return float4(OverlayColor, OverlayAlpha);

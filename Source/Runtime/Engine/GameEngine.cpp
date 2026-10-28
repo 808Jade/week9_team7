@@ -224,8 +224,8 @@ void UGameEngine::TickInput(float DeltaTime)
     if (FInputSystem::IsKeyPressed(EKeyCode::F9))
         PostProcess.bEnableGammaCorrection = !PostProcess.bEnableGammaCorrection;
 
-    // Show Flag 토글: F10 = Vignetting
-    if (FInputSystem::IsKeyPressed(EKeyCode::F10))
+    // Show Flag 토글: F6 = Vignetting (F10은 Windows 시스템 키라 WM_KEYDOWN으로 오지 않음)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F6))
         PostProcess.bEnableVignette = !PostProcess.bEnableVignette;
 
     // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단

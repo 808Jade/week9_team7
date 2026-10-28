@@ -46,7 +46,7 @@ namespace
 		float VignetteRadius = 0.f;
 		float VignetteSmoothness = 0.f;
 		uint32 bEnableVignette = 0;
-		float Padding0 = 0.f;
+		float LetterBoxSize = 0.f;
 	};
 	static_assert(sizeof(FPostProcessConstants) == 48);
 
@@ -705,8 +705,12 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 		const uint32 Width = Targets.SceneColor->GetWidth();
 		const uint32 Height = Targets.SceneColor->GetHeight();
 
+		const float ViewAspect = static_cast<float>(Width) / static_cast<float>(Height);
+		const float FullBar = std::max(0.f, 0.5f * (1.f - ViewAspect / View.LetterBoxAspect));
+		const float LetterBoxSize = FullBar * std::clamp(View.LetterBoxAmount, 0.f, 1.f);
+
 		if (!Graph.AddRasterPass(MakeViewportPass("PostProcess", FinalColor),
-			[this, Width, Height, PostProcess = Options.PostProcess]
+			[this, Width, Height, LetterBoxSize, PostProcess = Options.PostProcess]
 			{
 				FPipelineState* Pipeline = FRenderResourceManager::GetPSO(EPSOType::PostProcess);
 				if (!Pipeline || !Pipeline->Shader) return;
@@ -721,6 +725,7 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 				Constants.VignetteRadius = PostProcess.VignetteRadius;
 				Constants.VignetteSmoothness = PostProcess.VignetteSmoothness;
 				Constants.VignetteColor = PostProcess.VignetteColor;
+				Constants.LetterBoxSize = LetterBoxSize;
 
 				RenderCommand::UpdateBufferData(RenderData.PostProcessCB.get(), &Constants);
 				RenderCommand::BindConstantBuffer(0, RenderData.PostProcessCB.get(), EShaderBindFlagBits::Pixel);

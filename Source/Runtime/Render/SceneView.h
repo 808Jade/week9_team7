@@ -30,6 +30,8 @@ struct FSceneView
 	bool bIsPerspective = true;
 	bool bIsWireframe = false;
 	bool bGameView = false;
+	float LetterBoxAmount = 0.0f;   // 0 = 없음, 1 = 띠가 완전히 내려온 상태
+	float LetterBoxAspect = 2.39f;  // 띠를 제외하고 남는 영역의 목표 화면비
 	const TArray<const UPrimitiveComponent*>* HiddenComponents = nullptr;
 
 	FViewContext ToViewContext() const

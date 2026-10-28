@@ -13,6 +13,7 @@
 #include <cmath>
 #include "Math/Frustum.h"
 #include "Render/RenderCommand.h"
+#include "Core/Windows/WindowsPlatformTime.h"
 
 FGameViewportClient::FGameViewportClient()
 {
@@ -51,6 +52,12 @@ bool FGameViewportClient::InputKey(FViewport* Viewport, int32 Key, bool bDown)
 	if (bDown && Key == static_cast<int32>(EKeyCode::F8))
 	{
 		bSIEModeRequested = true;
+		return true;
+	}
+
+	if (bDown && Key == static_cast<int32>(EKeyCode::F7))
+	{
+		SetLetterBox(!bLetterBox);
 		return true;
 	}
 
@@ -200,6 +207,9 @@ FSceneView FGameViewportClient::CalcSceneView(const FRect& InViewRect)
 	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
 	OutView.FrustumCorners = GenerateFrustumCorners(OutView.ViewProjectionMatrix.Inverse());
 
+	OutView.LetterBoxAmount = EvaluateLetterBoxAmount();
+	OutView.LetterBoxAspect = LetterBoxAspect;
+
 	return OutView;
 }
 
@@ -325,4 +335,27 @@ void FGameViewportClient::Reset()
 	ViewTargets.Reset();
 	Width = 0;
 	Height = 0;
+}
+
+void FGameViewportClient::SetLetterBox(bool bEnable, float BlendTime, float TargetAspect)
+{
+	LetterBoxFrom = EvaluateLetterBoxAmount();
+	bLetterBox = bEnable;
+	LetterBoxBlendTime = BlendTime;
+	LetterBoxAspect = TargetAspect;
+	LetterBoxStartTime = FPlatformTime::Seconds();
+}
+
+float FGameViewportClient::EvaluateLetterBoxAmount() const
+{
+	const float To = bLetterBox ? 1.f : 0.f;
+	if (LetterBoxBlendTime <= 0.f)
+	{
+		return To;
+	}
+
+	const float Elapsed = static_cast<float>(FPlatformTime::Seconds() - LetterBoxStartTime);
+	const float T = std::clamp(Elapsed / LetterBoxBlendTime, 0.f, 1.f);
+	const float Ease = T * T * (3.f - 2.f * T);
+	return LetterBoxFrom + (To - LetterBoxFrom) * Ease;
 }
