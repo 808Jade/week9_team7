@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "LuaScriptComponent.h"
 #include "Lua/LuaManager.h"
 #include "Engine/World.h"
@@ -289,7 +289,12 @@ void ULuaScriptComponent::OnHit(AActor* OtherActor)
 void ULuaScriptComponent::Serialize(FStructuredArchive::FRecord Record)
 {
 	Super::Serialize(Record);
+	FString SavedPath = ScriptPath;
 	Record << SA_VALUE("ScriptPath", ScriptPath);
+	if (ScriptPath.empty() && !SavedPath.empty())
+	{
+		ScriptPath = SavedPath;
+	}
 }
 
 void ULuaScriptComponent::OnUnregister()

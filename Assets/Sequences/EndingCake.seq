@@ -1,7 +1,7 @@
 {
     "CameraBlendTime": 0.0,
     "CameraCutTarget": "EndingCamera",
-    "Duration": 33.0,
+    "Duration": 34.0,
     "FrameRate": 30.0,
     "SequenceName": "EndingCake",
     "Tracks": [
@@ -91,27 +91,7 @@
                         1.0,
                         1.0
                     ],
-                    "Time": 32.029998779296875,
-                    "Value": 0.0
-                },
-                {
-                    "Duration": 0.5,
-                    "Location": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "Rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "Scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "Time": 32.04999923706055,
+                    "Time": 32.0,
                     "Value": 1.0
                 }
             ],

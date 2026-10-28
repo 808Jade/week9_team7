@@ -8,6 +8,8 @@
 #include "Engine/World.h"
 #include <cstdio>
 #include "Asset/AssetManager.h"
+#include "Serialization/JsonArchive.h"
+#include <filesystem>
 
 AEndingCanvasActor::AEndingCanvasActor()
 {
@@ -229,6 +231,21 @@ void AEndingCanvasActor::Tick(float DeltaTime)
 	{
 		if (AUIManagerActor::Get())
 		{
+			FString ReturnPath = AUIManagerActor::GetReturnScenePath();
+			const FString& CurrentPath = FJsonArchive::GetLastLoadedScenePath();
+			if (GetWorld() && (CurrentPath.find("EndingScene") != std::string::npos || !Cast<APortalPawn>(GetWorld()->GetPlayerPawn())))
+			{
+				if (ReturnPath.empty())
+				{
+					ReturnPath = "Scenes/PortalFlingChamber.scene";
+				}
+				if (std::filesystem::exists(ReturnPath))
+				{
+					AUIManagerActor::SetNextSceneInitialUIMode(EUIMode::Title);
+					GetWorld()->RequestLoadScene(ReturnPath);
+					return;
+				}
+			}
 			AUIManagerActor::Get()->SetUIMode(EUIMode::Title);
 		}
 

@@ -24,6 +24,7 @@
 #include "GameFramework/Actor/StandButtonActor.h"
 #include "GameFramework/Actor/WeightedButtonActor.h"
 #include "GameFramework/Actor/ElevatorTriggerActor.h"
+#include "GameFramework/Actor/TriggerActor.h"
 #include "GameFramework/PlayerStart.h"
 
 // Pawn & Controller & Portals
@@ -72,6 +73,7 @@ UClass* GetEngineClass()
     AStandButtonActor::StaticClass();
     AWeightedButtonActor::StaticClass();
     AElevatorTriggerActor::StaticClass();
+    ATriggerActor::StaticClass();
     APlayerStart::StaticClass();
 
     APortalPawn::StaticClass();

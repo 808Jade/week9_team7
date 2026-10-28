@@ -237,7 +237,7 @@ void FSequencePlayer::RestoreCameraCut(UWorld* World)
 			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 			{
 				// 백업해둔 원래 플레이어로 복구
-				AActor* RestoreTarget = OriginalViewTarget ? OriginalViewTarget : Cast<AActor>(World->GetPlayerPawn());
+				AActor* RestoreTarget = PC->GetPawn() ? (OriginalViewTarget ? OriginalViewTarget : Cast<AActor>(PC->GetPawn())) : nullptr;
 				if (RestoreTarget)
 				{
 					PCM->SetViewTarget(RestoreTarget);

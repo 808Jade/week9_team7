@@ -27,6 +27,7 @@
 #include "GameFramework/Actor/PortalCameraActor.h"
 #include "GameFramework/Actor/PortalTurretActor.h"
 #include "GameFramework/Actor/SequenceTriggerActor.h"
+#include "GameFramework/Actor/TriggerActor.h"
 #include "Camera/CameraActor.h"
 
 class FViewportsPanel;
@@ -52,11 +53,12 @@ public:
 
 	int32 SelectedIndex = 0;
 
-	const char* Items[20] = {
+	const char* Items[21] = {
 		"StaticMesh", "Particle", "Text", "HeightFog", "FireBall", 
 		"Projectile", "PlayerStart", "PortalPawn", "PortalCube", "PortalGun", 
 		"Portal", "MapCube", "StandButton", "WeightedButton", "Door", 
-		"CubeDrop", "PortalCamera", "PortalTurret", "SequenceTrigger", "CameraActor"
+		"CubeDrop", "PortalCamera", "PortalTurret", "SequenceTrigger", "CameraActor",
+		"Trigger"
 	};
 
 	FGizmo* Gizmo = nullptr;
@@ -91,6 +93,7 @@ public:
 		APortalTurretActor::StaticClass(),
 		ASequenceTriggerActor::StaticClass(),
 		ACameraActor::StaticClass(),
+		ATriggerActor::StaticClass(),
 	};
 
 private:

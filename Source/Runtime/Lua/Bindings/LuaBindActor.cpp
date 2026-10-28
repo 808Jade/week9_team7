@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "LuaBindings.h"
 
 #include "GameFramework/Actor.h"
@@ -15,6 +15,48 @@
 #include "GameFramework/Actor/EndingCanvasActor.h"
 #include "GameFramework/PortalPawn.h"
 #include "GameFramework/Actor/SequenceTriggerActor.h"
+#include "GameFramework/Actor/TriggerActor.h"
+#include "Audio/AudioDevice.h"
+#include "Audio/Sound/SoundWave.h"
+#include "Asset/AssetManager.h"
+#include "Core/EngineLog.h"
+#include <filesystem>
+
+namespace
+{
+	USoundWave* GetOrLoadSoundWave(const FString& InPath)
+	{
+		FString Path = InPath;
+		for (char& c : Path) { if (c == '\\') c = '/'; }
+
+		USoundWave* Wave = UAssetManager::GetAssetByPath<USoundWave>(Path);
+		if (!Wave)
+		{
+			if (Path.rfind("Assets/", 0) != 0)
+			{
+				Wave = UAssetManager::GetAssetByPath<USoundWave>("Assets/" + Path);
+			}
+		}
+		if (!Wave)
+		{
+			if (!std::filesystem::exists(Path) && (Path.rfind("Assets/", 0) == 0 || !std::filesystem::exists("Assets/" + Path)))
+			{
+				HTR_LOG(Info, "[Audio] Sound file not found yet (skipping): {}", Path);
+				return nullptr;
+			}
+			Wave = UAssetManager::Get().LoadSoundWave(Path);
+			if (!Wave && Path.rfind("Assets/", 0) != 0)
+			{
+				Wave = UAssetManager::Get().LoadSoundWave("Assets/" + Path);
+			}
+			if (Wave)
+			{
+				UAssetManager::Get().RegisterAsset(Path, Wave);
+			}
+		}
+		return Wave;
+	}
+}
 #include "GameFramework/PortalPlayerController.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -390,6 +432,31 @@ namespace LuaBindings
 			if (ACanvasActor* Canvas = Cast<ACanvasActor>(Actor)) return Canvas->IsCanvasVisible();
 			return false;
 		};
+		// Audio & Subtitle on Actor
+		ActorType["PlaySound2D"] = [](AActor* Actor, const FString& Path, sol::optional<float> Volume, sol::optional<float> Pitch, sol::optional<bool> bLoop) -> int32 {
+			IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend();
+			if (!Backend) return -1;
+			USoundWave* Wave = GetOrLoadSoundWave(Path);
+			if (Wave && Wave->GetSoundID() != INVALID_SOUND_ID)
+			{
+				return Backend->Play(Wave->GetSoundID(), bLoop.value_or(false), Volume.value_or(1.0f), Pitch.value_or(1.0f), false, FVector::ZeroVector, 0.0f, 0.0f);
+			}
+			return -1;
+		};
+		ActorType["StopSound"] = [](AActor* Actor, int32 VoiceID) {
+			if (IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend()) Backend->Stop(VoiceID);
+		};
+		ActorType["StopAllSounds"] = [](AActor* Actor) {
+			if (IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend()) Backend->StopAll();
+		};
+		ActorType["ShowSubtitle"] = [](AActor* Actor, const FString& Text, sol::optional<float> Duration) {
+			if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetHUDCanvas())
+				AUIManagerActor::Get()->GetHUDCanvas()->ShowSubtitle(Text, Duration.value_or(3.0f));
+		};
+		ActorType["HideSubtitle"] = [](AActor* Actor) {
+			if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetHUDCanvas())
+				AUIManagerActor::Get()->GetHUDCanvas()->HideSubtitle();
+		};
 
 		// ==========================================
 		// [UnLua 스타일 게임플레이 편의 함수]
@@ -741,6 +808,15 @@ namespace LuaBindings
 			return ST && ST->GetSequencePlayer() && ST->GetSequencePlayer()->IsPlaying();
 		};
 
+		sol::usertype<ATriggerActor> TriggerType = Lua.new_usertype<ATriggerActor>("TriggerActor",
+			sol::base_classes, sol::bases<AActor>());
+		TriggerType["SetTriggerExtent"] = &ATriggerActor::SetTriggerExtent;
+		TriggerType["GetTriggerExtent"] = &ATriggerActor::GetTriggerExtent;
+		TriggerType["SetTriggerOnce"] = &ATriggerActor::SetTriggerOnce;
+		TriggerType["IsTriggerOnce"] = &ATriggerActor::IsTriggerOnce;
+		TriggerType["HasTriggered"] = &ATriggerActor::HasTriggered;
+		TriggerType["ResetTrigger"] = &ATriggerActor::ResetTrigger;
+
 		sol::usertype<APlayerController> PCType = Lua.new_usertype<APlayerController>("PlayerController",
 			sol::base_classes, sol::bases<AActor>());
 		PCType["Possess"] = &APlayerController::Possess;
@@ -794,11 +870,19 @@ namespace LuaBindings
 			if (AUIManagerActor::Get()) AUIManagerActor::Get()->ResetTimer();
 		};
 		UIManagerTable["SetUIMode"] = [](const FString& ModeStr) {
-			if (!AUIManagerActor::Get()) return;
+			if (!AUIManagerActor::GetOrSpawn()) return;
 			if (ModeStr == "InGame") AUIManagerActor::Get()->SetUIMode(EUIMode::InGame);
 			else if (ModeStr == "Title") AUIManagerActor::Get()->SetUIMode(EUIMode::Title);
 			else if (ModeStr == "Pause") AUIManagerActor::Get()->SetUIMode(EUIMode::Pause);
-			else if (ModeStr == "Ending") AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
+			else if (ModeStr == "None") AUIManagerActor::Get()->SetUIMode(EUIMode::None);
+			else if (ModeStr == "Ending")
+			{
+				if (AEndingCanvasActor* EndCanvas = AUIManagerActor::Get()->GetEndingCanvas())
+				{
+					EndCanvas->SetEndingType(EEndingType::Success);
+				}
+				AUIManagerActor::Get()->SetUIMode(EUIMode::Ending);
+			}
 		};
 		UIManagerTable["GetHUD"] = []() -> AHUDCanvasActor* {
 			return AUIManagerActor::Get() ? AUIManagerActor::Get()->GetHUDCanvas() : nullptr;
@@ -829,6 +913,49 @@ namespace LuaBindings
 			default: return FString("None");
 			}
 		};
+		UIManagerTable["ShowSubtitle"] = [](const FString& Text, sol::optional<float> Duration) {
+			if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetHUDCanvas())
+				AUIManagerActor::Get()->GetHUDCanvas()->ShowSubtitle(Text, Duration.value_or(3.0f));
+		};
+		UIManagerTable["HideSubtitle"] = []() {
+			if (AUIManagerActor::Get() && AUIManagerActor::Get()->GetHUDCanvas())
+				AUIManagerActor::Get()->GetHUDCanvas()->HideSubtitle();
+		};
+
+		// 5. Global Audio Table
+		auto AudioTable = Lua.create_named_table("Audio");
+		AudioTable["Play2D"] = [](const FString& Path, sol::optional<float> Volume, sol::optional<float> Pitch, sol::optional<bool> bLoop) -> int32 {
+			IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend();
+			if (!Backend) return -1;
+			USoundWave* Wave = GetOrLoadSoundWave(Path);
+			if (Wave && Wave->GetSoundID() != INVALID_SOUND_ID)
+			{
+				return Backend->Play(Wave->GetSoundID(), bLoop.value_or(false), Volume.value_or(1.0f), Pitch.value_or(1.0f), false, FVector::ZeroVector, 0.0f, 0.0f);
+			}
+			return -1;
+		};
+		AudioTable["Play"] = [](const FString& Path, sol::optional<bool> bLoop, sol::optional<float> Volume, sol::optional<float> Pitch,
+								sol::optional<bool> bIs3D, sol::optional<FVector> Position, sol::optional<float> MinDist, sol::optional<float> MaxDist) -> int32 {
+			IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend();
+			if (!Backend) return -1;
+			USoundWave* Wave = GetOrLoadSoundWave(Path);
+			if (Wave && Wave->GetSoundID() != INVALID_SOUND_ID)
+			{
+				return Backend->Play(Wave->GetSoundID(), bLoop.value_or(false), Volume.value_or(1.0f), Pitch.value_or(1.0f),
+									 bIs3D.value_or(false), Position.value_or(FVector::ZeroVector), MinDist.value_or(1.0f), MaxDist.value_or(50.0f));
+			}
+			return -1;
+		};
+		AudioTable["Stop"] = [](int32 VoiceID) {
+			if (IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend()) Backend->Stop(VoiceID);
+		};
+		AudioTable["StopAll"] = []() {
+			if (IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend()) Backend->StopAll();
+		};
+		AudioTable["IsPlaying"] = [](int32 VoiceID) -> bool {
+			if (IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend()) return Backend->IsPlaying(VoiceID);
+			return false;
+		};
 
 		// PortalPawn 유저타입 등록
 		sol::usertype<APortalPawn> PortalPawnType = Lua.new_usertype<APortalPawn>("PortalPawn",
@@ -848,6 +975,11 @@ namespace LuaBindings
 				return false;
 			}
 			ClearTimers();
+			if (World->HasBegunPlay())
+			{
+				World->RequestLoadScene(ScenePath);
+				return true;
+			}
 			bool bSuccess = FJsonArchive::LoadWorld(World, ScenePath);
 			if (bSuccess && World->HasBegunPlay())
 			{
@@ -870,6 +1002,11 @@ namespace LuaBindings
 				return false;
 			}
 			ClearTimers();
+			if (World->HasBegunPlay())
+			{
+				World->RequestLoadScene(LastPath);
+				return true;
+			}
 			bool bSuccess = FJsonArchive::LoadWorld(World, LastPath);
 			if (bSuccess && World->HasBegunPlay())
 			{

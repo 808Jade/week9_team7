@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 #include "UIManagerActor.h"
 #include "HUDCanvasActor.h"
 #include "TitleCanvasActor.h"
@@ -10,7 +10,27 @@
 #include "Engine/Level.h"
 #include "UObject/Casts.h"
 
+#include "Lua/LuaManager.h"
+
 AUIManagerActor* AUIManagerActor::Instance = nullptr;
+float AUIManagerActor::SavedClearTime = 0.0f;
+FString AUIManagerActor::ReturnScenePath = "";
+EUIMode AUIManagerActor::NextSceneInitialUIMode = EUIMode::Title;
+
+AUIManagerActor* AUIManagerActor::GetOrSpawn(UWorld* InWorld)
+{
+	if (Instance) return Instance;
+	UWorld* TargetWorld = InWorld ? InWorld : FLuaManager::Get().GetActiveWorld();
+	if (TargetWorld)
+	{
+		Instance = TargetWorld->SpawnActor<AUIManagerActor>();
+		if (Instance)
+		{
+			Instance->AutoDiscoverCanvases();
+		}
+	}
+	return Instance;
+}
 
 AUIManagerActor::AUIManagerActor()
 {
@@ -18,6 +38,12 @@ AUIManagerActor::AUIManagerActor()
 	if (!Instance)
 	{
 		Instance = this;
+
+	if (NextSceneInitialUIMode != EUIMode::Title)
+	{
+		CurrentMode = NextSceneInitialUIMode;
+		NextSceneInitialUIMode = EUIMode::Title;
+	}
 	}
 }
 
@@ -33,6 +59,12 @@ void AUIManagerActor::BeginPlay()
 {
 	Super::BeginPlay();
 	Instance = this;
+
+	if (NextSceneInitialUIMode != EUIMode::Title)
+	{
+		CurrentMode = NextSceneInitialUIMode;
+		NextSceneInitialUIMode = EUIMode::Title;
+	}
 
 	// 레벨에 배치된 캔버스들을 자동으로 탐색하여 연결
 	AutoDiscoverCanvases();
@@ -148,6 +180,10 @@ void AUIManagerActor::SetUIMode(EUIMode NewMode)
 {
 	const EUIMode PrevMode = CurrentMode;
 	CurrentMode = NewMode;
+	if (!EndingCanvas || !HUDCanvas)
+	{
+		AutoDiscoverCanvases();
+	}
 
 	// 0. 게임 타이머 및 크로스헤어 연동 (시작, 정지, 리셋, 클리어 타임 기록)
 	if (HUDCanvas)
@@ -169,7 +205,12 @@ void AUIManagerActor::SetUIMode(EUIMode NewMode)
 			HUDCanvas->StopTimer();
 			if (EndingCanvas)
 			{
-				EndingCanvas->SetClearTime(HUDCanvas->GetElapsedTime());
+				float Elapsed = HUDCanvas->GetElapsedTime();
+				if (Elapsed <= 0.01f && SavedClearTime > 0.0f)
+				{
+					Elapsed = SavedClearTime;
+				}
+				EndingCanvas->SetClearTime(Elapsed);
 			}
 		}
 		else if (CurrentMode == EUIMode::Title)

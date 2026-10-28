@@ -73,6 +73,7 @@ public:
 	virtual void OnResize(uint32 Width, uint32 Height) {}
 	// UObject 일괄 정리와 GPU 자원 해제 전에 호출된다.
 	virtual void PreExit() {};
+	virtual void OnActiveWorldChanged() {}
 
 	//UWorld* GetWorld() const { return World; }
 

@@ -241255,257 +241255,6 @@
                     }
                 },
                 {
-                    "Class": "APortalTurretActor",
-                    "Components": [
-                        {
-                            "Class": "USceneComponent",
-                            "Name": "DefaultSceneRoot",
-                            "Parent": "",
-                            "Properties": {
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UBoxComponent",
-                            "Name": "CollisionBox",
-                            "Parent": "",
-                            "Properties": {
-                                "CurrentCollisionResponse": 2,
-                                "Extent": {
-                                    "X": 0.6000000238418579,
-                                    "Y": 0.4000000059604645,
-                                    "Z": 0.8700000047683716
-                                },
-                                "ShapeColor": 4288517599,
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.0,
-                                        "Y": 0.0,
-                                        "Z": 0.8700000047683716
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": false,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": false,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "BodyMesh",
-                            "OverrideMaterials": [],
-                            "Parent": "CollisionBox",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/PortalTurret/portal_turret_body.obj",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 46.44828796386719,
-                                        "Y": 2.1906707286834717,
-                                        "Z": 6.0
-                                    },
-                                    "Rotation": {
-                                        "Pitch": -0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": -165.00003051757813
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": true,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": true,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "LeftWingMesh",
-                            "OverrideMaterials": [],
-                            "Parent": "BodyMesh",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_left.obj",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.14139999449253082,
-                                        "Y": -0.3594000041484833,
-                                        "Z": 0.9333999752998352
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": true,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": true,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "RightWingMesh",
-                            "OverrideMaterials": [],
-                            "Parent": "BodyMesh",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_right.obj",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.14139999449253082,
-                                        "Y": 0.3594000041484833,
-                                        "Z": 0.9333999752998352
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": true,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": true,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "LeftGunsMesh",
-                            "OverrideMaterials": [],
-                            "Parent": "BodyMesh",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": -0.22100000083446503,
-                                        "Z": 0.9790999889373779
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": true,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": true,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "UStaticMeshComponent",
-                            "Name": "RightGunsMesh",
-                            "OverrideMaterials": [],
-                            "Parent": "BodyMesh",
-                            "Properties": {
-                                "CurrentCollisionResponse": 0,
-                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
-                                "Transform": {
-                                    "Location": {
-                                        "X": 0.33559998869895935,
-                                        "Y": 0.22100000083446503,
-                                        "Z": 0.9790999889373779
-                                    },
-                                    "Rotation": {
-                                        "Pitch": 0.0,
-                                        "Roll": 0.0,
-                                        "Yaw": 0.0
-                                    },
-                                    "Scale": {
-                                        "X": 1.0,
-                                        "Y": 1.0,
-                                        "Z": 1.0
-                                    }
-                                },
-                                "bAutoActivate": true,
-                                "bCastShadow": true,
-                                "bHiddenInGame": false,
-                                "bReceiveShadow": true,
-                                "bVisible": true
-                            }
-                        },
-                        {
-                            "Class": "ULuaScriptComponent",
-                            "Name": "LuaScriptComponent",
-                            "Parent": "",
-                            "Properties": {
-                                "ScriptPath": "Scripts/PortalTurret.lua",
-                                "bAutoActivate": true,
-                                "bHiddenInGame": false,
-                                "bVisible": true
-                            },
-                            "ScriptPath": "Scripts/PortalTurret.lua"
-                        }
-                    ],
-                    "Name": "APortalTurretActor_0",
-                    "Properties": {
-                        "DeploySpeed": 4.0,
-                        "DetectionAngle": 50.0,
-                        "DetectionRadius": 20.0,
-                        "GunsExtendDistance": 0.07999999821186066,
-                        "MaxWingOpenAngle": 25.0,
-                        "bActorEnableCollision": true,
-                        "bAutoDeployOnAlert": true,
-                        "bStartDeployed": true
-                    }
-                },
-                {
                     "Class": "APortalCameraActor",
                     "Components": [
                         {
@@ -242800,6 +242549,38 @@
                                 "bHiddenInGame": false,
                                 "bVisible": true
                             }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "PawnMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "CapsuleComponent",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalChell/Portal_Chell.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
                         }
                     ],
                     "Name": "APortalPawn_1",
@@ -242986,6 +242767,1144 @@
                     ],
                     "Name": "StartCamera",
                     "Properties": {
+                        "bActorEnableCollision": true
+                    }
+                },
+                {
+                    "Class": "APortalTurretActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "CollisionBox",
+                            "Parent": "",
+                            "Properties": {
+                                "CurrentCollisionResponse": 2,
+                                "Extent": {
+                                    "X": 0.44999998807907104,
+                                    "Y": 0.3499999940395355,
+                                    "Z": 0.8700000047683716
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 46.0,
+                                        "Y": 2.0,
+                                        "Z": 6.920085430145264
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": -180.00003051757813
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "BodyMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "CollisionBox",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_body.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": -0.8700000047683716
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "LeftWingMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_left.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.14139999449253082,
+                                        "Y": -0.3594000041484833,
+                                        "Z": 0.9333999752998352
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "RightWingMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_wing_right.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.14139999449253082,
+                                        "Y": 0.3594000041484833,
+                                        "Z": 0.9333999752998352
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "LeftGunsMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_left.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.33559998869895935,
+                                        "Y": -0.22100000083446503,
+                                        "Z": 0.9790999889373779
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UStaticMeshComponent",
+                            "Name": "RightGunsMesh",
+                            "OverrideMaterials": [],
+                            "Parent": "BodyMesh",
+                            "Properties": {
+                                "CurrentCollisionResponse": 0,
+                                "StaticMesh": "Models/PortalTurret/portal_turret_guns_right.obj",
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.33559998869895935,
+                                        "Y": 0.22100000083446503,
+                                        "Z": 0.9790999889373779
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": true,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": true,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "LuaScriptComponent",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/PortalTurret.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/PortalTurret.lua"
+                        }
+                    ],
+                    "Name": "APortalTurretActor_1",
+                    "Properties": {
+                        "DeploySpeed": 4.0,
+                        "DetectionAngle": 50.0,
+                        "DetectionRadius": 20.0,
+                        "GunsExtendDistance": 0.07999999821186066,
+                        "MaxWingOpenAngle": 25.0,
+                        "bActorEnableCollision": true,
+                        "bAutoDeployOnAlert": true,
+                        "bStartDeployed": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 2.0,
+                                        "Y": 0.0,
+                                        "Z": 2.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "Welcome",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 16.0,
+                                        "Y": 5.0,
+                                        "Z": 5.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "Gravity",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 38.0,
+                                        "Y": 1.0,
+                                        "Z": 6.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 4.449651718139648,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "Turret",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 47.0,
+                                        "Y": 2.0,
+                                        "Z": 6.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 4.449651718139648,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "NoComplete",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 57.0,
+                                        "Y": -1.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.8016527891159058,
+                                        "Y": 1.9409468173980713,
+                                        "Z": 0.46562618017196655
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "Find",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 67.0,
+                                        "Y": 0.0,
+                                        "Z": 7.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.8016527891159058,
+                                        "Y": 1.9409468173980713,
+                                        "Z": 0.46562618017196655
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "BeforeAllThing",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 82.0,
+                                        "Y": 1.0,
+                                        "Z": 9.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.5170105695724487,
+                                        "Y": 4.300596714019775,
+                                        "Z": 0.46562618017196655
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "SoftSkill",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 100.0,
+                                        "Y": 2.0,
+                                        "Z": 9.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.5170105695724487,
+                                        "Y": 4.300596714019775,
+                                        "Z": 0.46562618017196655
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "Curious",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "ATriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": 118.0,
+                                        "Y": 2.0,
+                                        "Z": 9.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.5170105695724487,
+                                        "Y": 4.300596714019775,
+                                        "Z": 0.46562618017196655
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "TriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.0,
+                                    "Y": 2.0,
+                                    "Z": 2.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "ULuaScriptComponent",
+                            "Name": "ULuaScriptComponent_0",
+                            "Parent": "",
+                            "Properties": {
+                                "ScriptPath": "Scripts/NarrationTrigger.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/NarrationTrigger.lua"
+                        }
+                    ],
+                    "Name": "ManyQuestions",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.0,
+                            "Y": 2.0,
+                            "Z": 2.0
+                        },
+                        "bActorEnableCollision": true,
+                        "bTriggerOnce": true
+                    }
+                },
+                {
+                    "Class": "AElevatorTriggerActor",
+                    "Components": [
+                        {
+                            "Class": "USceneComponent",
+                            "Name": "DefaultSceneRoot",
+                            "Parent": "",
+                            "Properties": {
+                                "Transform": {
+                                    "Location": {
+                                        "X": -5.5,
+                                        "Y": 5.251999855041504,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            }
+                        },
+                        {
+                            "Class": "UBoxComponent",
+                            "Name": "ElevatorTriggerBox",
+                            "Parent": "DefaultSceneRoot",
+                            "Properties": {
+                                "CurrentCollisionResponse": 1,
+                                "Extent": {
+                                    "X": 2.5,
+                                    "Y": 2.5,
+                                    "Z": 3.0
+                                },
+                                "ShapeColor": 4288517599,
+                                "Transform": {
+                                    "Location": {
+                                        "X": 0.0,
+                                        "Y": 0.0,
+                                        "Z": 0.0
+                                    },
+                                    "Rotation": {
+                                        "Pitch": 0.0,
+                                        "Roll": 0.0,
+                                        "Yaw": 0.0
+                                    },
+                                    "Scale": {
+                                        "X": 1.0,
+                                        "Y": 1.0,
+                                        "Z": 1.0
+                                    }
+                                },
+                                "bAutoActivate": true,
+                                "bCastShadow": false,
+                                "bHiddenInGame": false,
+                                "bReceiveShadow": false,
+                                "bVisible": true
+                            }
+                        }
+                    ],
+                    "Name": "AElevatorTriggerActor_0_0",
+                    "Properties": {
+                        "TriggerExtent": {
+                            "X": 2.5,
+                            "Y": 2.5,
+                            "Z": 3.0
+                        },
                         "bActorEnableCollision": true
                     }
                 }
