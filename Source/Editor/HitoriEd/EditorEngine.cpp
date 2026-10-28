@@ -1,4 +1,4 @@
-﻿#include "EnginePCH.h"
+#include "EnginePCH.h"
 
 #include "Editor/HitoriEd/EditorEngine.h"
 #include "Editor/HitoriEd/EditorUndoManager.h"
@@ -313,6 +313,11 @@ bool UEditorEngine::Init()
 
 	DetailsPanel->SetWorld(GetActiveWorld());
 	ContentDrawerPanel->SetWorld(GetActiveWorld());
+
+	SequencerPanel = EditorUI->AddEditorPanel<FSequencerPanel>();
+	SequencerPanel->SetWorld(GetActiveWorld());
+	SequencerPanel->SetOutlinerPanel(OutlinerPanel);
+	SequencerPanel->SetIsPlayingQuery([this]() { return IsPlaying(); });
 
 	EditorControlsPanel->SetWorld(EditorWorld);
 	EditorControlsPanel->SetIsPlayingQuery([this]() { return IsPlaying(); });
@@ -1524,6 +1529,10 @@ void UEditorEngine::DeleteComponent(UActorComponent* Component)
 
 void UEditorEngine::StartPlayInEditorSession()
 {
+	if (SequencerPanel && SequencerPanel->GetPlayer())
+	{
+		SequencerPanel->GetPlayer()->Pause();
+	}
 	// 별도 창 모드면 패널 View는 모두 에디터 월드로 두고 창 하나에만 PIE 월드를 그린다.
 	// 창을 만들지 못하면 선택한 View에서 실행한다.
 	const bool bNewWindow = (PlayMode == EPlayModeType::InEditorFloating);
@@ -1591,6 +1600,7 @@ void UEditorEngine::OnActiveWorldChanged()
 	if (DetailsPanel) DetailsPanel->SetWorld(UIWorld);
 	if (EditorControlsPanel) EditorControlsPanel->SetWorld(UIWorld);
 	if (SettingsPanel) SettingsPanel->SetWorld(UIWorld);
+	if (SequencerPanel) SequencerPanel->SetWorld(UIWorld);
 	if (ContentDrawerPanel) ContentDrawerPanel->SetWorld(UIWorld);
 }
 

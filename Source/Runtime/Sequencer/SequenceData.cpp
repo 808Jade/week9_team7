@@ -1,6 +1,8 @@
 #include "EnginePCH.h"
 #include "SequenceData.h"
 #include <algorithm>
+#include <fstream>
+#include <filesystem>
 
 static float LerpAngle(float A, float B, float Alpha)
 {
@@ -28,7 +30,7 @@ static FRotator LerpRotator(const FRotator& A, const FRotator& B, float Alpha)
 bool FSequencerTrack::Evaluate(float Time, FVector& OutLoc, FRotator& OutRot, FVector& OutScale) const
 {
     if (Keys.IsEmpty()) return false;
-    if (Keys.size() == 1 || Time <= Keys.Front().Time)
+    if (Keys.Num() == 1 || Time <= Keys.Front().Time)
     {
         OutLoc = Keys.Front().Location;
         OutRot = Keys.Front().Rotation;
@@ -43,7 +45,7 @@ bool FSequencerTrack::Evaluate(float Time, FVector& OutLoc, FRotator& OutRot, FV
         return true;
     }
 
-    for (size_t i = 0; i < Keys.size() - 1; ++i)
+    for (int32 i = 0; i < Keys.Num() - 1; ++i)
     {
         const auto& K0 = Keys[i];
         const auto& K1 = Keys[i + 1];
@@ -120,4 +122,111 @@ bool FLevelSequence::RemoveTrack(const FString& InActorName)
 		}
 	}
 	return false;
+}
+
+bool FLevelSequence::SaveToFile(const FString& FilePath) const
+{
+	try
+	{
+		std::filesystem::path Path(FilePath);
+		if (Path.has_parent_path())
+		{
+			std::filesystem::create_directories(Path.parent_path());
+		}
+
+		json Root;
+		Root["SequenceName"] = Name;
+		Root["Duration"] = Duration;
+		Root["FrameRate"] = FrameRate;
+
+		json TracksArray = json::array();
+		for (int32 i = 0; i < Tracks.Num(); ++i)
+		{
+			const auto& Track = Tracks[i];
+			json TrackJson;
+			TrackJson["ActorName"] = Track.ActorName;
+			TrackJson["TrackType"] = "Transform";
+
+			json KeysArray = json::array();
+			for (int32 k = 0; k < Track.Keys.Num(); ++k)
+			{
+				const auto& Key = Track.Keys[k];
+				json KeyJson;
+				KeyJson["Time"] = Key.Time;
+				KeyJson["Location"] = { Key.Location.X, Key.Location.Y, Key.Location.Z };
+				KeyJson["Rotation"] = { Key.Rotation.Pitch, Key.Rotation.Yaw, Key.Rotation.Roll };
+				KeyJson["Scale"] = { Key.Scale.X, Key.Scale.Y, Key.Scale.Z };
+				KeysArray.push_back(KeyJson);
+			}
+			TrackJson["Keys"] = KeysArray;
+			TracksArray.push_back(TrackJson);
+		}
+		Root["Tracks"] = TracksArray;
+
+		std::ofstream File(FilePath);
+		if (!File.is_open()) return false;
+		File << Root.dump(4);
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+bool FLevelSequence::LoadFromFile(const FString& FilePath)
+{
+	try
+	{
+		std::ifstream File(FilePath);
+		if (!File.is_open()) return false;
+
+		json Root;
+		File >> Root;
+
+		Name = Root.value("SequenceName", Root.value("Name", "NewSequence"));
+		Duration = Root.value("Duration", 10.0f);
+		FrameRate = Root.value("FrameRate", 30.0f);
+
+		Tracks.Empty();
+
+		if (Root.contains("Tracks") && Root["Tracks"].is_array())
+		{
+			for (const auto& TrackJson : Root["Tracks"])
+			{
+				FSequencerTrack Track;
+				Track.ActorName = TrackJson.value("ActorName", "");
+
+				if (TrackJson.contains("Keys") && TrackJson["Keys"].is_array())
+				{
+					for (const auto& KeyJson : TrackJson["Keys"])
+					{
+						FTransformKey Key;
+						Key.Time = KeyJson.value("Time", 0.0f);
+
+						if (KeyJson.contains("Location") && KeyJson["Location"].is_array() && KeyJson["Location"].size() >= 3)
+						{
+							Key.Location = FVector(KeyJson["Location"][0], KeyJson["Location"][1], KeyJson["Location"][2]);
+						}
+						if (KeyJson.contains("Rotation") && KeyJson["Rotation"].is_array() && KeyJson["Rotation"].size() >= 3)
+						{
+							Key.Rotation = FRotator(KeyJson["Rotation"][0], KeyJson["Rotation"][1], KeyJson["Rotation"][2]);
+						}
+						if (KeyJson.contains("Scale") && KeyJson["Scale"].is_array() && KeyJson["Scale"].size() >= 3)
+						{
+							Key.Scale = FVector(KeyJson["Scale"][0], KeyJson["Scale"][1], KeyJson["Scale"][2]);
+						}
+						Track.Keys.Add(Key);
+					}
+					Track.SortKeys();
+				}
+				Tracks.Add(Track);
+			}
+		}
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
 }
