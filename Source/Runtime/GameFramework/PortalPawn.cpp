@@ -789,26 +789,38 @@ void APortalPawn::FirePortal(EPortalType Type)
 		return;
 	}
 
+	constexpr float MaxFireRange = 1000.0f;
+	const FVector RayStart = CameraComponent->GetWorldLocation();
 	const FVector RayDir = CameraComponent->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	const FRay WorldRay{ CameraComponent->GetWorldLocation(), RayDir };
+	const FRay WorldRay{ RayStart, RayDir };
+
+	FPortalShotInfo Shot;
+	Shot.Type = Type;
 
 	// LineTraceSingle은 ImpactNormal을 채우지 않으므로 반지름 0 SweepSingle 사용
 	FHitResult Hit;
-	if (!GetWorld()->SweepSingle(WorldRay, 1000.0f, 0.0f, Hit, this))
-	{
-		return;
-	}
+	Shot.bHit = GetWorld()->SweepSingle(WorldRay, MaxFireRange, 0.0f, Hit, this);
 
-	// 움직이는 큐브에는 포탈을 붙이지 않는다
-	if (Hit.HitComponent)
+	if (Shot.bHit)
 	{
-		if(Cast<APortalCubeActor>(Hit.HitComponent->GetOwner()) || Cast<APortalActor>(Hit.HitComponent->GetOwner()))
+		Shot.End = Hit.ImpactPoint;
+		Shot.ImpactNormal = Hit.ImpactNormal;
+
+		// 큐브/포탈에는 포탈을 붙이지 않는다 (빔은 나감)
+		AActor* HitOwner = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
+		const bool bBlocked = Cast<APortalCubeActor>(HitOwner) || Cast<APortalActor>(HitOwner);
+		if (!bBlocked)
 		{
-			return;
+			Shot.bPortalPlaced = PortalGun->FirePortal(Type, Hit, RayDir);
 		}
 	}
+	else
+	{
+		Shot.End = RayStart + RayDir * MaxFireRange;
+		Shot.ImpactNormal = RayDir * -1.0f;
+	}
 
-	PortalGun->FirePortal(Type, Hit, RayDir);
+	PortalGun->PlayFireEffect(Shot);
 }
 
 void APortalPawn::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, bool bFromSweep, const FHitResult& SweepResult)
