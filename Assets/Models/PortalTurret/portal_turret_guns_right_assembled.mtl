@@ -1,0 +1,6 @@
+# Portal Turret Material
+
+newmtl turret_frame02
+Kd 1.0 1.0 1.0
+map_Kd textures/turret_frame02.png
+map_bump textures/turret_frame02_NM.png

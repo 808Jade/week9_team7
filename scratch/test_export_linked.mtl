@@ -1,0 +1,66 @@
+# Blender 5.2.1 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl chell_hair
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd ../../../../../chell_hair_color-chell_hair_trans_6.png
+map_d ../../../../../chell_hair_color-chell_hair_trans_6.png
+
+newmtl chell_head_diffuse
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../../../chell_head_diffuse_color_5.png
+map_Bump -bm 1.000000 ../../../../../chell_head_diffuse_normal_4.png
+
+newmtl chell_legs_diffuse
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../../../chell_legs_diffuse_color_3.png
+map_Bump -bm 0.400000 ../../../../../chell_legs_diffuse_normal_2.png
+
+newmtl chell_teeth
+Ns 440.413177
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../../../chell_teeth_color_7.png
+
+newmtl chell_torso_diffuse
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../../../chell_torso_diffuse_color_1.png
+map_Bump -bm 1.000000 ../../../../../chell_torso_diffuse_normal_0.png
+
+newmtl eyeball_r
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ../../../../../gman_eye_color_psd_a416d4da_albedo_8.png
+map_Bump -bm 1.000000 ../../../../../gman_eye_color_psd_a416d4da_albedo_8.png
