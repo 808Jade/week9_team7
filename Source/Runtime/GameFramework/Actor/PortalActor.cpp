@@ -302,6 +302,12 @@ bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerF
 		return false;
 	}
 
+	if (!IsPortableSurface(InHitResult.HitComponent))
+	{
+		HTR_LOG(Warning, "PlaceAt Failed: Non-portable surface");
+		return false;
+	}
+
 	const FVector SurfaceNormal = InHitResult.ImpactNormal;
 	FVector TargetLocation = InHitResult.ImpactPoint;
 	FRotator TargetRotation;
@@ -340,6 +346,17 @@ bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerF
 
 bool APortalActor::IsPortableSurface(UPrimitiveComponent* HitComponent) const
 {
+	// [Fling45] 이름이 "NP_"로 시작하는 액터(회색 금속 타일)에는 포탈을 붙일 수 없다
+	if (HitComponent)
+	{
+		if (AActor* HitOwner = HitComponent->GetOwner())
+		{
+			if (HitOwner->GetName().rfind("NP_", 0) == 0)
+			{
+				return false;
+			}
+		}
+	}
 	return true;
 }
 
@@ -347,8 +364,9 @@ bool APortalActor::CalculatePortalRotation(const FVector& SurfaceNormal, const F
 {
 	const FVector Forward = SurfaceNormal.GetSafeNormal();
 
-	// 바닥 또는 천장 (수평면: 경사 45도 이상)
-	if (std::abs(Forward.Z) >= 0.707f)
+	// 바닥 또는 천장 (거의 수평인 면만). 0.707(=45도)이면 45도 경사 패널이 바닥으로 분류돼
+	// 포탈이 눕혀지고 모서리 검사에서 실패하므로, 약 25도 이내로 기울어진 면만 바닥/천장으로 본다.
+	if (std::abs(Forward.Z) >= 0.9f)
 	{
 		float ViewerYaw = atan2f(ViewerForward.Y, ViewerForward.X) * (180.0f / PI);
 		if (std::isnan(ViewerYaw))
