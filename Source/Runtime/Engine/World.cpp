@@ -144,6 +144,18 @@ void UWorld::Tick(float DeltaTime)
 		Scene.UpdateAllTransforms();
 	}
 
+	if (HitStopTimer > 0.0f)
+	{
+		HitStopTimer -= DeltaTime;
+		if (HitStopTimer <= 0.0f)
+		{
+			HitStopTimer = 0.0f;
+			GlobalTimeDilation = 1.0f;
+		}
+	}
+
+	float EffectiveDeltaTime = DeltaTime * GlobalTimeDilation;
+
 	// 에디터 월드가 아니면 액터 틱을 돌린다
 	if (WorldType != EWorldType::Editor)
 	{
@@ -155,7 +167,7 @@ void UWorld::Tick(float DeltaTime)
 		{
 			FLuaManager::Get().SetActiveWorld(this);
 		}
-		LuaBindings::TickTimers(DeltaTime);
+		LuaBindings::TickTimers(EffectiveDeltaTime);
 
 		while (!BeginPlayList.IsEmpty())
 		{
@@ -168,14 +180,14 @@ void UWorld::Tick(float DeltaTime)
 		{
 			SCOPE_CYCLE_COUNTER(STAT_ActorTick);
 			// 모든 Actor를 도는 대신 등록된 Tick 함수만 실행한다
-			TickTaskManager.RunAllTickGroups(DeltaTime);
+			TickTaskManager.RunAllTickGroups(EffectiveDeltaTime);
 
 			for (ULevel* Level : Levels)
 			{
-				PathTracker.Tick(Level->GetActors(), DeltaTime);
+				PathTracker.Tick(Level->GetActors(), EffectiveDeltaTime);
 			}
 			// Run Coroutines after actor Tick
-			FCoroutineScheduler::Get().Update(DeltaTime);
+			FCoroutineScheduler::Get().Update(EffectiveDeltaTime);
 		}
 	}
 	else
@@ -191,7 +203,7 @@ void UWorld::Tick(float DeltaTime)
 			{
 				Comp->SetParticles(10);
 			}
-			Comp->TickComponent(DeltaTime);
+			Comp->TickComponent(EffectiveDeltaTime);
 		}
 	}
 }

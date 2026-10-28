@@ -123,6 +123,11 @@ void APortalPlayerController::ProcessPlayerInput(float DeltaTime)
 	if (Forward != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetForwardVector(), Forward);
 	if (Right != 0.0f) PortalPawn->AddMovementInput(YawQuat.GetRightVector(), Right);
 
+	const bool bSwing = bKeyDown[static_cast<int32>(EKeyCode::V)];
+	const bool bSlomo = bKeyDown[static_cast<int32>(EKeyCode::H)];
+	if (bSwing) PortalPawn->SwingPortalGun();
+	if (bSlomo) PortalPawn->Slomo(0.5f);
+
 	// 4. 마우스 시선 회전 (bMouseCaptured 및 포커스 상태일 때만 1인칭 회전 & 화면 중앙 재고정)
 	if (bMouseCaptured && bIsAppFocused)
 	{

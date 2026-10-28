@@ -28,7 +28,23 @@ public:
 	virtual void Tick(float DeltaTime) {}
 	virtual void EndPlay() {};
 	// FActorTickFunction이 호출하는 진입점
-	void TickActor(float DeltaTime) { Tick(DeltaTime); }
+	void TickActor(float DeltaTime) 
+	{ 
+		if (CustomHitStopTimer > 0.0f)
+		{
+			CustomHitStopTimer -= DeltaTime;
+			if (CustomHitStopTimer <= 0.0f)
+			{
+				CustomHitStopTimer = 0.0f;
+				CustomTimeDilation = 1.0f;
+			}
+		}
+
+		Tick(DeltaTime * CustomTimeDilation);
+	}
+	// 액터의 시간 지연 배율. 1.0이면 정상 속도, 0.0이면 정지
+	float GetCustomTimeDilation() const { return CustomTimeDilation; }
+	void SetCustomTimeDilation(float InDilation) { CustomTimeDilation = InDilation; }
 
 	UWorld* GetWorld() const { return World; }
 	ULevel* GetLevel() const { return Level; }
@@ -86,7 +102,11 @@ public:
 		}
 		return nullptr;
 	}
-
+	void TriggerCustomHitStop(float Duration, float Dilation = 0.0f)
+	{
+		CustomTimeDilation = Dilation;
+		CustomHitStopTimer = Duration;
+	}
 protected:
 	virtual void OnDefaultSubobjectCreated(UObject* Subobject) override;
 
@@ -99,5 +119,6 @@ protected:
 private:
 	bool bActorEnableCollision = true;
 	bool bHasBegunPlay = false;
-
+	float CustomTimeDilation = 1.0f;
+	float CustomHitStopTimer = 0.0f;
 };

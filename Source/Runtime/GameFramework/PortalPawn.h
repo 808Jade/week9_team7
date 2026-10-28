@@ -101,6 +101,9 @@ public:
 	float GetLookSensitivity() const { return LookSensitivity; }
 	void SetLookSensitivity(float InSens) { LookSensitivity = InSens; }
 
+	void SwingPortalGun(); // V 키: 팔 휘두르기
+	void Slomo(float Duration, float Dilation = 0.0f); // H 키: 슬로모션 토글
+
 private:
 	// 카메라 정면으로 트레이스해서 포탈건에 발사 위임
 	void FirePortal(EPortalType Type);

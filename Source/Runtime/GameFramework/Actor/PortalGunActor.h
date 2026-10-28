@@ -50,6 +50,9 @@ public:
 		return Type == EPortalType::Blue ? BluePortal : OrangePortal;
 	}
 
+	void Swing();
+	bool IsSwinging() const { return bIsSwinging; }
+
 private:
 	// 포탈건 3D 메시 컴포넌트
 	UStaticMeshComponent* GunMeshComponent = nullptr;
@@ -72,4 +75,8 @@ private:
 
 	// FRotator(Pitch(상하), Yaw(좌우), Roll(기울기))
 	FRotator GunOffsetRotation = FRotator(0.0f, 180.0f, 0.0f);
+
+	bool bIsSwinging = false;
+	float SwingTimer = 0.0f;
+	const float SwingDuration = 0.22f;
 };

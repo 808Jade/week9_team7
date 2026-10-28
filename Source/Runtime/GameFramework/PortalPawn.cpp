@@ -819,3 +819,23 @@ void APortalPawn::ResetPortals()
 		PortalGun->ResetPortals();
 	}
 }
+
+void APortalPawn::SwingPortalGun()
+{
+	if (PortalGun)
+	{
+		PortalGun->Swing();
+	}
+}
+
+void APortalPawn::Slomo(float Duration, float Dilation)
+{
+	if (Duration <= 0.0f)
+	{
+		Duration = 1.0f;
+	}
+	if (GetWorld())
+	{
+		GetWorld()->SetTimeDilation(Duration, Dilation);
+	}
+}

@@ -114,6 +114,13 @@ public:
 
 	using Super::Serialize;
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+
+	void SetTimeDilation(float Duration, float Dilation = 0.0f)
+	{
+		HitStopTimer = Duration;
+		GlobalTimeDilation = Dilation;
+	}
+
 private:
 	EWorldType WorldType = EWorldType::None;
 
@@ -159,4 +166,11 @@ private:
 
 	FRenderStats RenderStats;
 
+
+	// Hit Stop 타이머 
+	float HitStopTimer = 0.0f;
+	// Hit Stop 시간 동안의 시간 지연 배율. 1.0이면 정상 속도, 0.0이면 정지
+	float HitStopDilation = 1.0f;
+	// 전역 시간 지연 배율. 1.0이면 정상 속도, 0.0이면 정지
+	float GlobalTimeDilation = 1.0f;
 };
