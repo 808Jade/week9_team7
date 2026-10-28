@@ -30,6 +30,7 @@ struct FSceneView
 	bool bIsPerspective = true;
 	bool bIsWireframe = false;
 	bool bGameView = false;
+	bool bRenderUI = true;
 	float LetterBoxAmount = 0.0f;   // 0 = 없음, 1 = 띠가 완전히 내려온 상태
 	float LetterBoxAspect = 2.39f;  // 띠를 제외하고 남는 영역의 목표 화면비
 	float FadeAlpha = 0.0f; // 0 = 안 덮음, 1 = 완전 암전
@@ -48,6 +49,7 @@ struct FSceneView
 		Context.NearZ = NearClip;
 		Context.bOrthographic = !bIsPerspective;
 		Context.bGameView = bGameView;
+		Context.bRenderUI = bRenderUI;
 		Context.HiddenComponents = HiddenComponents;
 		const float ScaleX = ProjectionMatrix.M[1][0];
 		const float ScaleY = ProjectionMatrix.M[2][1];

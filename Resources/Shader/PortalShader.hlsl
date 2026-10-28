@@ -9,6 +9,7 @@ cbuffer PortalConstants : register(b0)
 };
 
 Texture2D<float4> PortalTexture : register(t0);
+SamplerState PortalSampler : register(s0);
 
 struct VS_INPUT
 {
@@ -62,7 +63,13 @@ float4 mainPS(PS_INPUT input) : SV_TARGET
     // 포탈 안
     float3 View;
     if (Params.x > 0.5f)
-        View = PortalTexture.Load(int3(int2(input.position.xy), 0)).rgb;
+    {
+        uint texW = 1, texH = 1;
+        PortalTexture.GetDimensions(texW, texH);
+        float Scale = Params.w > 0.0f ? Params.w : 1.0f;
+        float2 uv = (input.position.xy * Scale) / float2(texW, texH);
+        View = PortalTexture.Sample(PortalSampler, uv).rgb;
+    }
     else
         View = PortalColor.rgb * (0.25f + 0.1f * sin(d * 20.0f - Time * 3.0f)); // 짝 없음: 소용돌이 단색
 

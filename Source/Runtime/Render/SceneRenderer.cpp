@@ -1038,7 +1038,10 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 
 				if (Cast<UUIImageComponent>(Primitive) || Cast<UUITextComponent>(Primitive))
 				{
-					UIComponents.Add(Primitive);
+					if (View.bRenderUI)
+					{
+						UIComponents.Add(Primitive);
+					}
 					continue;
 				}
 
@@ -1068,7 +1071,7 @@ void FSceneRenderer::GatherRenderPackets(FScene& Scene, FSceneRenderData& Data,
 			}
 		}
 
-		if (!UIComponents.IsEmpty())
+		if (View.bRenderUI && !UIComponents.IsEmpty())
 		{
 			std::stable_sort(UIComponents.begin(), UIComponents.end(),
 				[](UPrimitiveComponent* A, UPrimitiveComponent* B)

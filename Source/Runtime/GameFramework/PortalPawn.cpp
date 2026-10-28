@@ -88,6 +88,7 @@ void APortalPawn::BeginPlay()
 	{
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
 		CameraComponent->SetNearZ(0.01f);
+		CameraComponent->SetFarZ(CameraFarZ);
 	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
@@ -805,6 +806,19 @@ void APortalPawn::PostEditChangeProperty(const FProperty& Property)
 	if (CameraComponent)
 	{
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+		if (Property.Name == "CameraFarZ")
+		{
+			CameraComponent->SetFarZ(CameraFarZ);
+		}
+	}
+}
+
+void APortalPawn::SetCameraFarZ(float InFarZ)
+{
+	CameraFarZ = InFarZ;
+	if (CameraComponent)
+	{
+		CameraComponent->SetFarZ(InFarZ);
 	}
 }
 

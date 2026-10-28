@@ -28,7 +28,7 @@ bool FPortalSurfaceRenderer::EnsureInit()
 }
 
 void FPortalSurfaceRenderer::Draw(UStaticMesh* Mesh, const FMatrix& World, const FMatrix& ViewProjection,
-	FTexture2D* PortalTexture, const FVector4& PortalColor)
+	FTexture2D* PortalTexture, const FVector4& PortalColor, float ResolutionScale)
 {
 	if (!Mesh || !Mesh->IndexBuffer || !EnsureInit()) return;
 
@@ -39,7 +39,7 @@ void FPortalSurfaceRenderer::Draw(UStaticMesh* Mesh, const FMatrix& World, const
 	Constants.World = World;
 	Constants.ViewProjection = ViewProjection;
 	Constants.PortalColor = PortalColor;
-	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, Seconds, PortalDepthBias, 0.0f); // y = 시간, z = 깊이 바이어스
+	Constants.Params = FVector4(PortalTexture ? 1.0f : 0.0f, Seconds, PortalDepthBias, ResolutionScale); // y = 시간, z = 깊이 바이어스
 
 	RenderCommand::BindPipelineState(PipelineState);
 	RenderCommand::BindMesh(Mesh);
@@ -47,6 +47,7 @@ void FPortalSurfaceRenderer::Draw(UStaticMesh* Mesh, const FMatrix& World, const
 	RenderCommand::BindConstantBuffer(0, ConstantBuffer.get(), EShaderBindFlagBits::Vertex);
 	RenderCommand::BindConstantBuffer(0, ConstantBuffer.get(), EShaderBindFlagBits::Pixel);
 	RenderCommand::BindShaderResource(0, PortalTexture, EShaderBindFlagBits::Pixel);
+	RenderCommand::BindSamplerState(0, ESamplerState::LinearClamp, EShaderBindFlagBits::Pixel);
 
 	RenderCommand::DrawIndexed(Mesh->IndexBuffer->GetIndexCount());
 
