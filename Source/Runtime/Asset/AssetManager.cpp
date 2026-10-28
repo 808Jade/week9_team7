@@ -14,6 +14,9 @@
 #include "Render/GeometryGenerator.h"
 #include "UObject/UObjectGlobals.h"
 
+#include "Audio/Sound/SoundWave.h"
+#include "Audio/AudioDevice.h"
+
 #include "Render/ImageLoader.h"
 #include <cctype>
 
@@ -194,6 +197,15 @@ void UAssetManager::LoadAsset(const FString& Key, const FString& Path) {
 	}
 	if (Extension == ".obj") {
 		LoadObjStaticMesh(Path);
+	}
+
+	// Sound
+	if(Extension == ".wav" || Extension == ".mp3" || Extension == ".ogg")
+	{
+		if(USoundWave* SoundWave = LoadSoundWave(Path))
+		{
+			AssetMap[Key] = SoundWave;
+		}
 	}
 }
 
@@ -458,6 +470,27 @@ UStaticMesh* UAssetManager::LoadObjStaticMesh(const FString& Path)
 
 	Get().RegisterAsset(Key, Mesh);
 	return Mesh;
+}
+
+USoundWave* UAssetManager::LoadSoundWave(const FString& Path)
+{
+	IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend();
+	if(Backend == nullptr)
+	{
+		return nullptr;
+	}
+
+	int32 SoundID = Backend->LoadSound(Path);
+	if(SoundID == INVALID_SOUND_ID)
+	{
+		return nullptr;
+	}
+
+	USoundWave* SoundWave = NewObject<USoundWave>();
+	SoundWave->SetPath(Path);
+	SoundWave->SetSoundID(SoundID);
+
+	return SoundWave;
 }
 
 bool UAssetManager::ReorientStaticMesh(UStaticMesh& Mesh, const std::function<FVector(const FVector&)>& Rotate)
