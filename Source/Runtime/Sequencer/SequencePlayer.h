@@ -4,6 +4,7 @@
 #include <memory>
 
 class UWorld;
+class AActor;
 
 class FSequencePlayer
 {
