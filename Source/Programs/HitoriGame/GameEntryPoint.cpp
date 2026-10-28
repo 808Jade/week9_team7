@@ -45,6 +45,7 @@
 #include "Components/UITextComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UClass* GetEngineClass()
 {
@@ -89,6 +90,7 @@ UClass* GetEngineClass()
     UUITextComponent::StaticClass();
     UBoxComponent::StaticClass();
     USphereComponent::StaticClass();
+    UCapsuleComponent::StaticClass();
 
     return UGameEngine::StaticClass();
 }
