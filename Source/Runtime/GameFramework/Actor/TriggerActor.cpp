@@ -3,7 +3,30 @@
 #include "Components/LuaScriptComponent.h"
 #include "GameFramework/PortalPawn.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor/UIManagerActor.h"
 #include <cmath>
+
+namespace
+{
+	// 타이틀 화면 / 인트로 컷씬 / 엔딩 중에는 트리거가 발동하지 않도록,
+	// 플레이어가 실제로 조작 중(InGame + 컨트롤러 빙의 상태)일 때만 true를 반환한다.
+	bool IsPlayerInControl(AActor* Actor)
+	{
+		if (AUIManagerActor* UIManager = AUIManagerActor::Get())
+		{
+			if (UIManager->GetCurrentUIMode() != EUIMode::InGame)
+			{
+				return false;
+			}
+		}
+
+		if (APawn* Pawn = Cast<APawn>(Actor))
+		{
+			return Pawn->GetController() != nullptr;
+		}
+		return true;
+	}
+}
 
 ATriggerActor::ATriggerActor()
 {
@@ -41,7 +64,7 @@ void ATriggerActor::Tick(float DeltaTime)
 	// 거리 기반 AABB 체크 (콜라이더 누락 방지 보조 감지)
 	if (!bTriggered)
 	{
-		if (GetWorld() && GetWorld()->GetPlayerPawn())
+		if (GetWorld() && GetWorld()->GetPlayerPawn() && IsPlayerInControl(GetWorld()->GetPlayerPawn()))
 		{
 			APawn* Pawn = GetWorld()->GetPlayerPawn();
 			FVector PawnLoc = Pawn->GetActorLocation();
@@ -61,6 +84,7 @@ void ATriggerActor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 {
 	if (bTriggered && bTriggerOnce) return;
 	if (!OtherActor) return;
+	if (!IsPlayerInControl(OtherActor)) return;
 
 	if (Cast<APortalPawn>(OtherActor) || (GetWorld() && OtherActor == GetWorld()->GetPlayerPawn()))
 	{

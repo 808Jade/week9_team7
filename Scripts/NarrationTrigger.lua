@@ -60,8 +60,9 @@ local NarrationDatabase = {
 }
 
 -- 2. 액터 이름이 데이터베이스에 없을 때 사용할 기본 설정 (자유롭게 파일 경로와 텍스트 수정 가능)
+-- sound = nil 이면 음성 없이 자막만 출력 (예전엔 포탈건 발사음이 기본값이라 엉뚱한 포탈 소리가 났음)
 local DefaultNarration = {
-    sound = "Assets/Audio/Portal2_sfx_portal_gun_fire_blue.mp3",
+    sound = nil,
     text = "Aperture Science 실험 챔버에 진입하셨습니다.",
     duration = 4.0
 }
@@ -94,10 +95,12 @@ function OnOverlap(OtherActor)
     end
 
     -- 2. 2D 음성 재생 (플레이어 귀에 깨끗하게 들리는 방송/글라도스 음성)
-    if Audio and Audio.Play2D then
-        currentVoiceID = Audio.Play2D(data.sound, 1.0)
-    elseif obj and obj.PlaySound2D then
-        currentVoiceID = obj:PlaySound2D(data.sound, 1.0)
+    if data.sound then
+        if Audio and Audio.Play2D then
+            currentVoiceID = Audio.Play2D(data.sound, 1.0)
+        elseif obj and obj.PlaySound2D then
+            currentVoiceID = obj:PlaySound2D(data.sound, 1.0)
+        end
     end
 
     -- 3. 화면 하단 자막(Subtitle) 표시 (지정된 duration 초 동안 표시 후 자동 페이드/숨김)

@@ -214,7 +214,12 @@ void UWorld::Tick(float DeltaTime)
 	}
 
 	// Tick Audio listner
-	if(MainCamera)
+	FVector ListenerPos = FVector::ZeroVector;
+	FVector ListenerForward = FVector(1.0f, 0.0f, 0.0f);
+	FVector ListenerUp = FVector(0.0f, 0.0f, 1.0f);
+	bool bFoundListener = false;
+
+	if (APlayerController* PC = GetPlayerController())
 	{
 		if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
 		{
