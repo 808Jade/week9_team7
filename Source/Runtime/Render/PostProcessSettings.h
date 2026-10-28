@@ -9,4 +9,10 @@ struct FPostProcessSettings
 	bool bEnableGammaCorrection = true;
 	// 디스플레이 감마. ToneMap에서 pow(x, 1/Gamma)
 	float Gamma = 2.2f;
+
+	bool bEnableVignette = false;
+	float VignetteIntensity = 0.5f;
+	float VignetteRadius = 0.4f;
+	float VignetteSmoothness = 0.5f;
+	FVector VignetteColor{ 0.f, 0.f, 0.f };
 };

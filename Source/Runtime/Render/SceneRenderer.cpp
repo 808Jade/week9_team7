@@ -33,16 +33,22 @@ namespace
 	{
 		float Gamma = 2.2f;
 		uint32 bEnableGamma = 1;
-		float Padding[2] = {};
 	};
 	static_assert(sizeof(FToneMapConstants) == 16);
 
 	struct alignas(16) FPostProcessConstants
 	{
 		FVector2 ViewSize;
-		FVector2 InViewSize;
+		FVector2 InvViewSize;
+
+		FVector VignetteColor{ 0.f, 0.f, 0.f };
+		float VignetteIntensity = 0.f;
+		float VignetteRadius = 0.f;
+		float VignetteSmoothness = 0.f;
+		uint32 bEnableVignette = 0;
+		float Padding0 = 0.f;
 	};
-	static_assert(sizeof(FPostProcessConstants) == 16);
+	static_assert(sizeof(FPostProcessConstants) == 48);
 
 	FRenderGraphRasterPassDesc MakeViewportPass(const std::string& Name, FRenderGraphTextureRef Color,
 		FRenderGraphTextureRef DepthTarget = {},
@@ -700,26 +706,29 @@ bool FSceneRenderer::AddViewportPasses(FRenderGraphBuilder& Graph, FRenderer* Re
 		const uint32 Height = Targets.SceneColor->GetHeight();
 
 		if (!Graph.AddRasterPass(MakeViewportPass("PostProcess", FinalColor),
-			[this, Width, Height]
+			[this, Width, Height, PostProcess = Options.PostProcess]
 			{
 				FPipelineState* Pipeline = FRenderResourceManager::GetPSO(EPSOType::PostProcess);
 				if (!Pipeline || !Pipeline->Shader) return;
 				RenderCommand::BindPipelineState(*Pipeline);
 
 				FPostProcessConstants Constants{};
-				Constants.ViewSize.X = static_cast<float>(Width);
-				Constants.ViewSize.Y = static_cast<float>(Height);
-				Constants.InViewSize.X = 1.f / Width;
-				Constants.InViewSize.Y = 1.f / Height;
+				Constants.ViewSize = FVector2(static_cast<float>(Width), static_cast<float>(Height));
+				Constants.InvViewSize = FVector2(1.f / Width, 1.f / Height);
+
+				Constants.bEnableVignette = PostProcess.bEnableVignette ? 1u : 0u;
+				Constants.VignetteIntensity = PostProcess.VignetteIntensity;
+				Constants.VignetteRadius = PostProcess.VignetteRadius;
+				Constants.VignetteSmoothness = PostProcess.VignetteSmoothness;
+				Constants.VignetteColor = PostProcess.VignetteColor;
+
 				RenderCommand::UpdateBufferData(RenderData.PostProcessCB.get(), &Constants);
 				RenderCommand::BindConstantBuffer(0, RenderData.PostProcessCB.get(), EShaderBindFlagBits::Pixel);
 
-				RenderCommand::BindIndexBuffer(nullptr);
+				RenderCommand::BindVertexBuffer(nullptr);
 				RenderCommand::Draw(3);
 			})) return false;
 	}
-
-
 
 	if (Options.bShowLightCulling && Options.bDrawPrimitives && !Options.bShowWorldNormal)
 	{

@@ -95,6 +95,19 @@ void FSettingsPanel::OnRender()
 	ImGui::EndDisabled();
 	ImGui::TextDisabled("Off shows raw linear output (darker). Standard is 2.2.");
 
+	ImGui::Dummy(ImVec2(0.0f, 4.0f));
+	ImGui::Checkbox("Vignetting", &Settings.PostProcess.bEnableVignette);
+	ImGui::BeginDisabled(!Settings.PostProcess.bEnableVignette);
+	ImGui::SetNextItemWidth(200.0f);
+	ImGui::SliderFloat("Vignette Intensity", &Settings.PostProcess.VignetteIntensity, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::SetNextItemWidth(200.0f);
+	ImGui::SliderFloat("Vignette Radius", &Settings.PostProcess.VignetteRadius, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	ImGui::SetNextItemWidth(200.0f);
+	ImGui::SliderFloat("Vignette Smoothness", &Settings.PostProcess.VignetteSmoothness, 0.01f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	// FVector는 float V[3] union이라 ColorEdit3에 바로 넘길 수 있다.
+	ImGui::ColorEdit3("Vignette Color", Settings.PostProcess.VignetteColor.V);
+	ImGui::EndDisabled();
+
 	//////////////////////////////////////////////////////////
 
 	ImGui::Dummy(ImVec2(0.0f, SectionGap));
@@ -182,6 +195,13 @@ bool FSettingsPanel::SaveSettings() const
 	File << "EnableFXAA=" << Settings.bEnableFXAA << "\n";
 	File << "EnableGammaCorrection=" << Settings.PostProcess.bEnableGammaCorrection << "\n";
 	File << "Gamma=" << Settings.PostProcess.Gamma << "\n";
+	File << "EnableVignette=" << Settings.PostProcess.bEnableVignette << "\n";
+	File << "VignetteIntensity=" << Settings.PostProcess.VignetteIntensity << "\n";
+	File << "VignetteRadius=" << Settings.PostProcess.VignetteRadius << "\n";
+	File << "VignetteSmoothness=" << Settings.PostProcess.VignetteSmoothness << "\n";
+	File << "VignetteColorR=" << Settings.PostProcess.VignetteColor.X << "\n";
+	File << "VignetteColorG=" << Settings.PostProcess.VignetteColor.Y << "\n";
+	File << "VignetteColorB=" << Settings.PostProcess.VignetteColor.Z << "\n";
 	File << "LightCullingMode=" << (Settings.LightCullingMode == ELightCullingMode::Off ? "Off" : Settings.LightCullingMode == ELightCullingMode::Tiled ? "Tiled" : "Clustered") << "\n";
 	File << "RenderingPath=" << (Settings.RenderingPath == ERenderingPath::Forward ? "Forward" : "Deferred") << "\n";
 	File << "LightingModel=" << (Settings.LightingModel == ELightingModel::Gouraud ? "Gouraud" :
@@ -328,6 +348,13 @@ bool FSettingsPanel::LoadSettings()
 				else if (Key == "EnableFXAA") Settings.bEnableFXAA = std::stoi(ValueStr);
 				else if (Key == "EnableGammaCorrection") Settings.PostProcess.bEnableGammaCorrection = std::stoi(ValueStr);
 				else if (Key == "Gamma") Settings.PostProcess.Gamma = std::stof(ValueStr);
+				else if (Key == "EnableVignette") Settings.PostProcess.bEnableVignette = std::stoi(ValueStr);
+				else if (Key == "VignetteIntensity") Settings.PostProcess.VignetteIntensity = std::stof(ValueStr);
+				else if (Key == "VignetteRadius") Settings.PostProcess.VignetteRadius = std::stof(ValueStr);
+				else if (Key == "VignetteSmoothness") Settings.PostProcess.VignetteSmoothness = std::stof(ValueStr);
+				else if (Key == "VignetteColorR") Settings.PostProcess.VignetteColor.X = std::stof(ValueStr);
+				else if (Key == "VignetteColorG") Settings.PostProcess.VignetteColor.Y = std::stof(ValueStr);
+				else if (Key == "VignetteColorB") Settings.PostProcess.VignetteColor.Z = std::stof(ValueStr);
 				else if (Key == "LightCullingMode")
 				{
 					if (ValueStr == "Off") Settings.LightCullingMode = ELightCullingMode::Off;
