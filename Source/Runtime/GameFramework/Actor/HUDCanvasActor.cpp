@@ -57,10 +57,11 @@ AHUDCanvasActor::AHUDCanvasActor()
 	// 4. 자막/대사 텍스트 (화면 하단 중앙 배치, Layer 20)
 	SubtitleText = CreateDefaultSubobject<UUITextComponent>("SubtitleText");
 	SubtitleText->SetupAttachment(GetRootComponent());
-	SubtitleText->SetFontSize(24.0f);
+	SubtitleText->SetFontSize(70.f);
+	SubtitleText->SetFont(UAssetManager::GetAssetByPath<UFont>("Fonts/Pretendard.json"));
 	SubtitleText->SetCenterHorizontally(true);
 	SubtitleText->SetRelativeY(0.88f);
-	SubtitleText->SetColor(FColor(255, 230, 100, 255));
+	SubtitleText->SetColor(FColor(255, 255, 255, 255));
 	SubtitleText->SetLayer(20);
 	SubtitleText->SetVisibility(false);
 
@@ -89,6 +90,9 @@ void AHUDCanvasActor::BeginPlay()
 		CrosshairImage->SetSize(120.0f, 220.0f);
 		CrosshairImage->SetCenterOnViewport(true);
 	}
+
+	SubtitleText->SetFontSize(70.f);
+	SubtitleText->SetFont(UAssetManager::GetAssetByPath<UFont>("Fonts/Pretendard.json"));
 
 	SetCrosshairState(ECrosshairState::Unfilled);
 	ApplyMouseSensitivity();

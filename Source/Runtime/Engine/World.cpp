@@ -263,6 +263,25 @@ void UWorld::Tick(float DeltaTime)
 			AudioBackend->SetListner(ListenerPos, ListenerForward, ListenerUp);
 		}
 	}
+
+	// 예약된 씬 전환 처리 (RequestLoadScene)
+	// 액터 Tick 도중에 월드를 지우면 안 되므로, 모든 Tick이 끝난 프레임 마지막에 로드한다.
+	if (!PendingSceneLoadPath.empty() && (WorldType == EWorldType::Game || WorldType == EWorldType::PIE))
+	{
+		const FString ScenePath = PendingSceneLoadPath;
+		PendingSceneLoadPath.clear();
+
+		LuaBindings::ClearTimers();
+		if (FJsonArchive::LoadWorld(this, ScenePath))
+		{
+			HTR_LOG(Info, "[UWorld] Scene loaded: {}", ScenePath);
+			BeginPlay();
+		}
+		else
+		{
+			HTR_LOG(Error, "[UWorld] Failed to load scene: {}", ScenePath);
+		}
+	}
 }
 
 void UWorld::ClearWorld()

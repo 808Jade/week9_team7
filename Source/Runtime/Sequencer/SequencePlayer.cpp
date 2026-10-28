@@ -160,7 +160,11 @@ void FSequencePlayer::Evaluate(UWorld* World)
 						if (Context->GameViewport)
 						{
 							bool bEnable = (LetterBoxVal > 0.0f);
-							Context->GameViewport->SetLetterBox(bEnable, 0.5f, 2.39f);
+							// 매 프레임 호출하면 블렌드가 계속 리셋되어 띠가 거의 안 보이므로 상태가 바뀔 때만 호출
+							if (bEnable != Context->GameViewport->IsLetterBoxEnabled())
+							{
+								Context->GameViewport->SetLetterBox(bEnable, 0.5f, 2.39f);
+							}
 						}
 					}
 				}

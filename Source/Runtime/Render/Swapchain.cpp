@@ -107,10 +107,11 @@ void FSwapchain::Resize(int32 InWidth, int32 InHeight)
 	CreateBackbuffer();
 }
 
-void FSwapchain::SwapBuffers(uint32 SyncInterval, uint32 Flags)
+void FSwapchain::SwapBuffers(uint32 SyncInterval, uint32 Flags, bool bTearing)
 {
 	// ALLOW_TEARING은 SyncInterval이 0일 때만 유효하다. 1과 함께 넘기면 Present가 실패한다.
-	if (bAllowTearing && SyncInterval == 0)
+	// 기본적으로는 붙이지 않는다. 붙이면 DWM 합성을 건너뛰어 화면이 찢어진다.
+	if (bTearing && bAllowTearing && SyncInterval == 0)
 		Flags |= DXGI_PRESENT_ALLOW_TEARING;
 
 	Swapchain->Present(SyncInterval, Flags);

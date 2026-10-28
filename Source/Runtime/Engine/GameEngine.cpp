@@ -46,7 +46,8 @@ FEngineConfig UGameEngine::GetConfig() const
 	Desc.Width = 1280;
 	Desc.Height = 720;
 	Desc.bBorderless = false;
-	Desc.SyncInterval = 0;
+	// 0이면 Tearing Present로 화면이 찢어지므로 VSync(1)로 고정한다.
+	Desc.SyncInterval = 1;
 	Desc.bCreateDepthBuffer = true;   
 	Desc.bExitOnEscape = true;        
 	Desc.SplashImage = "Resources/Splash.png"; 

@@ -142,6 +142,15 @@ void FFMODCoreBackend::Stop(int32 VoiceID)
 
 void FFMODCoreBackend::StopAll()
 {
+    // 맵만 비우면 FMOD 채널은 계속 재생된다 (루프 사운드가 씬 전환 후에도 남는 원인).
+    // 등록된 모든 채널을 실제로 정지시킨 뒤 맵을 비운다.
+    for(std::pair<int32, FMOD::Channel*> Voice : VoiceMap)
+    {
+        if(Voice.second)
+        {
+            Voice.second->stop();
+        }
+    }
     VoiceMap.Empty();
 }
 
