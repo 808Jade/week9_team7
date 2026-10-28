@@ -4,6 +4,7 @@
 
 class UStaticMeshComponent;
 class UPointLightComponent;
+class UMaterial;
 class APortalCubeActor;
 class APortalPawn;
 class APortalActor;
@@ -40,6 +41,9 @@ class APortalGunActor : public AActor
 		PROPERTY(LaserGlowRadius)
 		PROPERTY(LaserBendRatio)
 		PROPERTY(LaserLightIntensity)
+		PROPERTY(ShotCoreRadius)
+		PROPERTY(ShotGlowRadius)
+		PROPERTY(ShotDuration)
 		REFLECT_END()
 
 public:
@@ -132,6 +136,17 @@ private:
 	FPortalShotInfo CurrentShot;
 	bool  bShotActive = false;
 	float ShotElapsed = 0.0f;
+
+	// ===== 발사 빔 =====
+	// 직선이라 원기둥 1개씩(코어 + 외곽). 1세트를 재사용하고 발사 시 색만 교체
+	UStaticMeshComponent* ShotCore = nullptr;
+	UStaticMeshComponent* ShotGlow = nullptr;
+	float ShotCoreRadius = 0.006f;   // 홀드 레이저(0.004)보다 약간 굵게
+	float ShotGlowRadius = 0.025f;
+	float ShotDuration   = 0.15f;    // 빔이 보이는 시간 (초)
+
+	void UpdateShotBeam(float DeltaTime);
+	void SetShotBeamVisibility(bool bVisible);
 
 	// [0] = Blue, [1] = Orange
 	UMaterial* ShotCoreMaterials[2] = { nullptr, nullptr };
