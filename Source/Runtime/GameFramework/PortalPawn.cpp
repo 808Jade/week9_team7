@@ -848,9 +848,6 @@ void APortalPawn::FirePortal(EPortalType Type)
 	{
 		Shot.End = Hit.ImpactPoint;
 		Shot.ImpactNormal = Hit.ImpactNormal;
-		PortalGun->PlayFailSound();
-		return;
-	}
 
 		// 큐브/포탈에는 포탈을 붙이지 않는다 (빔은 나감)
 		AActor* HitOwner = Hit.HitComponent ? Hit.HitComponent->GetOwner() : nullptr;
@@ -859,14 +856,16 @@ void APortalPawn::FirePortal(EPortalType Type)
 		{
 			Shot.bPortalPlaced = PortalGun->FirePortal(Type, Hit, RayDir);
 		}
+		else
+		{
+			PortalGun->PlayFailSound();
+		}
 	}
 	else
 	{
 		Shot.End = RayStart + RayDir * MaxFireRange;
 		Shot.ImpactNormal = RayDir * -1.0f;
-			PortalGun->PlayFailSound();
-			return;
-		}
+		PortalGun->PlayFailSound();
 	}
 
 	PortalGun->PlayFireEffect(Shot);

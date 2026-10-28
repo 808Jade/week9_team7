@@ -160,47 +160,6 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 	}
 }
 
-void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
-{
-	if (!RecoilModifier && GetWorld())
-	{
-		if (APlayerController* PC = GetWorld()->GetPlayerController())
-		{
-			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
-			{
-				RecoilModifier = PCM->AddNewCameraModifier<UCameraModifier_Recoil>();
-			}
-		}
-	}
-
-	if (RecoilModifier)
-	{
-		RecoilModifier->AddRecoil(10.0f, -0.2f, 0);
-	}
-
-	APortalActor* Portal = GetPortal(PortalToFire);
-	if (!Portal || !HitResult.bBlockingHit)
-	{
-		PlayFailSound();
-		return;
-	}
-
-	FVector Forward = ViewerForward;
-	if (Forward.SizeSquared() < 1e-4f && OwnerPawn && OwnerPawn->GetCameraComponent())
-	{
-		Forward = OwnerPawn->GetCameraComponent()->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	}
-
-	if(Portal->PlaceAt(HitResult, Forward))
-	{
-		PlayFireSound(PortalToFire);
-	}
-	else
-	{
-		PlayFailSound();
-	}
-}
-
 void APortalGunActor::Hold(APortalCubeActor* CubeToGrab)
 {
 	if(!CubeToGrab)
@@ -401,6 +360,7 @@ bool APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResul
 	APortalActor* Portal = GetPortal(PortalToFire);
 	if (!Portal || !HitResult.bBlockingHit)
 	{
+		PlayFailSound();
 		return false;
 	}
 
@@ -415,6 +375,8 @@ bool APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResul
 		PlayFireSound(PortalToFire);
 		return true;
 	}
+
+	PlayFailSound();
 	return false;
 }
 
