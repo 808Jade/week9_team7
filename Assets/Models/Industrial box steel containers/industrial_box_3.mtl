@@ -3,3 +3,4 @@ newmtl box_steel_3
 Kd 1.0 1.0 1.0
 d 1.0
 map_Kd 87c54bdb19e9c7faba8a03400adc4062.jpg
+map_Bump industrial_box_3_normal.png

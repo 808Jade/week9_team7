@@ -3,3 +3,4 @@ newmtl jonathan-provencal-sol
 Kd 1.0 1.0 1.0
 d 1.0
 map_Kd jonathan-provencal-sol.jpg
+map_Bump industrial_box_1_normal.png
