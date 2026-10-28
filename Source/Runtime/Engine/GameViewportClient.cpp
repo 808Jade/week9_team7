@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Camera/ViewportCameraMovement.h"
 #include <cmath>
 #include "Math/Frustum.h"
@@ -159,42 +160,72 @@ FSceneView FGameViewportClient::CalcSceneView(const FRect& InViewRect)
 
 	const float Aspect = static_cast<float>(Width) / static_cast<float>(Height);
 
-	if (!CameraComponent && World)
+	APlayerCameraManager* CameraManager = nullptr;
+	if (World)
 	{
-		CameraComponent = FindPlayerCamera();
-		if (!CameraComponent && World->GetMainCamera())
-			CameraComponent = World->GetMainCamera()->GetCameraComponent();
+		if (APlayerController* PC = World->GetPlayerController())
+		{
+			CameraManager = PC->GetPlayerCameraManager();
+		}
 	}
 
-	if (CameraComponent)
+	if (CameraManager)
 	{
-		CameraComponent->SetAspectRatio(Aspect);
+		const FViewInfo& CamView = CameraManager->GetCameraViewInfo();
 
-		OutView.ViewLocation = CameraComponent->GetWorldLocation();
-		OutView.ViewRotation = CameraComponent->GetWorldRotation();
+		OutView.ViewLocation = CamView.Location;
+		OutView.ViewRotation = CamView.Rotation;
 		OutView.ViewForward = OutView.ViewRotation.Quaternion().GetForwardVector();
-		OutView.ViewMatrix = CameraComponent->GetViewMatrix();
-		OutView.ProjectionMatrix = CameraComponent->GetProjectionMatrix();
-		OutView.ViewProjectionMatrix = CameraComponent->GetViewProjectionMatrix();
-		OutView.FieldOfView = CameraComponent->GetFieldOfView();
-		OutView.AspectRatio = Aspect;
-		OutView.NearClip = CameraComponent->GetNearZ();
-		OutView.FarClip = CameraComponent->GetFarZ();
-		OutView.OrthoWidth = CameraComponent->GetOrthoWidth();
-		OutView.bIsPerspective = !CameraComponent->GetIsOrthogonal();
+		OutView.ViewMatrix = CamView.ViewMatrix;
+		OutView.ProjectionMatrix = CamView.ProjectionMatrix;
+		OutView.ViewProjectionMatrix = CamView.ViewMatrix * CamView.ProjectionMatrix;
+		OutView.FieldOfView = CamView.FOV;
+		OutView.AspectRatio = CamView.AspectRatio > 0.0f ? CamView.AspectRatio : Aspect;
+		OutView.NearClip = CamView.NearClip;
+		OutView.FarClip = CamView.FarClip;
+		OutView.OrthoWidth = 10.0f;
+		OutView.bIsPerspective = CamView.bIsPerspective;
 		OutView.bIsWireframe = false;
 	}
 	else
 	{
-		OutView.ViewLocation = FVector(-5.0f, -10.0f, 10.0f);
-		OutView.ViewRotation = FRotator(30.0f, 45.0f, 0.0f);
-		OutView.ViewForward = OutView.ViewRotation.Quaternion().GetForwardVector();
-		OutView.FieldOfView = 60.0f;
-		OutView.AspectRatio = Aspect;
-		OutView.NearClip = 0.1f;
-		OutView.FarClip = 1000.0f;
-		OutView.bIsPerspective = true;
-		OutView.bIsWireframe = false;
+		if (!CameraComponent && World)
+		{
+		CameraComponent = FindPlayerCamera();
+		if (!CameraComponent && World->GetMainCamera())
+			CameraComponent = World->GetMainCamera()->GetCameraComponent();
+		}
+
+		if (CameraComponent)
+		{
+			CameraComponent->SetAspectRatio(Aspect);
+
+			OutView.ViewLocation = CameraComponent->GetWorldLocation();
+			OutView.ViewRotation = CameraComponent->GetWorldRotation();
+			OutView.ViewForward = OutView.ViewRotation.Quaternion().GetForwardVector();
+			OutView.ViewMatrix = CameraComponent->GetViewMatrix();
+			OutView.ProjectionMatrix = CameraComponent->GetProjectionMatrix();
+			OutView.ViewProjectionMatrix = CameraComponent->GetViewProjectionMatrix();
+			OutView.FieldOfView = CameraComponent->GetFieldOfView();
+			OutView.AspectRatio = Aspect;
+			OutView.NearClip = CameraComponent->GetNearZ();
+			OutView.FarClip = CameraComponent->GetFarZ();
+			OutView.OrthoWidth = CameraComponent->GetOrthoWidth();
+			OutView.bIsPerspective = !CameraComponent->GetIsOrthogonal();
+			OutView.bIsWireframe = false;
+		}
+		else
+		{
+			OutView.ViewLocation = FVector(-5.0f, -10.0f, 10.0f);
+			OutView.ViewRotation = FRotator(30.0f, 45.0f, 0.0f);
+			OutView.ViewForward = OutView.ViewRotation.Quaternion().GetForwardVector();
+			OutView.FieldOfView = 60.0f;
+			OutView.AspectRatio = Aspect;
+			OutView.NearClip = 0.1f;
+			OutView.FarClip = 1000.0f;
+			OutView.bIsPerspective = true;
+			OutView.bIsWireframe = false;
+		}
 	}
 
 	OutView.Frustum = ExtractFrustumPlanes(OutView.ViewProjectionMatrix);
