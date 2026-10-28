@@ -93,6 +93,7 @@ void AHUDCanvasActor::BeginPlay()
 
 	SubtitleText->SetFontSize(70.f);
 	SubtitleText->SetFont(UAssetManager::GetAssetByPath<UFont>("Fonts/Pretendard.json"));
+	SubtitleText->SetColor(FColor(255, 255, 255, 255));
 
 	SetCrosshairState(ECrosshairState::Unfilled);
 	ApplyMouseSensitivity();
