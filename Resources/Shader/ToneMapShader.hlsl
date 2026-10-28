@@ -1,3 +1,13 @@
+#include "ColorSpace.hlsli"
+
+// C++의 FToneMapConstants와 바이트 단위로 같아야 한다. (16바이트)
+cbuffer ToneMapConstants : register(b0)
+{
+    float Gamma; // 디스플레이 감마. 기본 2.2
+    uint bEnableGamma; // Show Flag. 0이면 감마 보정 없이 선형 값을 그대로 출력
+    float2 ToneMapPadding;
+};
+
 Texture2D<float4> LightingHDR : register(t0);
 
 struct FPSInput
@@ -41,10 +51,11 @@ float4 mainPS(FPSInput Input) : SV_Target
     int2 Pixel = int2(Input.Position.xy);
     float3 HDR = max(LightingHDR.Load(int3(Pixel, 0)).rgb, 0.0f);
 
-    // 고휘도에서 자연스럽게 채도가 빠지며 하얗게 번지는 정통 ACES 톤매핑
+    // 고휘도에서 자연스럽게 채도가 빠지며 하얗게 번지는 ACES 톤매핑 (선형 -> 선형 [0,1])
     float3 Mapped = ACESFitted(HDR);
 
-    // SceneColor는 UNORM이므로 화면에 표시할 sRGB 근사값으로 변환한다.
-    float3 DisplayColor = pow(saturate(Mapped), 1.0f / 2.2f);
+    // Gamma Correction: 선형 -> 모니터 감마 공간. 이후 패스(반투명/안개/텍스트)는 이 공간에 그대로 그린다.
+    // 꺼져 있으면 선형 값이 그대로 나가서 화면이 어둡게 보인다. (비교용)
+    float3 DisplayColor = (bEnableGamma != 0) ? LinearToGamma(Mapped, Gamma) : Mapped;
     return float4(DisplayColor, 1.0f);
 }

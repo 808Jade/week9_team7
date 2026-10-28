@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Math/EngineMath.h"
 
 // Degree but Quat: Radians
@@ -19,7 +19,9 @@ struct FRotator
 	FRotator(float P, float Y, float R);
 	FRotator(FVector V);
 
+	static FRotator Identity;
 	static FRotator Identitiy;
+	static FRotator ZeroRotator;
 
 	FQuat Quaternion() const;
 
