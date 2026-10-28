@@ -336,7 +336,7 @@ bool APortalActor::PlaceAt(const FHitResult& InHitResult, const FVector& ViewerF
 		return false;
 	}
 
-	SetActorLocation(TargetLocation + SurfaceNormal * 0.01f);
+	SetActorLocation(TargetLocation + SurfaceNormal * 0.001f);
 	SetActorRotation(TargetRotation);
 	bPlaced = true;
 	HTR_LOG(Warning, "PlaceAt Success!");

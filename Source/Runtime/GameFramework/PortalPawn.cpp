@@ -81,6 +81,7 @@ void APortalPawn::BeginPlay()
 	if (CameraComponent)
 	{
 		CameraComponent->SetRelativeLocation({ 0.0f, 0.0f, EyeHeight });
+		CameraComponent->SetNearZ(0.01f);
 	}
 	Velocity = FVector::ZeroVector;
 	PendingInputVector = FVector::ZeroVector;
@@ -561,7 +562,13 @@ void APortalPawn::Tick(float DeltaTime)
 		{
 			const FVector PostMoveLocation = GetActorLocation();
 
-			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f))
+			const FVector PreCamLocation = PreMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+			const FVector PostCamLocation = PostMoveLocation + FVector(0.0f, 0.0f, CurrentEyeHeight);
+
+			const bool bPawnCrossed = TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f);
+			const bool bCamCrossed = TargetPortal->Checkcrossing(PreCamLocation, PostCamLocation, 0.05f);
+
+			if(TargetPortal->Checkcrossing(PreMoveLocation, PostMoveLocation, 0.05f) && (bPawnCrossed || bCamCrossed))
 			{
 				APortalActor* ExitPortal = TargetPortal->GetLinkedPortal();
 				const FMatrix TelportMatrix = TargetPortal->GetTeleportMatrix();
@@ -733,6 +740,14 @@ void APortalPawn::TeleportThroughPortal(const FVector& NewLocation, const FRotat
 		CameraComponent->SetRelativeRotation(FRotator(NewRotation.Pitch, 0.0f, NewRotation.Roll));
 	}
 	Velocity = NewVelocity;
+
+	if(APlayerController* PC = GetController())
+	{
+		if(APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+		{
+			PCM->UpdateCamera(0.0f);
+		}
+	}
 
 	// 포탈 플링으로 획득한 고속 관성을 공중에서 보존할 수 있도록 한도 갱신
 	const float FlingHorizSpeed = sqrtf(NewVelocity.X * NewVelocity.X + NewVelocity.Y * NewVelocity.Y);
