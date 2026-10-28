@@ -45,6 +45,11 @@ APortalGunActor::APortalGunActor()
 	MuzzleLight = CreateLaserLight("LaserMuzzleLight", 1.5f);
 	BeamLight   = CreateLaserLight("LaserBeamLight",   2.5f);
 	CubeLight   = CreateLaserLight("LaserCubeLight",   2.0f);
+	// 5. 발사 빔 머티리얼 (색별)
+	ShotCoreMaterials[(int32)EPortalType::Blue] = UAssetManager::GetAssetByPath<UMaterial>("PortalShotBlueCoreMaterial");
+	ShotGlowMaterials[(int32)EPortalType::Blue] = UAssetManager::GetAssetByPath<UMaterial>("PortalShotBlueGlowMaterial");
+	ShotCoreMaterials[(int32)EPortalType::Orange] = UAssetManager::GetAssetByPath<UMaterial>("PortalShotOrangeCoreMaterial");
+	ShotGlowMaterials[(int32)EPortalType::Orange] = UAssetManager::GetAssetByPath<UMaterial>("PortalShotOrangeGlowMaterial");
 }
 
 UPointLightComponent* APortalGunActor::CreateLaserLight(const char* Name, float AttenuationRadius)
@@ -147,42 +152,6 @@ void APortalGunActor::AttachToPawn(APortalPawn* InOwnerPawn)
 			GunMeshComponent->SetRelativeRotation(GunOffsetRotation);
 			GunMeshComponent->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 		}
-	}
-}
-
-void APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
-{
-	if (!RecoilModifier && GetWorld())
-	{
-		if (APlayerController* PC = GetWorld()->GetPlayerController())
-		{
-			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
-			{
-				RecoilModifier = PCM->AddNewCameraModifier<UCameraModifier_Recoil>();
-			}
-		}
-	}
-
-	if (RecoilModifier)
-	{
-		RecoilModifier->AddRecoil(10.0f, -0.2f, 0);
-	}
-
-	APortalActor* Portal = GetPortal(PortalToFire);
-	if (!Portal || !HitResult.bBlockingHit)
-	{
-		return;
-	}
-
-	FVector Forward = ViewerForward;
-	if (Forward.SizeSquared() < 1e-4f && OwnerPawn && OwnerPawn->GetCameraComponent())
-	{
-		Forward = OwnerPawn->GetCameraComponent()->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	}
-
-	if(Portal->PlaceAt(HitResult, Forward))
-	{
-		PlayFireSound(PortalToFire);
 	}
 }
 
@@ -290,7 +259,7 @@ void APortalGunActor::UpdateLaser(float DeltaTime)
 	// P0: 총구, P2: 큐브 중심
 	// P1: 총구에서 카메라 정면으로 뻗은 점. 큐브가 조준선에서 늦게 따라올수록 곡선이 휜다
 	const FVector CamForward = Cam->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
-	const FVector P0 = GunMeshComponent->GetWorldMatrix().TransformPosition(MuzzleLocalOffset);
+	const FVector P0 = GetMuzzleLocation();
 	const FVector P2 = HeldCube->GetActorLocation();
 	const FVector P1 = P0 + CamForward * (FVector::Distance(P0, P2) * LaserBendRatio);
 
@@ -371,4 +340,59 @@ void APortalGunActor::PlayFireSound(EPortalType Type)
 	{		
 		AudioBackend->Play(SoundWave->GetSoundID(), false, 1.0f, 1.0f, false, FVector::ZeroVector, 0.0f, 0.0f);
 	}
+}
+
+FVector APortalGunActor::GetMuzzleLocation() const
+{
+	return GunMeshComponent->GetWorldMatrix().TransformPosition(MuzzleLocalOffset);
+}
+
+bool APortalGunActor::FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward)
+{
+	APortalActor* Portal = GetPortal(PortalToFire);
+	if (!Portal || !HitResult.bBlockingHit)
+	{
+		return false;
+	}
+
+	FVector Forward = ViewerForward;
+	if (Forward.SizeSquared() < 1e-4f && OwnerPawn && OwnerPawn->GetCameraComponent())
+	{
+		Forward = OwnerPawn->GetCameraComponent()->GetWorldRotation().Quaternion().GetForwardVector().Normalized();
+	}
+
+	if (Portal->PlaceAt(HitResult, Forward))
+	{
+		PlayFireSound(PortalToFire);
+		return true;
+	}
+	return false;
+}
+
+void APortalGunActor::PlayFireEffect(const FPortalShotInfo& InShot)
+{
+	CurrentShot = InShot;
+	CurrentShot.Start = GetMuzzleLocation();
+	ShotElapsed = 0.0f;
+	bShotActive = true;
+
+	// 반동: 포탈 성공 여부와 상관없이 쏠 때마다
+	if (!RecoilModifier && GetWorld())
+	{
+		if (APlayerController* PC = GetWorld()->GetPlayerController())
+		{
+			if (APlayerCameraManager* PCM = PC->GetPlayerCameraManager())
+			{
+				RecoilModifier = PCM->AddNewCameraModifier<UCameraModifier_Recoil>();
+			}
+		}
+	}
+	if (RecoilModifier)
+	{
+		RecoilModifier->AddRecoil(10.0f, -0.2f, 0);
+	}
+
+	HTR_LOG(Warning, "Shot: Type={} Hit={} Placed={} Dist={}",
+		(int32)CurrentShot.Type, CurrentShot.bHit, CurrentShot.bPortalPlaced,
+		FVector::Distance(CurrentShot.Start, CurrentShot.End));
 }

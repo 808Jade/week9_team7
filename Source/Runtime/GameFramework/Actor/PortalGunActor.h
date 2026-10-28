@@ -16,6 +16,17 @@ enum class EPortalType : int32
 	Orange = 1
 };
 
+// 발사 한 번에 대한 이펙트 정보
+struct FPortalShotInfo
+{
+	EPortalType Type = EPortalType::Blue;
+	FVector Start;                  // 총구 위치 (월드). PlayFireEffect에서 건이 채움
+	FVector End;                    // 착탄 지점 또는 최대 사거리 지점
+	FVector ImpactNormal;           // 착탄 면 법선 (빗나가면 -RayDir)
+	bool bHit = false;              // 무언가에 맞았는가
+	bool bPortalPlaced = false;     // 포탈이 실제로 열렸는가 
+};
+
 class APortalGunActor : public AActor
 {
 	DECLARE_CLASS(APortalGunActor, AActor)
@@ -42,7 +53,8 @@ public:
 	void AttachToPawn(APortalPawn* InOwnerPawn);
 
 	// 세부 동작
-	void FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
+	bool FirePortal(const EPortalType PortalToFire, const FHitResult& HitResult, const FVector& ViewerForward = FVector::ZeroVector);
+	void PlayFireEffect(const FPortalShotInfo& InShot);
 	void Hold(APortalCubeActor* CubeToGrab);
 	void Unhold();
 	void ResetPortals();
@@ -56,6 +68,8 @@ public:
 	{
 		return Type == EPortalType::Blue ? BluePortal : OrangePortal;
 	}
+
+	FVector GetMuzzleLocation() const;
 
 private:
 	// 포탈건 3D 메시 컴포넌트
@@ -114,4 +128,15 @@ private:
 	static void PlaceCylinder(UStaticMeshComponent* Comp, const FVector& Start, const FVector& End, float Radius);
 
 	void PlayFireSound(EPortalType Type);
+
+	FPortalShotInfo CurrentShot;
+	bool  bShotActive = false;
+	float ShotElapsed = 0.0f;
+
+	// [0] = Blue, [1] = Orange
+	UMaterial* ShotCoreMaterials[2] = { nullptr, nullptr };
+	UMaterial* ShotGlowMaterials[2] = { nullptr, nullptr };
+
+	UMaterial* GetShotCoreMaterial(EPortalType Type) const { return ShotCoreMaterials[(int32)Type]; }
+	UMaterial* GetShotGlowMaterial(EPortalType Type) const { return ShotGlowMaterials[(int32)Type]; }
 };

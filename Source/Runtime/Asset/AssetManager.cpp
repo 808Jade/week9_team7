@@ -430,6 +430,17 @@ void UAssetManager::CreateLaserMaterials()
 	MakeLaserMaterial("LaserCoreMaterial", MakeSolidTexture("LaserCoreTexture", 210, 245, 255, 255));
 	// 외곽: 포탈 파란색, 반투명
 	MakeLaserMaterial("LaserGlowMaterial", MakeSolidTexture("LaserGlowTexture", 40, 150, 255, 90));
+
+	// ===== 포탈 발사 빔 =====
+	MakeLaserMaterial("PortalShotBlueCoreMaterial",
+		MakeSolidTexture("PortalShotBlueCoreTexture", 200, 235, 255, 255));
+	MakeLaserMaterial("PortalShotBlueGlowMaterial",
+		MakeSolidTexture("PortalShotBlueGlowTexture", 30, 130, 255, 110));
+
+	MakeLaserMaterial("PortalShotOrangeCoreMaterial",
+		MakeSolidTexture("PortalShotOrangeCoreTexture", 255, 235, 200, 255));
+	MakeLaserMaterial("PortalShotOrangeGlowMaterial",
+		MakeSolidTexture("PortalShotOrangeGlowTexture", 255, 120, 20, 110));
 }
 
 void UAssetManager::CreateEditorArrowMaterial() {
