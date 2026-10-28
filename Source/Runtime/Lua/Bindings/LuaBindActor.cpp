@@ -14,6 +14,8 @@
 #include "GameFramework/Actor/PauseCanvasActor.h"
 #include "GameFramework/Actor/EndingCanvasActor.h"
 #include "GameFramework/PortalPawn.h"
+#include "GameFramework/Actor/SequenceTriggerActor.h"
+#include "GameFramework/PortalPlayerController.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Camera/CameraComponent.h"
@@ -348,6 +350,46 @@ namespace LuaBindings
 
 		// 액터 파괴
 		ActorType["Destroy"] = &AActor::Destroy;
+		// Possess / Player Control
+		ActorType["Possess"] = [](AActor* Actor, AActor* PawnActor) {
+			if (!Actor || !Actor->GetWorld() || !Actor->GetWorld()->GetPlayerController()) return;
+			if (APawn* P = Cast<APawn>(PawnActor)) Actor->GetWorld()->GetPlayerController()->Possess(P);
+		};
+		ActorType["UnPossess"] = [](AActor* Actor) {
+			if (Actor && Actor->GetWorld() && Actor->GetWorld()->GetPlayerController())
+				Actor->GetWorld()->GetPlayerController()->UnPossess();
+		};
+		ActorType["GetPlayerPawn"] = [](AActor* Actor) -> APawn* {
+			return (Actor && Actor->GetWorld()) ? Actor->GetWorld()->GetPlayerPawn() : nullptr;
+		};
+		ActorType["GetPlayerController"] = [](AActor* Actor) -> APlayerController* {
+			return (Actor && Actor->GetWorld()) ? Actor->GetWorld()->GetPlayerController() : nullptr;
+		};
+		ActorType["SetMouseCapture"] = [](AActor* Actor, bool bCapture) {
+			if (Actor && Actor->GetWorld()) {
+				if (APortalPlayerController* PC = Cast<APortalPlayerController>(Actor->GetWorld()->GetPlayerController()))
+					PC->SetMouseCapture(bCapture);
+			}
+		};
+		// Sequence Control
+		ActorType["PlaySequence"] = [](AActor* Actor) {
+			if (auto* ST = Cast<ASequenceTriggerActor>(Actor)) ST->Play();
+		};
+		ActorType["StopSequence"] = [](AActor* Actor) {
+			if (auto* ST = Cast<ASequenceTriggerActor>(Actor)) ST->Stop();
+		};
+		ActorType["IsSequencePlaying"] = [](AActor* Actor) -> bool {
+			if (auto* ST = Cast<ASequenceTriggerActor>(Actor))
+				return ST->GetSequencePlayer() && ST->GetSequencePlayer()->IsPlaying();
+			return false;
+		};
+		ActorType["SetCanvasVisibility"] = [](AActor* Actor, bool bVisible) {
+			if (ACanvasActor* Canvas = Cast<ACanvasActor>(Actor)) Canvas->SetCanvasVisibility(bVisible);
+		};
+		ActorType["IsCanvasVisible"] = [](AActor* Actor) -> bool {
+			if (ACanvasActor* Canvas = Cast<ACanvasActor>(Actor)) return Canvas->IsCanvasVisible();
+			return false;
+		};
 
 		// ==========================================
 		// [UnLua 스타일 게임플레이 편의 함수]
@@ -682,6 +724,29 @@ namespace LuaBindings
 		HUDType["SetCrosshairVisibility"] = [](AHUDCanvasActor* HUD, bool bVisible) {
 			if (HUD) HUD->SetCrosshairVisibility(bVisible);
 		};
+		HUDType["SetCanvasVisibility"] = &AHUDCanvasActor::SetCanvasVisibility;
+		HUDType["IsCanvasVisible"] = &AHUDCanvasActor::IsCanvasVisible;
+
+		sol::usertype<ATitleCanvasActor> TitleType = Lua.new_usertype<ATitleCanvasActor>("TitleCanvasActor",
+			sol::base_classes, sol::bases<AActor>());
+		TitleType["SetCanvasVisibility"] = &ATitleCanvasActor::SetCanvasVisibility;
+		TitleType["IsCanvasVisible"] = &ATitleCanvasActor::IsCanvasVisible;
+
+		sol::usertype<ASequenceTriggerActor> SeqTriggerType = Lua.new_usertype<ASequenceTriggerActor>("SequenceTriggerActor",
+			sol::base_classes, sol::bases<AActor>());
+		SeqTriggerType["Play"] = &ASequenceTriggerActor::Play;
+		SeqTriggerType["Pause"] = &ASequenceTriggerActor::Pause;
+		SeqTriggerType["Stop"] = &ASequenceTriggerActor::Stop;
+		SeqTriggerType["IsPlaying"] = [](ASequenceTriggerActor* ST) -> bool {
+			return ST && ST->GetSequencePlayer() && ST->GetSequencePlayer()->IsPlaying();
+		};
+
+		sol::usertype<APlayerController> PCType = Lua.new_usertype<APlayerController>("PlayerController",
+			sol::base_classes, sol::bases<AActor>());
+		PCType["Possess"] = &APlayerController::Possess;
+		PCType["UnPossess"] = &APlayerController::UnPossess;
+		PCType["GetPawn"] = &APlayerController::GetPawn;
+
 
 		sol::usertype<AEndingCanvasActor> EndingType = Lua.new_usertype<AEndingCanvasActor>("EndingCanvasActor",
 			sol::base_classes, sol::bases<AActor>());
