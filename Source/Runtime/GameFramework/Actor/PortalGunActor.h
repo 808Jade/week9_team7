@@ -7,6 +7,7 @@ class APortalCubeActor;
 class APortalPawn;
 class APortalActor;
 struct FHitResult;
+class UCameraModifier_Recoil;
 
 enum class EPortalType : int32
 {
@@ -72,4 +73,6 @@ private:
 
 	// FRotator(Pitch(상하), Yaw(좌우), Roll(기울기))
 	FRotator GunOffsetRotation = FRotator(0.0f, 180.0f, 0.0f);
+
+	UCameraModifier_Recoil* RecoilModifier = nullptr;
 };
