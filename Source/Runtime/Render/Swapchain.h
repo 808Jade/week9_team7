@@ -14,7 +14,8 @@ public:
 	// 스왑체인 크기 변경시
 	void Resize(int32 Width, int32 Height);
 
-	void SwapBuffers(uint32 SyncInterval = 1, uint32 Flags = 0);
+	// bTearing은 SyncInterval 0에서 주사율 상한 없이 올리고 싶을 때만 켠다 (화면 찢어짐 발생).
+	void SwapBuffers(uint32 SyncInterval = 1, uint32 Flags = 0, bool bTearing = false);
 
 	FTexture2D* GetBackbuffer() const { return BackbufferTexture.get(); }
 	// Tearing을 허용하면 보더리스 창에서도 주사율 상한 없이 Present한다.

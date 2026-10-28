@@ -1,4 +1,4 @@
-﻿{
+{
     "Version": 4,
     "World": {
         "PersistentLevel": {
@@ -174,15 +174,15 @@
                             "Name": "UPointLightComponent",
                             "Parent": "",
                             "Properties": {
-                                "AttenuationRadius": 12.800000190734863,
-                                "Intensity": 1.0,
+                                "AttenuationRadius": 32.400001525878906,
+                                "Intensity": 1.5,
                                 "LightColor": 4280728812,
-                                "LightFalloffExponent": 1.0,
+                                "LightFalloffExponent": 1.100000023841858,
                                 "ShadowBias": 0.009999999776482582,
                                 "ShadowResolutionScale": 1.0,
                                 "ShadowSharpen": 0.0,
                                 "ShadowSlopeBias": 0.009999999776482582,
-                                "SourceRadius": 0.019999999552965164,
+                                "SourceRadius": 1.0199999809265137,
                                 "Transform": {
                                     "Location": {
                                         "X": -3.0321450233459473,
@@ -478,12 +478,12 @@
                             "Properties": {
                                 "Transform": {
                                     "Location": {
-                                        "X": -16.299999237060547,
-                                        "Y": 6.300000190734863,
-                                        "Z": 90.0
+                                        "X": -8.869429588317871,
+                                        "Y": 6.405811309814453,
+                                        "Z": -5.594237327575684
                                     },
                                     "Rotation": {
-                                        "Pitch": 89.98023223876953,
+                                        "Pitch": 0.0,
                                         "Roll": 0.0,
                                         "Yaw": 0.0
                                     },
@@ -797,7 +797,7 @@
                                     "Location": {
                                         "X": -3.135573387145996,
                                         "Y": 6.232944965362549,
-                                        "Z": 9.107297897338867
+                                        "Z": 1.5
                                     },
                                     "Rotation": {
                                         "Pitch": 0.0,
@@ -1233,8 +1233,12 @@
                             "Name": "ULuaScriptComponent_CakePicker",
                             "Parent": "",
                             "Properties": {
-                                "ScriptPath": "Scripts/CakePicker.lua"
-                            }
+                                "ScriptPath": "Scripts/CakePicker.lua",
+                                "bAutoActivate": true,
+                                "bHiddenInGame": false,
+                                "bVisible": true
+                            },
+                            "ScriptPath": "Scripts/CakePicker.lua"
                         }
                     ],
                     "Name": "CakePicker",

@@ -71,7 +71,8 @@ FEngineConfig UEditorEngine::GetConfig() const
 	Desc.Width = 1920;
 	Desc.Height = 1080;
 	Desc.bBorderless = false;
-	Desc.SyncInterval = 0;
+	// 0이면 Tearing Present로 화면이 찢어지므로 VSync(1)로 고정한다.
+	Desc.SyncInterval = 1;
 	// View는 각자 깊이 버퍼를 쓰고 백버퍼에는 ImGui만 그린다.
 	Desc.bCreateDepthBuffer = false;
 	Desc.bExitOnEscape = false;
@@ -924,7 +925,8 @@ void UEditorEngine::TickPIEInput(float DeltaTime)
 void UEditorEngine::EndFrame()
 {
 	PresentFrame();
-	// 메인 Swapchain은 FEngineLoop가 VSync 설정대로 Present하므로 PIE 창은 기다리지 않고 올린다.
+	// 메인 Swapchain이 이미 VBlank를 기다렸으므로 PIE 창은 대기 없이 올린다.
+	// Tearing 플래그는 붙이지 않으므로 DWM이 합성해 찢어지지 않는다.
 	if (bPIEWindowRendered && PIESwapchain)
 		PIESwapchain->SwapBuffers(0);
 	// UI 변경 후 설정을 복사해 종료 시 카메라 수명에 의존하지 않는다.
