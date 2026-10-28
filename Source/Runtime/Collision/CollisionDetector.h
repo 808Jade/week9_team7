@@ -5,7 +5,7 @@
 #include "Math/Transform.h"
 
 class FSphere;
-class FBox;
+struct FBox;
 class FCapsule;
 struct FHitResult;
 

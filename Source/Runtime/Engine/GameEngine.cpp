@@ -80,13 +80,21 @@ bool UGameEngine::Init()
     GameViewport->SetGameInstance(GameInstance);
     Context.GameViewport = GameViewport;
 
-    // 4. 기본 씬 로드 (PortalComplex.scene 우선 탐색, 없으면 Bocchi.scene 또는 상대 경로 탐색)
-    FString DefaultScene = "Scenes/LightGameScene.scene";
+    // 4. 기본 씬 로드 (PortalFlingChamber.scene 우선 → LightGameScene.scene → Bocchi.scene, 각각 상대 경로도 탐색)
+    FString DefaultScene = "Scenes/PortalFlingChamber.scene";
     if (!std::filesystem::exists(DefaultScene))
     {
         if (std::filesystem::exists("../../../" + DefaultScene))
         {
             DefaultScene = "../../../" + DefaultScene;
+        }
+        else if (std::filesystem::exists("Scenes/LightGameScene.scene"))
+        {
+            DefaultScene = "Scenes/LightGameScene.scene";
+        }
+        else if (std::filesystem::exists("../../../Scenes/LightGameScene.scene"))
+        {
+            DefaultScene = "../../../Scenes/LightGameScene.scene";
         }
         else if (std::filesystem::exists("Scenes/Bocchi.scene"))
         {
@@ -220,6 +228,14 @@ void UGameEngine::TickInput(float DeltaTime)
 {
     if (!GameViewport) return;
 
+    // Show Flag 토글: F9 = Gamma Correction (게임 조작 키와 겹치지 않는 디버그 키)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F9))
+        PostProcess.bEnableGammaCorrection = !PostProcess.bEnableGammaCorrection;
+
+    // Show Flag 토글: F6 = Vignetting (F10은 Windows 시스템 키라 WM_KEYDOWN으로 오지 않음)
+    if (FInputSystem::IsKeyPressed(EKeyCode::F6))
+        PostProcess.bEnableVignette = !PostProcess.bEnableVignette;
+
     // ImGui가 마우스 커서를 그리거나(설정창 열림) 마우스 입력을 소비할 때는 인게임 조작 차단
     if (bImGuiInitialized && (ImGui::GetIO().MouseDrawCursor || ImGui::GetIO().WantCaptureMouse))
     {
@@ -292,6 +308,7 @@ void UGameEngine::RenderFrame()
     Options.PointShadowMapSize = 512;
     Options.SpotShadowMapSize = 2048; // Very High (2048)
     Options.PcfMode = EPcfMode::Sample32;
+    Options.PostProcess = PostProcess;
 
     // 2.5 포탈 뷰 먼저 렌더링
     APortalActor::RenderPortalViews(GameWorld, GetEngineLoop().GetRenderer(),

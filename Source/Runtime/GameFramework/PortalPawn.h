@@ -5,6 +5,7 @@
 
 class USphereComponent;
 class UBoxComponent;
+class UCapsuleComponent;
 class UCameraComponent;
 class APortalGunActor;
 class APlayerStart;
@@ -105,6 +106,7 @@ private:
 	// 컴포넌트
 	USphereComponent* SphereComponent = nullptr; // 루트 물리 콜라이더
 	UBoxComponent* BoxComponent = nullptr;
+	UCapsuleComponent* CapsuleComponent = nullptr;
 	UCameraComponent* CameraComponent = nullptr; // 1인칭 눈높이 카메라
 
 	// 이동 파라미터
@@ -143,9 +145,9 @@ private:
 	// 콜라이더 및 눈높이
 	float CollisionRadius = 0.5f;
 	float CrouchRadius = 0.35f;
-	float EyeHeight = 0.75f;
-	float CrouchEyeHeight = 0.25f;
-	float CurrentEyeHeight = 0.75f;
+	float EyeHeight = 1.0f;
+	float CrouchEyeHeight = 0.5f;
+	float CurrentEyeHeight = 1.0f;
 
 	// 중력, 점프, 3D 속도
 	bool bEnableGravity = true;

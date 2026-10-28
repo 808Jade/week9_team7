@@ -379,3 +379,10 @@ FVector FVector::Max(const FVector& V1, const FVector& V2)
 
 	return Result;
 }
+
+bool FVector::IsNearlyZero()
+{
+	FVectorRegister RegV = VectorSIMD::Load(V);
+
+	return VectorSIMD::IsNearlyZero(RegV);
+}

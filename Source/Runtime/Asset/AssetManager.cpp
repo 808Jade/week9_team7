@@ -14,6 +14,9 @@
 #include "Render/GeometryGenerator.h"
 #include "UObject/UObjectGlobals.h"
 
+#include "Audio/Sound/SoundWave.h"
+#include "Audio/AudioDevice.h"
+
 #include "Render/ImageLoader.h"
 #include <cctype>
 
@@ -144,6 +147,7 @@ void UAssetManager::Init(const FAssetLoadProgress& OnProgress)
 	Get().CreateUIImageMaterial();
 	Get().CreateUITextMaterial();
 	Get().CreateParticleMaterial();
+	Get().CreateLaserMaterials();
 	Get().CreateEditorArrowMaterial();
 }
 
@@ -194,6 +198,15 @@ void UAssetManager::LoadAsset(const FString& Key, const FString& Path) {
 	}
 	if (Extension == ".obj") {
 		LoadObjStaticMesh(Path);
+	}
+
+	// Sound
+	if(Extension == ".wav" || Extension == ".mp3" || Extension == ".ogg")
+	{
+		if(USoundWave* SoundWave = LoadSoundWave(Path))
+		{
+			AssetMap[Key] = SoundWave;
+		}
 	}
 }
 
@@ -363,6 +376,62 @@ void UAssetManager::CreateParticleMaterial()
 	RegisterAsset("SubUVMaterial", ParticleMat);
 }
 
+void UAssetManager::CreateLaserMaterials()
+{
+	// StaticMeshTranslucentShader는 조명 없이 텍스처 색을 그대로 출력한다(언릿).
+	// 그래서 1x1 단색 텍스처를 붙이면 그 색 그대로 빛나는 레이저가 된다.
+	auto MakeSolidTexture = [this](const FString& Key, uint8 R, uint8 G, uint8 B, uint8 A) -> UTexture2D*
+	{
+		const uint32 Pixel = (uint32(A) << 24) | (uint32(B) << 16) | (uint32(G) << 8) | uint32(R);
+
+		D3D11_TEXTURE2D_DESC Desc{};
+		Desc.Width = 1;
+		Desc.Height = 1;
+		Desc.MipLevels = 1;
+		Desc.ArraySize = 1;
+		Desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		Desc.SampleDesc.Count = 1;
+		Desc.Usage = D3D11_USAGE_IMMUTABLE;
+		Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+		TUniquePtr<FTexture2D> Resource{ RenderCommand::CreateTexture2D(Desc, &Pixel) };
+		if (!Resource)
+		{
+			return nullptr;
+		}
+
+		UTexture2D* Texture{ NewObject<UTexture2D>() };
+		Texture->SetResource(std::move(Resource));
+		Texture->SetPath(Key);
+		AssetMap[Key] = Texture;
+		return Texture;
+	};
+
+	auto MakeLaserMaterial = [this](const FString& Key, UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			HTR_LOG(Warning, "CreateLaserMaterials: texture for {} is null", Key);
+			return;
+		}
+
+		UMaterial* Mat = NewObject<UMaterial>();
+		Mat->PSOType = EPSOType::StaticMesh_Translucent;     // 반투명 패스, StaticMeshTranslucentShader
+		Mat->BlendState = EBlendState::AlphaBlend;
+		Mat->DepthStencilState = EDepthStencilState::ReadOnly;
+		Mat->SamplerState = ESamplerState::LinearClamp;
+		Mat->ParamLayout = EMaterialParamLayout::StaticMesh;
+		Mat->ParamBuffer = RenderCommand::CreateConstantBuffer(sizeof(FStaticMeshMaterialParams));
+		Mat->Textures.Add(Texture);
+		RegisterAsset(Key, Mat);
+	};
+
+	// 코어: 거의 흰색에 가까운 하늘색, 불투명
+	MakeLaserMaterial("LaserCoreMaterial", MakeSolidTexture("LaserCoreTexture", 210, 245, 255, 255));
+	// 외곽: 포탈 파란색, 반투명
+	MakeLaserMaterial("LaserGlowMaterial", MakeSolidTexture("LaserGlowTexture", 40, 150, 255, 90));
+}
+
 void UAssetManager::CreateEditorArrowMaterial() {
 	UMaterial* BaseMaterial{ GetAssetByPath<UMaterial>("DefaultMaterial") };
 	UMaterial* ArrowMaterial{ UMaterial::CreateInstance(BaseMaterial) };
@@ -458,6 +527,27 @@ UStaticMesh* UAssetManager::LoadObjStaticMesh(const FString& Path)
 
 	Get().RegisterAsset(Key, Mesh);
 	return Mesh;
+}
+
+USoundWave* UAssetManager::LoadSoundWave(const FString& Path)
+{
+	IAudioBackend* Backend = FAudioDevice::GetInstance().GetBackend();
+	if(Backend == nullptr)
+	{
+		return nullptr;
+	}
+
+	int32 SoundID = Backend->LoadSound(Path);
+	if(SoundID == INVALID_SOUND_ID)
+	{
+		return nullptr;
+	}
+
+	USoundWave* SoundWave = NewObject<USoundWave>();
+	SoundWave->SetPath(Path);
+	SoundWave->SetSoundID(SoundID);
+
+	return SoundWave;
 }
 
 bool UAssetManager::ReorientStaticMesh(UStaticMesh& Mesh, const std::function<FVector(const FVector&)>& Rotate)

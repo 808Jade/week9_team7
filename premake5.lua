@@ -22,6 +22,11 @@ IncludeDir["json"]  = "Source/ThirdParty/json"
 IncludeDir["DDSLoader"] = "Source/ThirdParty/DDSLoader"
 IncludeDir["LuaJIT"] = "Source/ThirdParty/LuaJIT/include"
 IncludeDir["sol2"]   = "Source/ThirdParty/sol2/include"
+IncludeDir["FMOD"]   = "Source/ThirdParty/Audio/FMOD/include"
+
+LibDir = {}
+LibDir["LuaJIT"] = "Source/ThirdParty/LuaJIT/lib"
+LibDir["FMOD"]   = "Source/ThirdParty/Audio/FMOD/lib"
 
 -- premake의 filter는 project()를 만나면 초기화된다.
 -- 두 프로젝트가 같은 런타임(/MDd vs /MD)으로 컴파일되지 않으면 링크가 실패하므로
@@ -149,13 +154,15 @@ project "HitoriEngine"
 		"%{IncludeDir.DDSLoader}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
+		"%{IncludeDir.FMOD}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends",
 	}
 
 	libdirs
 	{
-		"Source/ThirdParty/LuaJIT/lib",
+		"%{LibDir.LuaJIT}",
+		"%{LibDir.FMOD}",
 	}
 
 	links
@@ -166,6 +173,14 @@ project "HitoriEngine"
 		"d3dcompiler.lib",
 		"lua51.lib",
 	}
+
+	filter "configurations:*Debug*"
+		links { "fmodL_vc.lib" }
+
+	filter "configurations:not *Debug*"
+		links { "fmod_vc.lib" }
+
+	filter {}
 
 	filter "files:Source/ThirdParty/DDSLoader/**.cpp"
 		enablepch "Off"
@@ -207,13 +222,13 @@ project "HitoriEditor"
 		"%{IncludeDir.json}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.ImGui}/backends",
+		"%{IncludeDir.FMOD}",
 	}
 
 	libdirs
 	{
-		"Source/ThirdParty/LuaJIT/lib",
+		"%{LibDir.LuaJIT}",
+		"%{LibDir.FMOD}",
 	}
 
 	links
@@ -225,9 +240,19 @@ project "HitoriEditor"
 		"lua51.lib",
 	}
 
+	filter "configurations:*Debug*"
+		links { "fmodL_vc.lib" }
+
+	filter "configurations:not *Debug*"
+		links { "fmod_vc.lib" }
+
+	filter {}
+
 	postbuildcommands
 	{
-		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"'
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/Audio/FMOD/lib/fmod.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/Audio/FMOD/lib/fmodL.dll" "%{cfg.targetdir}"',
 	}
 
 	filter "configurations:ObjViewer"
@@ -269,13 +294,15 @@ project "HitoriGame"
 		"%{IncludeDir.DDSLoader}",
 		"%{IncludeDir.LuaJIT}",
 		"%{IncludeDir.sol2}",
+		"%{IncludeDir.FMOD}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGui}/backends",
 	}
 
 	libdirs
 	{
-		"Source/ThirdParty/LuaJIT/lib",
+		"%{LibDir.LuaJIT}",
+		"%{LibDir.FMOD}",
 	}
 
 	links
@@ -287,9 +314,19 @@ project "HitoriGame"
 		"lua51.lib",
 	}
 
+	filter "configurations:*Debug*"
+		links { "fmodL_vc.lib" }
+
+	filter "configurations:not *Debug*"
+		links { "fmod_vc.lib" }
+
+	filter {}
+
 	postbuildcommands
 	{
-		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"'
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/LuaJIT/bin/lua51.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/Audio/FMOD/lib/fmod.dll" "%{cfg.targetdir}"',
+		'{COPYFILE} "%{wks.location}/Source/ThirdParty/Audio/FMOD/lib/fmodL.dll" "%{cfg.targetdir}"',
 	}
 
 

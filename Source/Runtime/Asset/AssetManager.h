@@ -14,6 +14,7 @@ enum class EAssetType
 };
 
 class UStaticMesh;
+class USoundWave;
 class FShader;
 
 namespace fs = std::filesystem;
@@ -43,6 +44,8 @@ public:
 	void CreateUIImageMaterial();
 	void CreateUITextMaterial();
 	void CreateParticleMaterial();
+	// 포탈건 홀드 레이저: 단색 1x1 텍스처 + 언릿 반투명 스태틱 메시 머티리얼
+	void CreateLaserMaterials();
 	void CreateEditorArrowMaterial();
 
 	template <typename T>
@@ -65,6 +68,7 @@ public:
 	UTexture2D* LoadTexture(const FString& InPath, bool bGenerateMips = true);
 	UFont* LoadFontAtlas(const FString& JsonPath, const FString& AtlasTexturePath);
 	static UStaticMesh* LoadObjStaticMesh(const FString& Path);
+	USoundWave* LoadSoundWave(const FString& Path);
 
 	FLODGenerateResult GenerateStaticMeshLODs(UStaticMesh& Mesh,const FLODGenerateRequest& Request);
 

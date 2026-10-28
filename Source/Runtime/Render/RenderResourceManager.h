@@ -8,12 +8,12 @@ enum class EPSOType : uint8
 {
 	StaticMesh_Opaque,       // 기본 불투명
 	StaticMesh_Translucent,  // 반투명
-	StaticMesh_Wireframe,    
-	Particle_AlphaBlend,     
-	Particle_Additive,       
-	Skybox,                  
-	Grid,                    
-	Outline_Mask,            
+	StaticMesh_Wireframe,
+	Particle_AlphaBlend,
+	Particle_Additive,
+	Skybox,
+	Grid,
+	Outline_Mask,
 	Outline_Draw,
 	StaticMesh_GBuffer,
 	DeferredLighting,
@@ -29,6 +29,7 @@ enum class EPSOType : uint8
 	ShadowTileClear,         // 그림자 캐시: 다시 그릴 아틀라스 타일만 깊이 1로 지운다
 	UI_Image,
 	UI_Text,
+	PostProcess,
 	Count
 };
 
