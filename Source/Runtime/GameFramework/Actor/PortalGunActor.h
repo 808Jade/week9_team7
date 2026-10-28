@@ -110,4 +110,6 @@ private:
 	static FVector QuadBezier(const FVector& P0, const FVector& P1, const FVector& P2, float T);
 	// 원기둥(로컬 Z축, 높이 1, 반지름 1)을 Start→End 방향으로 늘려 배치
 	static void PlaceCylinder(UStaticMeshComponent* Comp, const FVector& Start, const FVector& End, float Radius);
+
+	void PlayFireSound(EPortalType Type);
 };
